@@ -1,11 +1,12 @@
 
 import React, { useEffect } from 'react';
 import { useVoice } from '../contexts/VoiceContext';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { MessageSquare, Plus, Search, CheckCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { VoiceControls } from '../components/shared/VoiceControls';
+import { TicketManagement } from '../components/helpdesk/TicketManagement';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { CheckCircle, Search } from 'lucide-react';
 
 const Helpdesk: React.FC = () => {
   const { speak } = useVoice();
@@ -16,84 +17,95 @@ const Helpdesk: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">HR Helpdesk</h1>
-        <p className="text-muted-foreground">
-          Submit and track HR-related support tickets.
-        </p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">HR Helpdesk</h1>
+          <p className="text-muted-foreground">
+            Submit and track HR-related support tickets.
+          </p>
+        </div>
+        <VoiceControls />
       </div>
       
       <Tabs defaultValue="tickets" className="space-y-4">
-        <TabsList>
+        <TabsList className="w-full sm:w-auto overflow-x-auto">
           <TabsTrigger value="tickets">My Tickets</TabsTrigger>
           <TabsTrigger value="new">New Ticket</TabsTrigger>
           <TabsTrigger value="knowledge">Knowledge Base</TabsTrigger>
         </TabsList>
         
         <TabsContent value="tickets" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <div className="flex justify-between items-center">
-                <div>
-                  <CardTitle>Support Tickets</CardTitle>
-                  <CardDescription>
-                    View and track your support requests
-                  </CardDescription>
-                </div>
-                <Button>
-                  <Plus className="mr-2 h-4 w-4" />
-                  New Ticket
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="mb-4">
-                <div className="relative">
-                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    type="search"
-                    placeholder="Search tickets..."
-                    className="pl-8"
-                  />
-                </div>
-              </div>
-              <div className="rounded-lg border p-8 flex items-center justify-center">
-                <MessageSquare size={48} className="text-muted-foreground" />
-                <p className="ml-4 text-muted-foreground">Support ticket tracking features will be implemented here.</p>
-              </div>
-            </CardContent>
-          </Card>
+          <TicketManagement />
         </TabsContent>
         
         <TabsContent value="new" className="space-y-4">
           <Card>
-            <CardHeader>
-              <CardTitle>Submit New Ticket</CardTitle>
-              <CardDescription>
-                Create a new HR support request
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex items-center justify-center p-8 text-center">
-              <div>
-                <Plus size={64} className="mx-auto mb-4 text-muted-foreground" />
-                <p className="text-muted-foreground">Support ticket creation features coming soon.</p>
-              </div>
+            <CardContent className="pt-6">
+              <p className="text-center text-muted-foreground mb-4">
+                You can create a new ticket directly from the My Tickets tab by clicking the "New Ticket" button.
+              </p>
+              
+              <TicketManagement />
             </CardContent>
           </Card>
         </TabsContent>
         
         <TabsContent value="knowledge" className="space-y-4">
           <Card>
-            <CardHeader>
-              <CardTitle>Knowledge Base</CardTitle>
-              <CardDescription>
-                Browse HR resources and guides
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex items-center justify-center p-8 text-center">
-              <div>
-                <CheckCircle size={64} className="mx-auto mb-4 text-muted-foreground" />
-                <p className="text-muted-foreground">Knowledge base features coming soon.</p>
+            <CardContent className="pt-6">
+              <div className="flex justify-center mb-6">
+                <div className="relative w-full max-w-md">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    type="search"
+                    placeholder="Search knowledge base..."
+                    className="pl-8"
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-6">
+                <h3 className="text-lg font-medium">Popular Articles</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {[
+                    { title: "How to apply for leave", category: "Leave Management" },
+                    { title: "Understanding your payslip", category: "Payroll" },
+                    { title: "Submitting health insurance claims", category: "Benefits" },
+                    { title: "Employee onboarding process", category: "HR Policies" },
+                    { title: "Work from home guidelines", category: "Workplace" },
+                    { title: "Performance review process", category: "Performance" }
+                  ].map((article, index) => (
+                    <div key={index} className="border rounded-lg p-4 hover:bg-muted/50 cursor-pointer transition-colors">
+                      <h4 className="font-medium flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-primary" />
+                        {article.title}
+                      </h4>
+                      <p className="text-sm text-muted-foreground mt-1">{article.category}</p>
+                    </div>
+                  ))}
+                </div>
+                
+                <div>
+                  <h3 className="text-lg font-medium mb-4">Categories</h3>
+                  
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    {[
+                      "Leave Management",
+                      "Payroll",
+                      "Benefits",
+                      "HR Policies",
+                      "Workplace",
+                      "Performance",
+                      "Training",
+                      "Career Development"
+                    ].map((category, index) => (
+                      <div key={index} className="border rounded-lg p-3 text-center hover:bg-muted/50 cursor-pointer transition-colors">
+                        {category}
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>

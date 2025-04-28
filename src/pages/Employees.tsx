@@ -1,11 +1,11 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useVoice } from '../contexts/VoiceContext';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { User, Search, UserPlus, FileText } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { EmployeeDirectory } from '../components/employees/EmployeeDirectory';
+import { VoiceControls } from '../components/shared/VoiceControls';
+import { Card, CardContent } from '@/components/ui/card';
+import { UserPlus, FileText, Users, Briefcase } from 'lucide-react';
 
 const Employees: React.FC = () => {
   const { speak } = useVoice();
@@ -16,15 +16,18 @@ const Employees: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Employee Management</h1>
-        <p className="text-muted-foreground">
-          Manage employee profiles, information, and work history.
-        </p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Employee Management</h1>
+          <p className="text-muted-foreground">
+            Manage employee profiles, information, and work history.
+          </p>
+        </div>
+        <VoiceControls />
       </div>
       
       <Tabs defaultValue="directory" className="space-y-4">
-        <TabsList>
+        <TabsList className="w-full sm:w-auto overflow-x-auto">
           <TabsTrigger value="directory">Directory</TabsTrigger>
           <TabsTrigger value="profiles">Profiles</TabsTrigger>
           <TabsTrigger value="onboarding">Onboarding</TabsTrigger>
@@ -32,52 +35,18 @@ const Employees: React.FC = () => {
         </TabsList>
         
         <TabsContent value="directory" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <div className="flex justify-between items-center">
-                <div>
-                  <CardTitle>Employee Directory</CardTitle>
-                  <CardDescription>
-                    Search and filter employees
-                  </CardDescription>
-                </div>
-                <Button>
-                  <UserPlus className="mr-2 h-4 w-4" />
-                  Add Employee
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="mb-4">
-                <div className="relative">
-                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    type="search"
-                    placeholder="Search employees..."
-                    className="pl-8"
-                  />
-                </div>
-              </div>
-              <div className="rounded-lg border p-8 flex items-center justify-center">
-                <User size={48} className="text-muted-foreground" />
-                <p className="ml-4 text-muted-foreground">Employee directory features will be implemented here.</p>
-              </div>
-            </CardContent>
-          </Card>
+          <EmployeeDirectory />
         </TabsContent>
         
         <TabsContent value="profiles" className="space-y-4">
           <Card>
-            <CardHeader>
-              <CardTitle>Employee Profiles</CardTitle>
-              <CardDescription>
-                View and edit employee profiles
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex items-center justify-center p-8 text-center">
+            <CardContent className="pt-6 flex items-center justify-center p-8 text-center min-h-[300px]">
               <div>
-                <User size={64} className="mx-auto mb-4 text-muted-foreground" />
-                <p className="text-muted-foreground">Employee profile management features coming soon.</p>
+                <Users size={64} className="mx-auto mb-4 text-muted-foreground" />
+                <h3 className="text-lg font-medium mb-2">Employee Profiles</h3>
+                <p className="text-muted-foreground">
+                  View and manage comprehensive employee profiles with personal details, work history, skills, and more.
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -85,16 +54,13 @@ const Employees: React.FC = () => {
         
         <TabsContent value="onboarding" className="space-y-4">
           <Card>
-            <CardHeader>
-              <CardTitle>Employee Onboarding</CardTitle>
-              <CardDescription>
-                Manage the onboarding process for new employees
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex items-center justify-center p-8 text-center">
+            <CardContent className="pt-6 flex items-center justify-center p-8 text-center min-h-[300px]">
               <div>
                 <UserPlus size={64} className="mx-auto mb-4 text-muted-foreground" />
-                <p className="text-muted-foreground">Employee onboarding features coming soon.</p>
+                <h3 className="text-lg font-medium mb-2">Employee Onboarding</h3>
+                <p className="text-muted-foreground">
+                  Streamline the onboarding process for new employees with customizable workflows, automated tasks, and progress tracking.
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -102,16 +68,13 @@ const Employees: React.FC = () => {
         
         <TabsContent value="documents" className="space-y-4">
           <Card>
-            <CardHeader>
-              <CardTitle>Employee Documents</CardTitle>
-              <CardDescription>
-                Manage employee documents and files
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex items-center justify-center p-8 text-center">
+            <CardContent className="pt-6 flex items-center justify-center p-8 text-center min-h-[300px]">
               <div>
                 <FileText size={64} className="mx-auto mb-4 text-muted-foreground" />
-                <p className="text-muted-foreground">Document management features coming soon.</p>
+                <h3 className="text-lg font-medium mb-2">Employee Documents</h3>
+                <p className="text-muted-foreground">
+                  Securely store and manage employee documents including contracts, certificates, ID proofs, and other important files.
+                </p>
               </div>
             </CardContent>
           </Card>

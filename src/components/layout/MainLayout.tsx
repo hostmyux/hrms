@@ -4,6 +4,7 @@ import { useLocation } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
 import { useVoice } from '../../contexts/VoiceContext';
+import { VoiceControls } from '../shared/VoiceControls';
 
 interface MainLayoutProps {
   children: React.ReactNode;

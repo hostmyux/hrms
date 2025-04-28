@@ -7,6 +7,7 @@ import { DepartmentManagement } from '../components/organization/DepartmentManag
 import { DesignationManagement } from '../components/organization/DesignationManagement';
 import { LocationManagement } from '../components/organization/LocationManagement';
 import { OrganizationChart } from '../components/organization/OrganizationChart';
+import { VoiceControls } from '../components/shared/VoiceControls';
 
 const Organization: React.FC = () => {
   const { speak } = useVoice();
@@ -17,15 +18,18 @@ const Organization: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Organization Management</h1>
-        <p className="text-muted-foreground">
-          Manage your company structure, departments, and locations.
-        </p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Organization Management</h1>
+          <p className="text-muted-foreground">
+            Manage your company structure, departments, and locations.
+          </p>
+        </div>
+        <VoiceControls />
       </div>
       
       <Tabs defaultValue="company" className="space-y-4">
-        <TabsList>
+        <TabsList className="w-full sm:w-auto overflow-x-auto">
           <TabsTrigger value="company">Company Info</TabsTrigger>
           <TabsTrigger value="departments">Departments</TabsTrigger>
           <TabsTrigger value="designations">Designations</TabsTrigger>

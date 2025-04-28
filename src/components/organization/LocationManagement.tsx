@@ -181,7 +181,10 @@ export const LocationManagement: React.FC = () => {
   // Open edit dialog
   const handleOpenEditDialog = (location: Location) => {
     setSelectedLocation(location);
-    setFormData(location);
+    setFormData({
+      ...location,
+      address: { ...location.address }
+    });
     setIsEditDialogOpen(true);
     speak(`Editing ${location.name} location. You can update location details.`);
   };
@@ -199,13 +202,16 @@ export const LocationManagement: React.FC = () => {
     
     if (name.includes('.')) {
       const [parent, child] = name.split('.');
-      setFormData(prev => ({
-        ...prev,
-        [parent]: {
-          ...prev[parent as keyof typeof prev],
-          [child]: value
-        }
-      }));
+      
+      if (parent === 'address') {
+        setFormData(prev => ({
+          ...prev,
+          address: {
+            ...prev.address!,
+            [child]: value
+          }
+        }));
+      }
     } else if (name === 'employees') {
       setFormData(prev => ({
         ...prev,
@@ -284,7 +290,10 @@ export const LocationManagement: React.FC = () => {
 
     setIsSaving(true);
     try {
-      const updatedLocation = await updateLocation(selectedLocation.id, formData);
+      const updatedLocation = await updateLocation(selectedLocation.id, {
+        ...formData,
+        address: { ...formData.address }
+      } as Location);
       
       setLocations(prev => 
         prev.map(loc => loc.id === updatedLocation.id ? updatedLocation : loc)

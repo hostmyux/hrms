@@ -1,9 +1,12 @@
 
 import React, { useEffect } from 'react';
 import { useVoice } from '../contexts/VoiceContext';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calendar, Clock, Home } from 'lucide-react';
+import { AttendanceTracker } from '../components/attendance/AttendanceTracker';
+import { LeaveManagement } from '../components/attendance/LeaveManagement';
+import { VoiceControls } from '../components/shared/VoiceControls';
+import { Card, CardContent } from '@/components/ui/card';
+import { Home, CalendarDays } from 'lucide-react';
 
 const Attendance: React.FC = () => {
   const { speak } = useVoice();
@@ -14,15 +17,18 @@ const Attendance: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Attendance & Leave</h1>
-        <p className="text-muted-foreground">
-          Track time, manage leaves, and monitor attendance.
-        </p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Attendance & Leave</h1>
+          <p className="text-muted-foreground">
+            Track time, manage leaves, and monitor attendance.
+          </p>
+        </div>
+        <VoiceControls />
       </div>
       
       <Tabs defaultValue="attendance" className="space-y-4">
-        <TabsList>
+        <TabsList className="w-full sm:w-auto overflow-x-auto">
           <TabsTrigger value="attendance">Attendance</TabsTrigger>
           <TabsTrigger value="leave">Leave Management</TabsTrigger>
           <TabsTrigger value="wfh">Work From Home</TabsTrigger>
@@ -30,51 +36,22 @@ const Attendance: React.FC = () => {
         </TabsList>
         
         <TabsContent value="attendance" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Attendance Tracking</CardTitle>
-              <CardDescription>
-                Track daily employee attendance
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex items-center justify-center p-8 text-center">
-              <div>
-                <Clock size={64} className="mx-auto mb-4 text-muted-foreground" />
-                <p className="text-muted-foreground">Attendance tracking features coming soon.</p>
-              </div>
-            </CardContent>
-          </Card>
+          <AttendanceTracker />
         </TabsContent>
         
         <TabsContent value="leave" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Leave Management</CardTitle>
-              <CardDescription>
-                Request and approve leave applications
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex items-center justify-center p-8 text-center">
-              <div>
-                <Calendar size={64} className="mx-auto mb-4 text-muted-foreground" />
-                <p className="text-muted-foreground">Leave management features coming soon.</p>
-              </div>
-            </CardContent>
-          </Card>
+          <LeaveManagement />
         </TabsContent>
         
         <TabsContent value="wfh" className="space-y-4">
           <Card>
-            <CardHeader>
-              <CardTitle>Work From Home</CardTitle>
-              <CardDescription>
-                Track work from home requests and status
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex items-center justify-center p-8 text-center">
+            <CardContent className="pt-6 flex items-center justify-center p-8 text-center min-h-[300px]">
               <div>
                 <Home size={64} className="mx-auto mb-4 text-muted-foreground" />
-                <p className="text-muted-foreground">Work from home tracking features coming soon.</p>
+                <h3 className="text-lg font-medium mb-2">Work From Home</h3>
+                <p className="text-muted-foreground">
+                  Track and manage work from home requests. Set policies, approve requests, and monitor remote work schedules.
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -82,16 +59,13 @@ const Attendance: React.FC = () => {
         
         <TabsContent value="holidays" className="space-y-4">
           <Card>
-            <CardHeader>
-              <CardTitle>Holiday Calendar</CardTitle>
-              <CardDescription>
-                View and manage company holidays
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex items-center justify-center p-8 text-center">
+            <CardContent className="pt-6 flex items-center justify-center p-8 text-center min-h-[300px]">
               <div>
-                <Calendar size={64} className="mx-auto mb-4 text-muted-foreground" />
-                <p className="text-muted-foreground">Holiday management features coming soon.</p>
+                <CalendarDays size={64} className="mx-auto mb-4 text-muted-foreground" />
+                <h3 className="text-lg font-medium mb-2">Holiday Calendar</h3>
+                <p className="text-muted-foreground">
+                  Manage company-wide holidays, regional holidays, and configure working days for different office locations.
+                </p>
               </div>
             </CardContent>
           </Card>
