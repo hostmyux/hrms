@@ -1,9 +1,12 @@
 
 import React, { useEffect } from 'react';
 import { useVoice } from '../contexts/VoiceContext';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Building, MapPin, Users, Network } from 'lucide-react';
+import { CompanyInfoForm } from '../components/organization/CompanyInfoForm';
+import { DepartmentManagement } from '../components/organization/DepartmentManagement';
+import { DesignationManagement } from '../components/organization/DesignationManagement';
+import { LocationManagement } from '../components/organization/LocationManagement';
+import { OrganizationChart } from '../components/organization/OrganizationChart';
 
 const Organization: React.FC = () => {
   const { speak } = useVoice();
@@ -31,87 +34,23 @@ const Organization: React.FC = () => {
         </TabsList>
         
         <TabsContent value="company" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Company Information</CardTitle>
-              <CardDescription>
-                View and manage company details
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <p>Company information management features will be implemented here.</p>
-              </div>
-            </CardContent>
-          </Card>
+          <CompanyInfoForm />
         </TabsContent>
         
         <TabsContent value="departments" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Departments</CardTitle>
-              <CardDescription>
-                Create, view and manage departments
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-center p-8">
-                <Users size={64} className="text-muted-foreground" />
-              </div>
-              <p className="text-center text-muted-foreground">Department management features coming soon.</p>
-            </CardContent>
-          </Card>
+          <DepartmentManagement />
         </TabsContent>
         
         <TabsContent value="designations" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Designations / Job Titles</CardTitle>
-              <CardDescription>
-                Manage job titles and roles
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-center p-8">
-                <Building size={64} className="text-muted-foreground" />
-              </div>
-              <p className="text-center text-muted-foreground">Designation management features coming soon.</p>
-            </CardContent>
-          </Card>
+          <DesignationManagement />
         </TabsContent>
         
         <TabsContent value="locations" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Office Locations</CardTitle>
-              <CardDescription>
-                Manage office locations and branches
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-center p-8">
-                <MapPin size={64} className="text-muted-foreground" />
-              </div>
-              <p className="text-center text-muted-foreground">Location management features coming soon.</p>
-            </CardContent>
-          </Card>
+          <LocationManagement />
         </TabsContent>
         
         <TabsContent value="structure" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Organization Chart</CardTitle>
-              <CardDescription>
-                Visual representation of organization hierarchy
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-center p-8">
-                <Network size={64} className="text-muted-foreground" />
-              </div>
-              <p className="text-center text-muted-foreground">Organization chart features coming soon.</p>
-            </CardContent>
-          </Card>
+          <OrganizationChart />
         </TabsContent>
       </Tabs>
     </div>

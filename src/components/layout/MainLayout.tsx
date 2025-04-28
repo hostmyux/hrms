@@ -13,25 +13,66 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const { speak } = useVoice();
   const location = useLocation();
 
-  // Speak when layout mounts or route changes to provide location context
+  // Get the current path without any query parameters
+  const currentPath = location.pathname;
+
+  // Enhanced voice guidance based on route
   useEffect(() => {
-    const pathToModuleMap: Record<string, string> = {
-      '/': 'Main dashboard',
-      '/organization': 'Organization management',
-      '/employees': 'Employee management',
-      '/recruitment': 'Recruitment',
-      '/attendance': 'Attendance and leave',
-      '/payroll': 'Payroll',
-      '/performance': 'Performance management',
-      '/learning': 'Learning and development',
-      '/reports': 'Analytics and reports',
-      '/helpdesk': 'HR helpdesk',
-      '/settings': 'System settings',
+    const pathToModuleMap: Record<string, { name: string, description: string }> = {
+      '/': {
+        name: 'Main dashboard',
+        description: 'View key metrics and activities across your organization.'
+      },
+      '/organization': {
+        name: 'Organization management',
+        description: 'Manage company information, departments, job titles, and office locations.'
+      },
+      '/employees': {
+        name: 'Employee management',
+        description: 'Manage employee profiles, documents, and work history.'
+      },
+      '/recruitment': {
+        name: 'Recruitment',
+        description: 'Post jobs, track applications, and manage candidate interviews.'
+      },
+      '/attendance': {
+        name: 'Attendance and leave',
+        description: 'Track attendance, manage leave applications and approvals.'
+      },
+      '/payroll': {
+        name: 'Payroll',
+        description: 'Process salaries, manage tax deductions, and generate payslips.'
+      },
+      '/performance': {
+        name: 'Performance management',
+        description: 'Set goals, conduct reviews, and manage feedback.'
+      },
+      '/learning': {
+        name: 'Learning and development',
+        description: 'Manage training programs and track employee skill development.'
+      },
+      '/reports': {
+        name: 'Analytics and reports',
+        description: 'Generate custom reports and analyze HR metrics.'
+      },
+      '/helpdesk': {
+        name: 'HR helpdesk',
+        description: 'Submit and track HR support tickets and access knowledge base.'
+      },
+      '/settings': {
+        name: 'System settings',
+        description: 'Configure system preferences and permissions.'
+      },
     };
 
-    const moduleName = pathToModuleMap[location.pathname] || 'Unknown module';
-    speak(`${moduleName} loaded. Navigate using the sidebar menu for different HR modules.`);
-  }, [speak, location.pathname]);
+    const moduleInfo = pathToModuleMap[currentPath] || { 
+      name: 'Unknown module', 
+      description: 'Navigate using the sidebar menu for different HR modules.' 
+    };
+    
+    // Speak the module name and brief description
+    speak(`${moduleInfo.name} loaded. ${moduleInfo.description}`);
+  }, [speak, currentPath]);
 
   return (
     <div className="flex min-h-screen bg-background">
