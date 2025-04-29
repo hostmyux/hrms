@@ -2,7 +2,7 @@
 import React from 'react';
 import { useVoice } from '../../contexts/VoiceContext';
 import { Button } from '@/components/ui/button';
-import { Mic, MicOff, Volume2, VolumeX } from 'lucide-react';
+import { Mic, MicOff, Volume2, VolumeX, StopCircle } from 'lucide-react';
 import {
   Tooltip,
   TooltipContent,
@@ -53,10 +53,20 @@ export const VoiceControls: React.FC = () => {
             <TooltipContent>Adjust volume</TooltipContent>
           </Tooltip>
 
-          <Button variant="outline" size="icon" onClick={stopSpeaking} className="ml-1">
-            <span className="sr-only">Stop speaking</span>
-            <span className="h-3 w-3 rounded-sm bg-destructive"></span>
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant="outline" 
+                size="icon" 
+                onClick={stopSpeaking} 
+                className="ml-1"
+              >
+                <span className="sr-only">Stop speaking</span>
+                <StopCircle className="h-4 w-4 text-destructive" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Stop speaking</TooltipContent>
+          </Tooltip>
 
           {showVolumeSlider && (
             <div className="w-24 ml-1">

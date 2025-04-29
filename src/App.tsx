@@ -18,6 +18,9 @@ import Reports from "./pages/Reports";
 import Helpdesk from "./pages/Helpdesk";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
+import Notifications from "./pages/Notifications";
+import Calendar from "./pages/Calendar";
+import Documents from "./pages/Documents";
 
 const queryClient = new QueryClient();
 
@@ -114,6 +117,30 @@ const App = () => (
               element={
                 <MainLayout>
                   <Settings />
+                </MainLayout>
+              } 
+            />
+            <Route 
+              path="/notifications" 
+              element={
+                <MainLayout>
+                  <Notifications />
+                </MainLayout>
+              } 
+            />
+            <Route 
+              path="/calendar" 
+              element={
+                <MainLayout>
+                  <Calendar />
+                </MainLayout>
+              } 
+            />
+            <Route 
+              path="/documents" 
+              element={
+                <MainLayout>
+                  <Documents />
                 </MainLayout>
               } 
             />
