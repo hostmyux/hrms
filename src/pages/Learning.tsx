@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useVoice } from '../contexts/VoiceContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -403,7 +402,12 @@ const Learning: React.FC = () => {
                 <p className="text-muted-foreground mt-1">
                   {searchQuery ? 'Try a different search term' : 'Enroll in courses to start learning'}
                 </p>
-                <Button className="mt-4" onClick={() => document.querySelector('[data-value="courses"]')?.click()}>
+                <Button className="mt-4" onClick={() => {
+                  const coursesTab = document.querySelector('[data-value="courses"]');
+                  if (coursesTab) {
+                    (coursesTab as HTMLElement).click();
+                  }
+                }}>
                   Browse Courses
                 </Button>
               </div>

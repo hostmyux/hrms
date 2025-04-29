@@ -6,7 +6,7 @@ import { useVoice } from '../../contexts/VoiceContext';
 import { 
   Users, Building, Briefcase, Clock, PieChart, BarChart, 
   Shield, Bell, Calendar, Folder, MessageSquare, 
-  User, Settings, UserPlus
+  User, Settings, UserPlus, Book
 } from 'lucide-react';
 
 interface SidebarItemProps {
@@ -154,6 +154,12 @@ export const Sidebar = () => {
               href="/payroll" 
               isActive={location.pathname.startsWith('/payroll')}
             />
+            <SidebarItem 
+              icon={<Book size={18} />} 
+              label="Learning" 
+              href="/learning" 
+              isActive={location.pathname.startsWith('/learning')}
+            />
           </nav>
         </div>
 
@@ -188,6 +194,12 @@ export const Sidebar = () => {
               label="Documents" 
               href="/documents" 
               isActive={location.pathname.startsWith('/documents')}
+            />
+            <SidebarItem 
+              icon={<Settings size={18} />} 
+              label="Settings" 
+              href="/settings" 
+              isActive={location.pathname.startsWith('/settings')}
             />
           </nav>
         </div>
