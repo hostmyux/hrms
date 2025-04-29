@@ -8,15 +8,18 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { Slider } from '@/components/ui/slider';
 import { voiceAssistant } from '../../services/voiceAssistant';
 
 export const VoiceControls: React.FC = () => {
   const { isVoiceEnabled, toggleVoice, stopSpeaking } = useVoice();
   const [volume, setVolume] = React.useState(0.8);
+  const [showVolumeSlider, setShowVolumeSlider] = React.useState(false);
 
-  const handleVolumeChange = (newVolume: number) => {
-    setVolume(newVolume);
-    voiceAssistant.setOptions({ volume: newVolume });
+  const handleVolumeChange = (newVolume: number[]) => {
+    const value = newVolume[0];
+    setVolume(value);
+    voiceAssistant.setOptions({ volume: value });
   };
 
   return (
@@ -39,12 +42,32 @@ export const VoiceControls: React.FC = () => {
         <>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="outline" size="icon" onClick={stopSpeaking}>
+              <Button 
+                variant="outline" 
+                size="icon" 
+                onClick={() => setShowVolumeSlider(!showVolumeSlider)}
+              >
                 {volume === 0 ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Stop speaking</TooltipContent>
+            <TooltipContent>Adjust volume</TooltipContent>
           </Tooltip>
+
+          <Button variant="outline" size="icon" onClick={stopSpeaking} className="ml-1">
+            <span className="sr-only">Stop speaking</span>
+            <span className="h-3 w-3 rounded-sm bg-destructive"></span>
+          </Button>
+
+          {showVolumeSlider && (
+            <div className="w-24 ml-1">
+              <Slider
+                defaultValue={[volume]}
+                max={1}
+                step={0.1}
+                onValueChange={handleVolumeChange}
+              />
+            </div>
+          )}
         </>
       )}
     </div>

@@ -5,6 +5,7 @@ import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
 import { useVoice } from '../../contexts/VoiceContext';
 import { VoiceControls } from '../shared/VoiceControls';
+import { toast } from '@/components/ui/use-toast';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -73,6 +74,13 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     
     // Speak the module name and brief description
     speak(`${moduleInfo.name} loaded. ${moduleInfo.description}`);
+    
+    // Show toast notification for module change
+    toast({
+      title: moduleInfo.name,
+      description: moduleInfo.description,
+      duration: 3000,
+    });
   }, [speak, currentPath]);
 
   return (

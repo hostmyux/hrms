@@ -8,13 +8,34 @@ import { DesignationManagement } from '../components/organization/DesignationMan
 import { LocationManagement } from '../components/organization/LocationManagement';
 import { OrganizationChart } from '../components/organization/OrganizationChart';
 import { VoiceControls } from '../components/shared/VoiceControls';
+import { toast } from '@/components/ui/use-toast';
 
 const Organization: React.FC = () => {
   const { speak } = useVoice();
+  const [activeTab, setActiveTab] = React.useState('company');
 
   useEffect(() => {
     speak("Organization management module loaded. Here you can manage company information, departments, designations, and view organization structure.");
   }, [speak]);
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    
+    const tabMessages = {
+      'company': "Company information management. Update your organization details and branding.",
+      'departments': "Department management. Create, update, and manage your organization's departments.",
+      'designations': "Designation management. Manage job titles and positions across your organization.",
+      'locations': "Location management. Add and manage office locations and facilities.",
+      'structure': "Organization chart. View and navigate your organization's hierarchical structure."
+    };
+    
+    speak(tabMessages[value as keyof typeof tabMessages] || "");
+    toast({
+      title: "Tab changed",
+      description: `You are now viewing the ${value} tab`,
+      duration: 2000,
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -28,7 +49,7 @@ const Organization: React.FC = () => {
         <VoiceControls />
       </div>
       
-      <Tabs defaultValue="company" className="space-y-4">
+      <Tabs defaultValue="company" value={activeTab} onValueChange={handleTabChange} className="space-y-4">
         <TabsList className="w-full sm:w-auto overflow-x-auto">
           <TabsTrigger value="company">Company Info</TabsTrigger>
           <TabsTrigger value="departments">Departments</TabsTrigger>
