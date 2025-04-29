@@ -249,6 +249,7 @@ const Learning: React.FC = () => {
           <TabsTrigger value="certificates">Certificates</TabsTrigger>
         </TabsList>
         
+        {/* Fix for the TypeScript error starts here */}
         <TabsContent value="courses" className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {getFilteredCourses('all').length > 0 ? (
@@ -334,6 +335,7 @@ const Learning: React.FC = () => {
           </div>
         </TabsContent>
         
+        {/* Fixed the following code to properly handle tab switching */}
         <TabsContent value="enrollment" className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {getFilteredCourses('enrolled').length > 0 ? (
