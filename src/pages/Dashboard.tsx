@@ -5,6 +5,7 @@ import { StatCard } from '../components/dashboard/StatCard';
 import { EmployeeTable } from '../components/dashboard/EmployeeTable';
 import { ActivityLog } from '../components/dashboard/ActivityLog';
 import { useVoice } from '../contexts/VoiceContext';
+import { VoiceControls } from '../components/shared/VoiceControls';
 
 // Mock data
 const employees = [
@@ -106,16 +107,19 @@ const Dashboard: React.FC = () => {
   const { speak } = useVoice();
   
   React.useEffect(() => {
-    speak("Welcome to the HRMS Dashboard. Here you can view key HR metrics, recent employees, and activity logs. Use the voice assistant for guidance through your HR tasks.");
+    speak("Welcome to the HRMS Dashboard. This is your central command center for human resources management. The overview cards show key metrics like employee count, leave status, open positions, and pending approvals. Below, you'll find recent employee details and activity logs. Use the voice assistant for step-by-step guidance through any HR process.");
   }, [speak]);
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground">
-          Overview of your human resources system
-        </p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+          <p className="text-muted-foreground">
+            Overview of your human resources system
+          </p>
+        </div>
+        <VoiceControls />
       </div>
       
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -124,34 +128,40 @@ const Dashboard: React.FC = () => {
           value="245" 
           icon={<Users size={24} />} 
           trend={{ value: 12, isPositive: true }}
-          voiceDescription="Total of 245 employees, which is a 12% increase from last month."
+          voiceDescription="Total of 245 employees, which is a 12% increase from last month. This trend suggests healthy organizational growth. Consider reviewing departmental distribution to ensure balanced resource allocation."
         />
         <StatCard 
           title="On Leave Today" 
           value="8" 
           icon={<Calendar size={24} />} 
           description="3.2% of workforce"
-          voiceDescription="8 employees are currently on leave today, which is 3.2% of the total workforce."
+          voiceDescription="8 employees are currently on leave today, representing 3.2% of the total workforce. This is within expected absence rates. You can click this card to view detailed absence distribution by department."
         />
         <StatCard 
           title="Open Positions" 
           value="12" 
           icon={<UserPlus size={24} />} 
           trend={{ value: 5, isPositive: true }}
-          voiceDescription="12 open positions are currently available, which is a 5% increase from last month."
+          voiceDescription="12 open positions are currently available across departments, which is a 5% increase from last month. Consider reviewing recruitment timelines and exploring additional hiring channels to expedite the filling of critical roles."
         />
         <StatCard 
           title="Pending Approvals" 
           value="18" 
           icon={<FileText size={24} />} 
           description="Leave and expense requests"
-          voiceDescription="18 pending approvals waiting, including leave requests and expense approvals."
+          voiceDescription="18 pending approvals waiting for your review, including leave requests and expense approvals. Consider setting aside time to review these items to maintain operational efficiency and employee satisfaction with approval turnaround times."
         />
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
-        <EmployeeTable employees={employees} />
-        <ActivityLog activities={activities} />
+        <EmployeeTable 
+          employees={employees} 
+          voiceDescription="Recent employee listing showing key personnel information. You can click on any employee row to view their detailed profile and employment history."
+        />
+        <ActivityLog 
+          activities={activities}
+          voiceDescription="Recent HR activities across your organization. Each entry represents an important event that may require your attention or awareness."  
+        />
       </div>
     </div>
   );

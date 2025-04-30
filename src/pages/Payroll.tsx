@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useVoice } from '../contexts/VoiceContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -8,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Pagination } from '@/components/ui/pagination';
 import { VoiceControls } from '../components/shared/VoiceControls';
+import { toast } from '@/components/ui/use-toast';
 
 // Mock salary structure data
 const mockSalaryStructures = [
@@ -42,7 +42,7 @@ const Payroll: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
-    speak("Payroll management module loaded. Process salaries, manage compensations, and generate payslips.");
+    speak("Payroll management module loaded. This is your financial command center for employee compensation. Here you can configure salary structures, process regular payments, generate payslips, and manage overtime calculations. The module ensures accurate and compliant compensation processing while maintaining a complete audit trail.");
   }, [speak]);
 
   const handleTabChange = (value: string) => {
@@ -51,13 +51,18 @@ const Payroll: React.FC = () => {
     setSearchQuery('');
     
     const tabMessages = {
-      'salary': "Salary structure management. Define and manage employee compensation components.",
-      'process': "Payroll processing. Run payroll calculations for the current period.",
-      'payslips': "Payslips management. Generate and manage employee salary slips.",
-      'overtime': "Overtime management. Track and process employee overtime hours.",
+      'salary': "Salary structure management. Define and customize compensation components for different roles and levels. The structured approach ensures internal equity while maintaining market competitiveness. You can configure basic salary, allowances, and benefits for each position category.",
+      'process': "Payroll processing workflow. Run payroll calculations for the current period, verify accuracy, and authorize payments. The multi-step approval process ensures thorough verification before disbursement. The dashboard provides real-time status of the current payroll cycle.",
+      'payslips': "Payslips generation and distribution. Create detailed earnings statements for employees with complete breakdown of earnings and deductions. Automated delivery options save time and ensure confidentiality. Historical payslips are archived for future reference.",
+      'overtime': "Overtime calculation and approval. Track additional hours worked, apply appropriate pay rates, and process overtime compensation. The approval workflow ensures proper authorization of overtime claims. Analytics help identify departments with consistent overtime patterns.",
     };
     
     speak(tabMessages[value as keyof typeof tabMessages] || "");
+    toast({
+      title: `${value.charAt(0).toUpperCase() + value.slice(1)} Management`,
+      description: tabMessages[value as keyof typeof tabMessages] || "",
+      duration: 3000,
+    });
   };
 
   // Filter salary structures based on search query

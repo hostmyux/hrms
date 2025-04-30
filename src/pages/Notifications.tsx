@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useVoice } from '../contexts/VoiceContext';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Bell, CheckCircle, Clock, Users, Calendar, FileText, Settings } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
+import { VoiceControls } from '../components/shared/VoiceControls';
 
 interface Notification {
   id: string;
@@ -21,6 +21,7 @@ interface Notification {
 const Notifications: React.FC = () => {
   const { speak } = useVoice();
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [activeTab, setActiveTab] = useState('all');
 
   // Sample notification data
   useEffect(() => {
@@ -73,24 +74,41 @@ const Notifications: React.FC = () => {
     ];
 
     setNotifications(sampleNotifications);
-    speak("Notifications page loaded. You have 3 unread notifications.");
+    const unreadCount = notifications.filter(n => !n.isRead).length;
+    speak(`Notifications center loaded. You have ${unreadCount} unread notifications. This hub centralizes all system alerts, task reminders, and important updates. Use the category filters to focus on specific notification types, and mark items as read once you've addressed them.`);
   }, [speak]);
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    
+    const tabMessages = {
+      'all': "All notifications view. This comprehensive list shows every notification across all categories, ordered by date. Use this view when you want to see the complete activity history.",
+      'system': "System notifications. These are automated alerts about platform updates, maintenance windows, and important system events. Pay special attention to warnings that may affect system functionality.",
+      'task': "Task notifications. These alerts relate to workflows, approvals, and action items requiring your attention. Timely response to these notifications ensures smooth business processes.",
+      'message': "Message notifications. These include communications, document shares, and collaboration updates. These notifications facilitate effective information exchange across your organization."
+    };
+    
+    speak(tabMessages[value as keyof typeof tabMessages] || "");
+  };
 
   const markAsRead = (id: string) => {
     setNotifications(notifications.map(notification => 
       notification.id === id ? { ...notification, isRead: true } : notification
     ));
     toast.success("Notification marked as read");
+    speak("Notification marked as read. This will remove it from your unread count.");
   };
 
   const markAllAsRead = () => {
     setNotifications(notifications.map(notification => ({ ...notification, isRead: true })));
     toast.success("All notifications marked as read");
+    speak("All notifications have been marked as read. Your notification center is now clear.");
   };
 
   const deleteNotification = (id: string) => {
     setNotifications(notifications.filter(notification => notification.id !== id));
     toast.success("Notification deleted");
+    speak("Notification deleted. This action cannot be undone.");
   };
 
   const getNotificationIcon = (type: string) => {
@@ -129,11 +147,14 @@ const Notifications: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Notifications</h1>
-        <p className="text-muted-foreground">
-          View and manage your system notifications.
-        </p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Notifications</h1>
+          <p className="text-muted-foreground">
+            View and manage your system notifications.
+          </p>
+        </div>
+        <VoiceControls />
       </div>
 
       <div className="flex items-center justify-between">
@@ -151,7 +172,7 @@ const Notifications: React.FC = () => {
         </Button>
       </div>
       
-      <Tabs defaultValue="all" className="space-y-4">
+      <Tabs defaultValue="all" value={activeTab} onValueChange={handleTabChange} className="space-y-4">
         <TabsList>
           <TabsTrigger value="all">All</TabsTrigger>
           <TabsTrigger value="system">System</TabsTrigger>

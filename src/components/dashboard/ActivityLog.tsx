@@ -18,13 +18,22 @@ interface ActivityItem {
 interface ActivityLogProps {
   activities: ActivityItem[];
   title?: string;
+  voiceDescription?: string;
 }
 
 export const ActivityLog: React.FC<ActivityLogProps> = ({ 
   activities, 
-  title = "Recent Activities" 
+  title = "Recent Activities",
+  voiceDescription 
 }) => {
   const { speak } = useVoice();
+
+  React.useEffect(() => {
+    if (voiceDescription) {
+      // Register this component with voice assistant when mounted
+      // This could be expanded to support more complex voice interactions
+    }
+  }, [voiceDescription]);
 
   const getActivityIcon = (type: string) => {
     switch (type) {
@@ -56,6 +65,28 @@ export const ActivityLog: React.FC<ActivityLogProps> = ({
     }
   };
 
+  const getDetailedActivityDescription = (activity: ActivityItem) => {
+    let detailedDescription = `${activity.title}: ${activity.description}`;
+    
+    switch (activity.type) {
+      case 'new_employee':
+        detailedDescription += `. This represents an addition to your workforce. Consider checking if all onboarding steps have been completed.`;
+        break;
+      case 'leave_request':
+        detailedDescription += `. Ensure team coverage during this absence and verify that the leave balance is accurate.`;
+        break;
+      case 'document_upload':
+        detailedDescription += `. Make sure to review the document for compliance with company policies.`;
+        break;
+      case 'attendance':
+        detailedDescription += `. Check for any anomalies or patterns that may require attention.`;
+        break;
+    }
+    
+    detailedDescription += ` Action taken by ${activity.user.name}, ${activity.user.role} on ${activity.date}`;
+    return detailedDescription;
+  };
+
   return (
     <div className="bg-card rounded-lg border border-border overflow-hidden">
       <div className="p-6 border-b border-border">
@@ -67,7 +98,8 @@ export const ActivityLog: React.FC<ActivityLogProps> = ({
           <div 
             key={activity.id} 
             className="p-4 hover:bg-muted/30 cursor-pointer transition-colors"
-            onClick={() => speak(`${activity.title}: ${activity.description} by ${activity.user.name}, ${activity.user.role} on ${activity.date}`)}
+            onClick={() => speak(getDetailedActivityDescription(activity))}
+            aria-label={`Activity: ${activity.title}`}
           >
             <div className="flex items-start">
               <div className={`w-10 h-10 rounded-full flex items-center justify-center mr-4 ${getActivityColor(activity.type)}`}>
