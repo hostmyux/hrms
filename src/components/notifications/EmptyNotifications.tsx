@@ -1,9 +1,11 @@
 
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Bell } from 'lucide-react';
+import { Bell, Settings, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useVoice } from '../../contexts/VoiceContext';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 interface EmptyNotificationsProps {
   category: string;
@@ -11,6 +13,7 @@ interface EmptyNotificationsProps {
 
 export const EmptyNotifications: React.FC<EmptyNotificationsProps> = ({ category }) => {
   const { speak } = useVoice();
+  const navigate = useNavigate();
   
   const getCategorySpecificMessage = () => {
     switch(category) {
@@ -40,7 +43,15 @@ export const EmptyNotifications: React.FC<EmptyNotificationsProps> = ({ category
   const categoryMessage = getCategorySpecificMessage();
   
   const handleExploreFeatures = () => {
-    speak("The notification system tracks important events across the HR platform. You'll receive alerts for approvals, document shares, system changes, and deadlines. You can filter by category or mark items as read to keep your workspace organized.");
+    speak("The notification system tracks important events across the HR platform. You'll receive alerts for approvals, document shares, system changes, and deadlines. You can filter by category or mark items as read to keep your workspace organized. I'm your AI assistant, ready to guide you through the notification features whenever needed.");
+    toast.success("Notification features explained", {
+      description: "Turn on notifications in settings for optimal experience."
+    });
+  };
+
+  const goToSettings = () => {
+    speak("Navigating to notification settings where you can configure your preferences for different notification types.");
+    navigate('/settings');
   };
 
   return (
@@ -51,13 +62,24 @@ export const EmptyNotifications: React.FC<EmptyNotificationsProps> = ({ category
         <p className="text-sm text-muted-foreground text-center mt-2 max-w-md">
           {categoryMessage.message}
         </p>
-        <Button 
-          variant="outline" 
-          className="mt-6"
-          onClick={handleExploreFeatures}
-        >
-          Learn about notifications
-        </Button>
+        <div className="flex flex-col sm:flex-row gap-3 mt-6">
+          <Button 
+            variant="outline" 
+            className="flex gap-2"
+            onClick={handleExploreFeatures}
+          >
+            <Check className="h-4 w-4" />
+            Learn about notifications
+          </Button>
+          
+          <Button 
+            className="flex gap-2"
+            onClick={goToSettings}
+          >
+            <Settings className="h-4 w-4" />
+            Notification settings
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );

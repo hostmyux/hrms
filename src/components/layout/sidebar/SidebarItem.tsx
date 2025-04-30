@@ -3,6 +3,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '../../../lib/utils';
 import { useVoice } from '../../../contexts/VoiceContext';
+import { toast } from 'sonner';
 
 interface SidebarItemProps {
   icon: React.ReactNode;
@@ -26,6 +27,7 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
   
   const handleClick = () => {
     speak(`Navigating to ${label} module`);
+    toast.info(`Navigating to ${label}`);
     if (onClick) onClick();
   };
 
@@ -37,6 +39,7 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
         active ? "bg-accent text-accent-foreground font-medium" : "text-foreground/70"
       )}
       onClick={handleClick}
+      aria-current={active ? "page" : undefined}
     >
       <span className="flex items-center justify-center w-5 h-5">{icon}</span>
       <span>{label}</span>

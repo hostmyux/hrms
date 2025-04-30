@@ -3,47 +3,102 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Calendar, Download, FileText } from 'lucide-react';
+import { Calendar, Download, FileText, Eye, Filter } from 'lucide-react';
 import { useVoice } from '../../contexts/VoiceContext';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export const PayrollHistory: React.FC = () => {
   const { speak } = useVoice();
   
+  const handleViewPayroll = (period: string) => {
+    speak(`Viewing detailed payroll information for ${period}`);
+  };
+  
   const payrollHistory = [
-    { id: 1, period: "March 2025", processDate: "March 31, 2025", totalAmount: "$126,500", employees: 234, taxFiled: true },
-    { id: 2, period: "February 2025", processDate: "February 28, 2025", totalAmount: "$124,850", employees: 232, taxFiled: true },
-    { id: 3, period: "January 2025", processDate: "January 31, 2025", totalAmount: "$123,700", employees: 230, taxFiled: true },
-    { id: 4, period: "December 2024", processDate: "December 31, 2024", totalAmount: "$145,200", employees: 235, taxFiled: true },
-    { id: 5, period: "November 2024", processDate: "November 30, 2024", totalAmount: "$123,100", employees: 228, taxFiled: true },
+    { 
+      id: 1, 
+      period: "March 2025", 
+      date: "March 31, 2025", 
+      employees: 234, 
+      totalAmount: "$126,500.00",
+      status: "Completed"
+    },
+    { 
+      id: 2, 
+      period: "February 2025", 
+      date: "February 28, 2025", 
+      employees: 232, 
+      totalAmount: "$124,780.00",
+      status: "Completed"
+    },
+    { 
+      id: 3, 
+      period: "January 2025", 
+      date: "January 31, 2025", 
+      employees: 230, 
+      totalAmount: "$122,450.00",
+      status: "Completed"
+    },
+    { 
+      id: 4, 
+      period: "December 2024", 
+      date: "December 31, 2024", 
+      employees: 228, 
+      totalAmount: "$120,200.00",
+      status: "Completed"
+    }
   ];
-  
-  const handleDownload = (period: string) => {
-    speak(`Downloading payroll report for ${period}`);
-  };
-  
-  const handleViewTaxDocuments = (period: string) => {
-    speak(`Viewing tax documents for ${period} payroll`);
-  };
 
   return (
     <div className="space-y-6">
+      <div className="flex justify-between items-center flex-col sm:flex-row gap-4">
+        <div>
+          <h3 className="text-lg font-medium">Payroll History</h3>
+          <p className="text-muted-foreground text-sm">
+            View and access past payroll records
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Select defaultValue="all">
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Filter by status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Statuses</SelectItem>
+              <SelectItem value="completed">Completed</SelectItem>
+              <SelectItem value="processing">Processing</SelectItem>
+              <SelectItem value="failed">Failed</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button variant="outline" size="icon">
+            <Filter className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+      
       <Card>
-        <CardHeader>
-          <CardTitle>Payroll History</CardTitle>
+        <CardHeader className="pb-3">
+          <CardTitle>Payroll Records</CardTitle>
           <CardDescription>
-            View past payroll records and download reports
+            View and download past payroll records
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
-            <TableCaption>A history of processed payrolls.</TableCaption>
+            <TableCaption>A history of payroll processing.</TableCaption>
             <TableHeader>
               <TableRow>
                 <TableHead>Period</TableHead>
-                <TableHead>Process Date</TableHead>
-                <TableHead>Total Amount</TableHead>
+                <TableHead>Date</TableHead>
                 <TableHead>Employees</TableHead>
-                <TableHead>Tax Filed</TableHead>
+                <TableHead>Total Amount</TableHead>
+                <TableHead>Status</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -51,33 +106,38 @@ export const PayrollHistory: React.FC = () => {
               {payrollHistory.map((item) => (
                 <TableRow key={item.id}>
                   <TableCell className="font-medium">{item.period}</TableCell>
-                  <TableCell>{item.processDate}</TableCell>
-                  <TableCell>{item.totalAmount}</TableCell>
+                  <TableCell>{item.date}</TableCell>
                   <TableCell>{item.employees}</TableCell>
+                  <TableCell>{item.totalAmount}</TableCell>
                   <TableCell>
-                    {item.taxFiled ? (
-                      <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        Filed
-                      </span>
-                    ) : (
-                      <span className="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                        Pending
-                      </span>
-                    )}
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      item.status === "Completed" ? "bg-green-100 text-green-800" :
+                      item.status === "Processing" ? "bg-yellow-100 text-yellow-800" :
+                      "bg-red-100 text-red-800"
+                    }`}>
+                      {item.status}
+                    </span>
                   </TableCell>
                   <TableCell>
                     <div className="flex space-x-2">
                       <Button 
                         variant="ghost" 
-                        size="sm" 
-                        onClick={() => handleDownload(item.period)}
+                        size="sm"
+                        onClick={() => handleViewPayroll(item.period)}
+                      >
+                        <Eye size={16} />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => speak(`Downloading payslips for ${item.period}`)}
                       >
                         <Download size={16} />
                       </Button>
                       <Button 
                         variant="ghost" 
                         size="sm"
-                        onClick={() => handleViewTaxDocuments(item.period)}
+                        onClick={() => speak(`Viewing detailed report for ${item.period}`)}
                       >
                         <FileText size={16} />
                       </Button>
@@ -89,24 +149,6 @@ export const PayrollHistory: React.FC = () => {
           </Table>
         </CardContent>
       </Card>
-      
-      <div className="flex justify-between items-center">
-        <Button 
-          variant="outline"
-          onClick={() => speak("Generating comprehensive annual payroll report with detailed breakdown by department and employee type.")}
-        >
-          Generate Annual Report
-        </Button>
-        
-        <Button 
-          variant="outline" 
-          className="flex items-center gap-2"
-          onClick={() => speak("Opening tax filing calendar. This view shows all critical tax deadlines and filing responsibilities.")}
-        >
-          <Calendar size={16} />
-          Tax Calendar
-        </Button>
-      </div>
     </div>
   );
 };
