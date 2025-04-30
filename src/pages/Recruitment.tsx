@@ -1,11 +1,13 @@
 
 import React, { useEffect } from 'react';
 import { useVoice } from '../contexts/VoiceContext';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Briefcase, Calendar, FileText, UserPlus } from 'lucide-react';
 import { VoiceControls } from '../components/shared/VoiceControls';
 import { toast } from '@/components/ui/use-toast';
+import { JobPostings } from '../components/recruitment/JobPostings';
+import { Applications } from '../components/recruitment/Applications';
+import { Interviews } from '../components/recruitment/Interviews';
+import { Offers } from '../components/recruitment/Offers';
 
 const Recruitment: React.FC = () => {
   const { speak } = useVoice();
@@ -54,71 +56,19 @@ const Recruitment: React.FC = () => {
         </TabsList>
         
         <TabsContent value="jobs" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Job Postings</CardTitle>
-              <CardDescription>
-                Create and manage job postings
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex items-center justify-center p-8 text-center">
-              <div>
-                <Briefcase size={64} className="mx-auto mb-4 text-muted-foreground" />
-                <p className="text-muted-foreground">Job posting management features coming soon.</p>
-              </div>
-            </CardContent>
-          </Card>
+          <JobPostings />
         </TabsContent>
         
         <TabsContent value="applications" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Job Applications</CardTitle>
-              <CardDescription>
-                Track and manage job applications
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex items-center justify-center p-8 text-center">
-              <div>
-                <FileText size={64} className="mx-auto mb-4 text-muted-foreground" />
-                <p className="text-muted-foreground">Application tracking features coming soon.</p>
-              </div>
-            </CardContent>
-          </Card>
+          <Applications />
         </TabsContent>
         
         <TabsContent value="interviews" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Interview Scheduling</CardTitle>
-              <CardDescription>
-                Schedule and track candidate interviews
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex items-center justify-center p-8 text-center">
-              <div>
-                <Calendar size={64} className="mx-auto mb-4 text-muted-foreground" />
-                <p className="text-muted-foreground">Interview scheduling features coming soon.</p>
-              </div>
-            </CardContent>
-          </Card>
+          <Interviews />
         </TabsContent>
         
         <TabsContent value="offers" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Offer Management</CardTitle>
-              <CardDescription>
-                Create and track job offers
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex items-center justify-center p-8 text-center">
-              <div>
-                <UserPlus size={64} className="mx-auto mb-4 text-muted-foreground" />
-                <p className="text-muted-foreground">Offer management features coming soon.</p>
-              </div>
-            </CardContent>
-          </Card>
+          <Offers />
         </TabsContent>
       </Tabs>
     </div>

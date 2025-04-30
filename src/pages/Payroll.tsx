@@ -2,13 +2,13 @@
 import React, { useEffect } from 'react';
 import { useVoice } from '../contexts/VoiceContext';
 import { VoiceControls } from '../components/shared/VoiceControls';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Briefcase, DollarSign, CalendarDays, FileText } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 
 import { PayrollOverview } from '../components/payroll/PayrollOverview';
 import { SalaryStructure } from '../components/payroll/SalaryStructure';
+import { PayrollProcessing } from '../components/payroll/PayrollProcessing';
+import { PayrollHistory } from '../components/payroll/PayrollHistory';
 
 const Payroll: React.FC = () => {
   const { speak } = useVoice();
@@ -65,45 +65,11 @@ const Payroll: React.FC = () => {
         </TabsContent>
         
         <TabsContent value="processing" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Payroll Processing</CardTitle>
-              <CardDescription>
-                Run payroll calculations and generate payment instructions
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex items-center justify-center p-8 text-center min-h-[300px]">
-              <div>
-                <CalendarDays size={64} className="mx-auto mb-4 text-muted-foreground" />
-                <h3 className="text-lg font-medium mb-2">Payroll Processing Center</h3>
-                <p className="text-muted-foreground">
-                  This feature is coming soon. You'll be able to calculate payroll, manage approvals,
-                  and process payments for all employees.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          <PayrollProcessing />
         </TabsContent>
         
         <TabsContent value="history" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Payroll History</CardTitle>
-              <CardDescription>
-                Access historical payroll records and reports
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex items-center justify-center p-8 text-center min-h-[300px]">
-              <div>
-                <FileText size={64} className="mx-auto mb-4 text-muted-foreground" />
-                <h3 className="text-lg font-medium mb-2">Historical Records</h3>
-                <p className="text-muted-foreground">
-                  This feature is coming soon. You'll be able to access past payrolls,
-                  tax documents, and generate comprehensive reports.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          <PayrollHistory />
         </TabsContent>
       </Tabs>
     </div>
