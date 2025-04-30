@@ -17,10 +17,17 @@ interface Employee {
 interface EmployeeTableProps {
   employees: Employee[];
   title?: string;
+  voiceDescription?: string;
 }
 
-export const EmployeeTable: React.FC<EmployeeTableProps> = ({ employees, title = "Recent Employees" }) => {
+export const EmployeeTable: React.FC<EmployeeTableProps> = ({ employees, title = "Recent Employees", voiceDescription }) => {
   const { speak } = useVoice();
+
+  React.useEffect(() => {
+    if (voiceDescription) {
+      // Register voice description when component mounts
+    }
+  }, [voiceDescription, speak]);
 
   const handleRowClick = (employee: Employee) => {
     speak(`Employee ${employee.name}, ${employee.position} in ${employee.department}. Email: ${employee.email}`);

@@ -1,12 +1,13 @@
+
 import React, { useEffect, useState } from 'react';
 import { useVoice } from '../contexts/VoiceContext';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Bell, CheckCircle, Clock, Users, Calendar, FileText, Settings } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { VoiceControls } from '../components/shared/VoiceControls';
+import { NotificationCard } from '../components/notifications/NotificationCard';
+import { EmptyNotifications } from '../components/notifications/EmptyNotifications';
 
 interface Notification {
   id: string;
@@ -74,7 +75,7 @@ const Notifications: React.FC = () => {
     ];
 
     setNotifications(sampleNotifications);
-    const unreadCount = notifications.filter(n => !n.isRead).length;
+    const unreadCount = sampleNotifications.filter(n => !n.isRead).length;
     speak(`Notifications center loaded. You have ${unreadCount} unread notifications. This hub centralizes all system alerts, task reminders, and important updates. Use the category filters to focus on specific notification types, and mark items as read once you've addressed them.`);
   }, [speak]);
 
@@ -111,38 +112,10 @@ const Notifications: React.FC = () => {
     speak("Notification deleted. This action cannot be undone.");
   };
 
-  const getNotificationIcon = (type: string) => {
-    switch(type) {
-      case 'success': return <CheckCircle className="h-5 w-5 text-green-500" />;
-      case 'warning': return <Clock className="h-5 w-5 text-yellow-500" />;
-      case 'error': return <Bell className="h-5 w-5 text-red-500" />;
-      case 'info': 
-      default: return <Bell className="h-5 w-5 text-blue-500" />;
-    }
-  };
-
-  const getCategoryIcon = (category: string) => {
-    switch(category) {
-      case 'system': return <Settings className="h-5 w-5" />;
-      case 'task': return <Users className="h-5 w-5" />;
-      case 'message': 
-      default: return <FileText className="h-5 w-5" />;
-    }
-  };
-
   const getFilteredNotifications = (category: string) => {
     return category === 'all' 
       ? notifications 
       : notifications.filter(notification => notification.category === category);
-  };
-
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', { 
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
   };
 
   return (
@@ -184,53 +157,15 @@ const Notifications: React.FC = () => {
           <TabsContent key={category} value={category} className="space-y-4">
             {getFilteredNotifications(category).length > 0 ? (
               getFilteredNotifications(category).map((notification) => (
-                <Card key={notification.id} className={!notification.isRead ? "border-l-4 border-l-primary" : ""}>
-                  <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
-                    <div className="flex items-center space-x-2">
-                      {getNotificationIcon(notification.type)}
-                      <CardTitle className="text-base font-medium">{notification.title}</CardTitle>
-                      {!notification.isRead && (
-                        <Badge className="ml-2 bg-primary">New</Badge>
-                      )}
-                    </div>
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      {getCategoryIcon(notification.category)}
-                      <span className="ml-1">{formatDate(notification.date)}</span>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <CardDescription className="text-sm">{notification.description}</CardDescription>
-                  </CardContent>
-                  <CardFooter className="flex justify-end space-x-2">
-                    {!notification.isRead && (
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => markAsRead(notification.id)}
-                      >
-                        Mark as read
-                      </Button>
-                    )}
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => deleteNotification(notification.id)}
-                    >
-                      Delete
-                    </Button>
-                  </CardFooter>
-                </Card>
+                <NotificationCard 
+                  key={notification.id}
+                  notification={notification}
+                  onMarkAsRead={markAsRead}
+                  onDelete={deleteNotification}
+                />
               ))
             ) : (
-              <Card>
-                <CardContent className="flex flex-col items-center justify-center py-10">
-                  <Bell className="h-12 w-12 text-muted-foreground mb-4" />
-                  <p className="text-xl font-medium text-center">No notifications</p>
-                  <p className="text-sm text-muted-foreground text-center mt-2">
-                    You don't have any {category !== 'all' ? category : ''} notifications at the moment.
-                  </p>
-                </CardContent>
-              </Card>
+              <EmptyNotifications category={category} />
             )}
           </TabsContent>
         ))}
