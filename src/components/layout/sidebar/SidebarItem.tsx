@@ -25,15 +25,21 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
   // Use either passed isActive prop or determine from current path
   const active = isActive || isCurrentPath;
   
-  const handleClick = () => {
-    speak(`Navigating to ${label} module`);
-    toast.info(`Navigating to ${label}`);
+  const handleClick = (e: React.MouseEvent) => {
+    if (href === '#') {
+      e.preventDefault();
+      toast.info(`${label} module will be available soon`);
+    } else {
+      speak(`Navigating to ${label} module`);
+      toast.info(`Navigating to ${label}`);
+    }
+    
     if (onClick) onClick();
   };
 
   return (
     <Link
-      to={href}
+      to={href === '#' ? location.pathname : href}
       className={cn(
         "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent",
         active ? "bg-accent text-accent-foreground font-medium" : "text-foreground/70"

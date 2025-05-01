@@ -6,13 +6,15 @@ import { EmployeeDirectory } from '../components/employees/EmployeeDirectory';
 import { VoiceControls } from '../components/shared/VoiceControls';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger, SheetFooter } from '@/components/ui/sheet';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { UserPlus, FileText, Users, Briefcase, Upload } from 'lucide-react';
+import { UserPlus, FileText, Users, Briefcase, Upload, Eye, Pencil, Trash2, Check } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
+import { toast } from 'sonner';
 
 // Define form schema
 const employeeProfileSchema = z.object({
@@ -28,30 +30,36 @@ const employeeProfileSchema = z.object({
 const mockProfiles = [
   {
     id: 1,
-    name: "John Smith",
+    firstName: "John",
+    lastName: "Smith",
     position: "Software Engineer",
     department: "Engineering",
     joiningDate: "2022-05-15",
     email: "john.smith@example.com",
-    phone: "123-456-7890"
+    phone: "123-456-7890",
+    status: 'active'
   },
   {
     id: 2,
-    name: "Sarah Johnson",
+    firstName: "Sarah",
+    lastName: "Johnson",
     position: "HR Manager",
     department: "Human Resources",
     joiningDate: "2021-03-10",
     email: "sarah.johnson@example.com",
-    phone: "234-567-8901"
+    phone: "234-567-8901",
+    status: 'active'
   },
   {
     id: 3,
-    name: "Michael Brown",
+    firstName: "Michael",
+    lastName: "Brown",
     position: "Product Manager",
     department: "Product",
     joiningDate: "2023-01-22",
     email: "michael.brown@example.com",
-    phone: "345-678-9012"
+    phone: "345-678-9012",
+    status: 'on-leave'
   }
 ];
 
@@ -66,9 +74,27 @@ const mockDocumentTypes = [
   "Performance Reviews"
 ];
 
+const mockOnboardingStatus = [
+  { name: "Sarah Johnson", id: 1, progress: 100, position: "HR Manager", dept: "Human Resources" },
+  { name: "Michael Brown", id: 2, progress: 85, position: "Product Manager", dept: "Product" },
+  { name: "Emily Davis", id: 3, progress: 70, position: "UX Designer", dept: "Design" }
+];
+
+const mockUpcomingOnboarding = [
+  { name: "Robert Wilson", id: 4, date: "May 20, 2025", position: "Frontend Developer", dept: "Engineering" },
+  { name: "Jennifer Lee", id: 5, date: "May 25, 2025", position: "Marketing Specialist", dept: "Marketing" }
+];
+
 const Employees: React.FC = () => {
   const { speak } = useVoice();
   const [activeTab, setActiveTab] = useState('directory');
+  const [employees, setEmployees] = useState(mockProfiles);
+  const [isEditingEmployee, setIsEditingEmployee] = useState(false);
+  const [isViewingEmployee, setIsViewingEmployee] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+  const [selectedDocType, setSelectedDocType] = useState<string | null>(null);
+  const [isUploadingDocument, setIsUploadingDocument] = useState(false);
 
   const form = useForm<z.infer<typeof employeeProfileSchema>>({
     resolver: zodResolver(employeeProfileSchema),
@@ -83,9 +109,36 @@ const Employees: React.FC = () => {
     },
   });
 
+  const editForm = useForm<z.infer<typeof employeeProfileSchema>>({
+    resolver: zodResolver(employeeProfileSchema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      phone: "",
+      position: "",
+      department: "",
+      joiningDate: "",
+    },
+  });
+
   useEffect(() => {
     speak("Employee management module loaded. Here you can manage employee profiles, view directories, and handle employee information.");
   }, [speak]);
+
+  useEffect(() => {
+    if (selectedEmployee && isEditingEmployee) {
+      editForm.reset({
+        firstName: selectedEmployee.firstName,
+        lastName: selectedEmployee.lastName,
+        email: selectedEmployee.email,
+        phone: selectedEmployee.phone,
+        position: selectedEmployee.position,
+        department: selectedEmployee.department,
+        joiningDate: selectedEmployee.joiningDate,
+      });
+    }
+  }, [selectedEmployee, isEditingEmployee, editForm]);
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
@@ -101,10 +154,107 @@ const Employees: React.FC = () => {
   };
 
   function onSubmitProfile(values: z.infer<typeof employeeProfileSchema>) {
-    console.log(values);
+    const newEmployee = {
+      id: employees.length + 1,
+      firstName: values.firstName,
+      lastName: values.lastName,
+      position: values.position,
+      department: values.department,
+      joiningDate: values.joiningDate,
+      email: values.email,
+      phone: values.phone,
+      status: 'active'
+    };
+    
+    setEmployees([...employees, newEmployee]);
     speak("New employee profile has been created successfully.");
+    toast.success("Employee created successfully", {
+      description: `${values.firstName} ${values.lastName} has been added to the directory.`
+    });
     form.reset();
   }
+
+  function onSubmitEditProfile(values: z.infer<typeof employeeProfileSchema>) {
+    if (!selectedEmployee) return;
+    
+    const updatedEmployees = employees.map(emp => 
+      emp.id === selectedEmployee.id 
+        ? { ...emp, ...values }
+        : emp
+    );
+    
+    setEmployees(updatedEmployees);
+    setIsEditingEmployee(false);
+    setSelectedEmployee(null);
+    speak(`${values.firstName} ${values.lastName}'s profile has been updated successfully.`);
+    toast.success("Employee updated successfully", {
+      description: `${values.firstName} ${values.lastName}'s information has been updated.`
+    });
+  }
+
+  const handleViewEmployee = (employee: any) => {
+    setSelectedEmployee(employee);
+    setIsViewingEmployee(true);
+  };
+
+  const handleEditEmployee = (employee: any) => {
+    setSelectedEmployee(employee);
+    setIsEditingEmployee(true);
+  };
+
+  const handleDeleteEmployee = (employee: any) => {
+    setSelectedEmployee(employee);
+    setIsConfirmingDelete(true);
+  };
+
+  const confirmDeleteEmployee = () => {
+    if (!selectedEmployee) return;
+    
+    const updatedEmployees = employees.filter(emp => emp.id !== selectedEmployee.id);
+    setEmployees(updatedEmployees);
+    setIsConfirmingDelete(false);
+    setSelectedEmployee(null);
+    speak(`${selectedEmployee.firstName} ${selectedEmployee.lastName}'s profile has been deleted.`);
+    toast.success("Employee deleted", {
+      description: `${selectedEmployee.firstName} ${selectedEmployee.lastName} has been removed from the directory.`
+    });
+  };
+
+  const handleViewDocuments = (docType: string) => {
+    setSelectedDocType(docType);
+    speak(`Viewing ${docType} documents. Here you can see all files and upload new ones.`);
+  };
+
+  const handleUploadDocument = () => {
+    setIsUploadingDocument(true);
+    speak("Opening document upload interface. You can select files and assign them to specific employees.");
+  };
+  
+  const handleCreateOnboardingPlan = () => {
+    speak("Creating a new onboarding plan. You can define tasks, assign mentors, and set up training schedules for new employees.");
+    toast.success("Creating onboarding plan", {
+      description: "You can now set up a new employee onboarding process."
+    });
+  };
+
+  const handlePrepareOnboarding = (employee: any) => {
+    speak(`Preparing onboarding for ${employee.name}. Setting up workstation, accounts, and orientation schedule.`);
+    toast.success("Onboarding preparation started", {
+      description: `Onboarding preparation for ${employee.name} has been initiated.`
+    });
+  };
+  
+  const handleSubmitDocumentUpload = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsUploadingDocument(false);
+    toast.success("Document uploaded successfully", {
+      description: "The document has been added to employee records."
+    });
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString();
+  };
 
   return (
     <div className="space-y-6">
@@ -132,10 +282,10 @@ const Employees: React.FC = () => {
         
         <TabsContent value="profiles" className="space-y-4">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {mockProfiles.map(profile => (
+            {employees.map(profile => (
               <Card key={profile.id}>
                 <CardHeader>
-                  <CardTitle>{profile.name}</CardTitle>
+                  <CardTitle>{profile.firstName} {profile.lastName}</CardTitle>
                   <CardDescription>{profile.position}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-2">
@@ -145,7 +295,7 @@ const Employees: React.FC = () => {
                   </div>
                   <div className="grid grid-cols-[80px_1fr] gap-1">
                     <span className="text-sm text-muted-foreground font-medium">Joined:</span>
-                    <span>{new Date(profile.joiningDate).toLocaleDateString()}</span>
+                    <span>{formatDate(profile.joiningDate)}</span>
                   </div>
                   <div className="grid grid-cols-[80px_1fr] gap-1">
                     <span className="text-sm text-muted-foreground font-medium">Email:</span>
@@ -156,8 +306,19 @@ const Employees: React.FC = () => {
                     <span>{profile.phone}</span>
                   </div>
                 </CardContent>
-                <CardFooter>
-                  <Button variant="outline" size="sm" className="w-full">View Full Profile</Button>
+                <CardFooter className="flex gap-2 justify-end">
+                  <Button variant="outline" size="sm" onClick={() => handleViewEmployee(profile)}>
+                    <Eye size={16} className="mr-1" />
+                    View
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => handleEditEmployee(profile)}>
+                    <Pencil size={16} className="mr-1" />
+                    Edit
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => handleDeleteEmployee(profile)} className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700">
+                    <Trash2 size={16} className="mr-1" />
+                    Delete
+                  </Button>
                 </CardFooter>
               </Card>
             ))}
@@ -279,6 +440,247 @@ const Employees: React.FC = () => {
               </Sheet>
             </Card>
           </div>
+
+          {/* View Employee Dialog */}
+          <Dialog open={isViewingEmployee} onOpenChange={setIsViewingEmployee}>
+            <DialogContent className="sm:max-w-[600px]">
+              <DialogHeader>
+                <DialogTitle>Employee Profile</DialogTitle>
+                <DialogDescription>
+                  Detailed information for {selectedEmployee?.firstName} {selectedEmployee?.lastName}
+                </DialogDescription>
+              </DialogHeader>
+              
+              {selectedEmployee && (
+                <div className="space-y-6 py-4">
+                  <div className="flex items-center space-x-4">
+                    <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Users size={24} className="text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold">{selectedEmployee.firstName} {selectedEmployee.lastName}</h3>
+                      <p className="text-sm text-muted-foreground">{selectedEmployee.position}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <h4 className="text-sm font-semibold mb-2">Contact Information</h4>
+                      <div className="space-y-2">
+                        <div className="grid grid-cols-[100px_1fr]">
+                          <span className="text-sm text-muted-foreground">Email:</span>
+                          <span className="text-sm">{selectedEmployee.email}</span>
+                        </div>
+                        <div className="grid grid-cols-[100px_1fr]">
+                          <span className="text-sm text-muted-foreground">Phone:</span>
+                          <span className="text-sm">{selectedEmployee.phone}</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h4 className="text-sm font-semibold mb-2">Employment Details</h4>
+                      <div className="space-y-2">
+                        <div className="grid grid-cols-[100px_1fr]">
+                          <span className="text-sm text-muted-foreground">Department:</span>
+                          <span className="text-sm">{selectedEmployee.department}</span>
+                        </div>
+                        <div className="grid grid-cols-[100px_1fr]">
+                          <span className="text-sm text-muted-foreground">Position:</span>
+                          <span className="text-sm">{selectedEmployee.position}</span>
+                        </div>
+                        <div className="grid grid-cols-[100px_1fr]">
+                          <span className="text-sm text-muted-foreground">Joined:</span>
+                          <span className="text-sm">{formatDate(selectedEmployee.joiningDate)}</span>
+                        </div>
+                        <div className="grid grid-cols-[100px_1fr]">
+                          <span className="text-sm text-muted-foreground">Status:</span>
+                          <span className="text-sm">
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              selectedEmployee.status === 'active' ? 'bg-green-100 text-green-800' :
+                              selectedEmployee.status === 'on-leave' ? 'bg-amber-100 text-amber-800' :
+                              'bg-red-100 text-red-800'
+                            }`}>
+                              {selectedEmployee.status === 'active' ? 'Active' : 
+                              selectedEmployee.status === 'on-leave' ? 'On Leave' : 
+                              'Inactive'}
+                            </span>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              <DialogFooter className="flex space-x-2 justify-end">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => {
+                    setIsViewingEmployee(false);
+                    handleEditEmployee(selectedEmployee);
+                  }}>
+                  <Pencil size={16} className="mr-1" />
+                  Edit
+                </Button>
+                <Button 
+                  variant="destructive" 
+                  size="sm"
+                  onClick={() => {
+                    setIsViewingEmployee(false);
+                    handleDeleteEmployee(selectedEmployee);
+                  }}>
+                  <Trash2 size={16} className="mr-1" />
+                  Delete
+                </Button>
+                <Button onClick={() => setIsViewingEmployee(false)}>Close</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          {/* Edit Employee Dialog */}
+          <Dialog open={isEditingEmployee} onOpenChange={setIsEditingEmployee}>
+            <DialogContent className="sm:max-w-[600px]">
+              <DialogHeader>
+                <DialogTitle>Edit Employee</DialogTitle>
+                <DialogDescription>
+                  Update information for {selectedEmployee?.firstName} {selectedEmployee?.lastName}
+                </DialogDescription>
+              </DialogHeader>
+              
+              <Form {...editForm}>
+                <form onSubmit={editForm.handleSubmit(onSubmitEditProfile)} className="space-y-4 py-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={editForm.control}
+                      name="firstName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>First Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="John" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={editForm.control}
+                      name="lastName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Last Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Smith" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <FormField
+                    control={editForm.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input type="email" placeholder="john@example.com" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={editForm.control}
+                    name="phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Phone</FormLabel>
+                        <FormControl>
+                          <Input placeholder="123-456-7890" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={editForm.control}
+                    name="position"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Position</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Software Engineer" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={editForm.control}
+                    name="department"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Department</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Engineering" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={editForm.control}
+                    name="joiningDate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Joining Date</FormLabel>
+                        <FormControl>
+                          <Input type="date" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <DialogFooter>
+                    <Button type="button" variant="outline" onClick={() => setIsEditingEmployee(false)}>Cancel</Button>
+                    <Button type="submit">Save Changes</Button>
+                  </DialogFooter>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
+
+          {/* Confirm Delete Dialog */}
+          <Dialog open={isConfirmingDelete} onOpenChange={setIsConfirmingDelete}>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Confirm Deletion</DialogTitle>
+                <DialogDescription>
+                  Are you sure you want to delete this employee? This action cannot be undone.
+                </DialogDescription>
+              </DialogHeader>
+              
+              {selectedEmployee && (
+                <div className="py-4">
+                  <p>You are about to delete:</p>
+                  <p className="font-semibold">{selectedEmployee.firstName} {selectedEmployee.lastName}</p>
+                  <p className="text-sm text-muted-foreground">{selectedEmployee.position} in {selectedEmployee.department}</p>
+                </div>
+              )}
+              
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsConfirmingDelete(false)}>Cancel</Button>
+                <Button variant="destructive" onClick={confirmDeleteEmployee}>
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete Employee
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </TabsContent>
         
         <TabsContent value="onboarding" className="space-y-4">
@@ -290,7 +692,7 @@ const Employees: React.FC = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <div className="grid gap-6">
                   <Card>
                     <CardHeader className="pb-3">
@@ -307,15 +709,21 @@ const Employees: React.FC = () => {
                           <span>Prepare workstation</span>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <div className="h-6 w-6 rounded-full border border-gray-300"></div>
+                          <Button variant="ghost" size="sm" className="h-6 w-6 p-0 rounded-full">
+                            <Check className="h-4 w-4" />
+                          </Button>
                           <span>Set up email account</span>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <div className="h-6 w-6 rounded-full border border-gray-300"></div>
+                          <Button variant="ghost" size="sm" className="h-6 w-6 p-0 rounded-full">
+                            <Check className="h-4 w-4" />
+                          </Button>
                           <span>Configure access rights</span>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <div className="h-6 w-6 rounded-full border border-gray-300"></div>
+                          <Button variant="ghost" size="sm" className="h-6 w-6 p-0 rounded-full">
+                            <Check className="h-4 w-4" />
+                          </Button>
                           <span>Schedule orientation</span>
                         </div>
                       </div>
@@ -326,20 +734,26 @@ const Employees: React.FC = () => {
                       <CardHeader className="pb-2">
                         <CardTitle className="text-lg">Recent Onboardings</CardTitle>
                       </CardHeader>
-                      <CardContent>
-                        <div className="space-y-2">
-                          <div className="flex justify-between items-center">
-                            <span>Sarah Johnson</span>
-                            <Button variant="outline" size="sm">View</Button>
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <span>Michael Brown</span>
-                            <Button variant="outline" size="sm">View</Button>
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <span>Emily Davis</span>
-                            <Button variant="outline" size="sm">View</Button>
-                          </div>
+                      <CardContent className="pt-2">
+                        <div className="space-y-4">
+                          {mockOnboardingStatus.map((employee) => (
+                            <div key={employee.id} className="space-y-2">
+                              <div className="flex justify-between items-center">
+                                <div>
+                                  <p className="font-medium">{employee.name}</p>
+                                  <p className="text-xs text-muted-foreground">{employee.position} • {employee.dept}</p>
+                                </div>
+                                <Button variant="outline" size="sm">View</Button>
+                              </div>
+                              <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
+                                <div 
+                                  className="h-full bg-primary" 
+                                  style={{ width: `${employee.progress}%` }}
+                                />
+                              </div>
+                              <p className="text-xs text-right text-muted-foreground">{employee.progress}% complete</p>
+                            </div>
+                          ))}
                         </div>
                       </CardContent>
                     </Card>
@@ -347,22 +761,24 @@ const Employees: React.FC = () => {
                       <CardHeader className="pb-2">
                         <CardTitle className="text-lg">Upcoming Onboardings</CardTitle>
                       </CardHeader>
-                      <CardContent>
-                        <div className="space-y-2">
-                          <div className="flex justify-between items-center">
-                            <div>
-                              <p>Robert Wilson</p>
-                              <p className="text-sm text-muted-foreground">May 20, 2025</p>
+                      <CardContent className="pt-2">
+                        <div className="space-y-4">
+                          {mockUpcomingOnboarding.map((employee) => (
+                            <div key={employee.id} className="flex justify-between items-center">
+                              <div>
+                                <p className="font-medium">{employee.name}</p>
+                                <p className="text-xs text-muted-foreground">{employee.position} • {employee.dept}</p>
+                                <p className="text-sm text-muted-foreground">Start date: {employee.date}</p>
+                              </div>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => handlePrepareOnboarding(employee)}
+                              >
+                                Prepare
+                              </Button>
                             </div>
-                            <Button variant="outline" size="sm">Prepare</Button>
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <div>
-                              <p>Jennifer Lee</p>
-                              <p className="text-sm text-muted-foreground">May 25, 2025</p>
-                            </div>
-                            <Button variant="outline" size="sm">Prepare</Button>
-                          </div>
+                          ))}
                         </div>
                       </CardContent>
                     </Card>
@@ -371,7 +787,9 @@ const Employees: React.FC = () => {
               </div>
             </CardContent>
             <CardFooter>
-              <Button className="w-full">Create New Onboarding Plan</Button>
+              <Button className="w-full" onClick={handleCreateOnboardingPlan}>
+                Create New Onboarding Plan
+              </Button>
             </CardFooter>
           </Card>
         </TabsContent>
@@ -400,7 +818,12 @@ const Employees: React.FC = () => {
                         </p>
                       </CardContent>
                       <CardFooter>
-                        <Button variant="outline" size="sm" className="w-full">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="w-full"
+                          onClick={() => handleViewDocuments(docType)}
+                        >
                           <FileText className="mr-2 h-4 w-4" />
                           View Files
                         </Button>
@@ -409,7 +832,7 @@ const Employees: React.FC = () => {
                   ))}
 
                   <Card className="flex flex-col items-center justify-center h-40 border-dashed border-2">
-                    <Button variant="outline" className="flex flex-col h-full w-full">
+                    <Button variant="outline" className="flex flex-col h-full w-full" onClick={handleUploadDocument}>
                       <Upload className="h-8 w-8 mb-2" />
                       <span>Upload Document</span>
                     </Button>
@@ -418,6 +841,150 @@ const Employees: React.FC = () => {
               </div>
             </CardContent>
           </Card>
+
+          {/* Document View Dialog */}
+          <Dialog open={!!selectedDocType} onOpenChange={() => setSelectedDocType(null)}>
+            <DialogContent className="sm:max-w-[700px]">
+              <DialogHeader>
+                <DialogTitle>{selectedDocType} Documents</DialogTitle>
+                <DialogDescription>
+                  View and manage employee {selectedDocType} files
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="py-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-base">john_smith_resume.pdf</CardTitle>
+                        <Button variant="ghost" size="sm">
+                          <Eye size={16} />
+                        </Button>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pt-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">John Smith</span>
+                        <span className="text-muted-foreground">Added May 12, 2023</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-base">sarah_johnson_resume.pdf</CardTitle>
+                        <Button variant="ghost" size="sm">
+                          <Eye size={16} />
+                        </Button>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pt-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Sarah Johnson</span>
+                        <span className="text-muted-foreground">Added Mar 05, 2022</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-base">michael_brown_resume.pdf</CardTitle>
+                        <Button variant="ghost" size="sm">
+                          <Eye size={16} />
+                        </Button>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pt-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Michael Brown</span>
+                        <span className="text-muted-foreground">Added Jan 18, 2023</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+              
+              <DialogFooter className="justify-between space-x-2">
+                <Button variant="outline" onClick={() => handleUploadDocument()}>
+                  <Upload className="mr-2 h-4 w-4" />
+                  Add Document
+                </Button>
+                <Button onClick={() => setSelectedDocType(null)}>Close</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          {/* Upload Document Dialog */}
+          <Dialog open={isUploadingDocument} onOpenChange={setIsUploadingDocument}>
+            <DialogContent className="sm:max-w-[500px]">
+              <DialogHeader>
+                <DialogTitle>Upload Document</DialogTitle>
+                <DialogDescription>
+                  Add a new document to employee records
+                </DialogDescription>
+              </DialogHeader>
+              
+              <form onSubmit={handleSubmitDocumentUpload} className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <label htmlFor="documentType" className="text-sm font-medium">Document Type</label>
+                  <select 
+                    id="documentType"
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  >
+                    {mockDocumentTypes.map((docType, index) => (
+                      <option key={index} value={docType}>{docType}</option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div className="space-y-2">
+                  <label htmlFor="employee" className="text-sm font-medium">Employee</label>
+                  <select 
+                    id="employee"
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  >
+                    <option value="">Select an employee...</option>
+                    {employees.map((emp) => (
+                      <option key={emp.id} value={emp.id}>
+                        {emp.firstName} {emp.lastName} - {emp.position}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">File</label>
+                  <div className="border-2 border-dashed border-input rounded-md p-6 flex flex-col items-center justify-center">
+                    <Upload className="h-8 w-8 text-muted-foreground mb-2" />
+                    <p className="text-sm text-center text-muted-foreground mb-1">
+                      Drag & drop your file here, or click to browse
+                    </p>
+                    <p className="text-xs text-center text-muted-foreground">
+                      Supports PDF, DOCX, JPG, PNG (Max 10MB)
+                    </p>
+                    <Button type="button" variant="ghost" className="mt-2">Browse Files</Button>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <label htmlFor="description" className="text-sm font-medium">Description (optional)</label>
+                  <textarea 
+                    id="description"
+                    className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    placeholder="Add a brief description of the document..."
+                  />
+                </div>
+                
+                <DialogFooter>
+                  <Button type="button" variant="outline" onClick={() => setIsUploadingDocument(false)}>Cancel</Button>
+                  <Button type="submit">Upload Document</Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
         </TabsContent>
       </Tabs>
     </div>
