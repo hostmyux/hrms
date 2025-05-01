@@ -1,10 +1,9 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { FileText, MessageSquare, ThumbsDown, ThumbsUp, User, X, Check, Eye, Mail } from 'lucide-react';
+import { FileText, MessageSquare, ThumbsDown, ThumbsUp, User, X, Check, Eye, Mail, Phone } from 'lucide-react';
 import { useVoice } from '../../contexts/VoiceContext';
 import { toast } from 'sonner';
 
