@@ -46,6 +46,7 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
       )}
       onClick={handleClick}
       aria-current={active ? "page" : undefined}
+      data-testid={`sidebar-item-${label.toLowerCase().replace(/\s+/g, '-')}`}
     >
       <span className="flex items-center justify-center w-5 h-5">{icon}</span>
       <span>{label}</span>
