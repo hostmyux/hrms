@@ -1,11 +1,15 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Users, Clock, Calendar, FileText, UserPlus, BarChart } from 'lucide-react';
 import { StatCard } from '../components/dashboard/StatCard';
 import { EmployeeTable } from '../components/dashboard/EmployeeTable';
 import { ActivityLog } from '../components/dashboard/ActivityLog';
 import { useVoice } from '../contexts/VoiceContext';
 import { VoiceControls } from '../components/shared/VoiceControls';
+import { Button } from '@/components/ui/button';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { toast } from 'sonner';
 
 // Mock data
 const employees = [
@@ -105,10 +109,39 @@ const activities = [
 
 const Dashboard: React.FC = () => {
   const { speak } = useVoice();
+  const [isLoading, setIsLoading] = useState(true);
+  const [dashboardData, setDashboardData] = useState({
+    employees: 245,
+    onLeave: 8,
+    openPositions: 12,
+    pendingApprovals: 18
+  });
   
-  React.useEffect(() => {
+  // Simulate loading data
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+    
     speak("Welcome to the HRMS Dashboard. This is your central command center for human resources management. The overview cards show key metrics like employee count, leave status, open positions, and pending approvals. Below, you'll find recent employee details and activity logs. Use the voice assistant for step-by-step guidance through any HR process.");
+    
+    return () => clearTimeout(timer);
   }, [speak]);
+
+  const handleAddEmployeeClick = () => {
+    toast.info("Navigating to add employee form");
+    speak("Opening employee creation form where you can add a new team member.");
+  };
+
+  const handleViewAllEmployees = () => {
+    toast.info("Navigating to employees section");
+    speak("Navigating to the full employee directory where you can view and manage all staff records.");
+  };
+
+  const handleViewAllActivities = () => {
+    toast.info("Navigating to notifications center");
+    speak("Opening the notifications center where you can review all recent system activities.");
+  };
 
   return (
     <div className="space-y-6">
@@ -123,45 +156,78 @@ const Dashboard: React.FC = () => {
       </div>
       
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard 
-          title="Total Employees" 
-          value="245" 
-          icon={<Users size={24} />} 
-          trend={{ value: 12, isPositive: true }}
-          voiceDescription="Total of 245 employees, which is a 12% increase from last month. This trend suggests healthy organizational growth. Consider reviewing departmental distribution to ensure balanced resource allocation."
-        />
-        <StatCard 
-          title="On Leave Today" 
-          value="8" 
-          icon={<Calendar size={24} />} 
-          description="3.2% of workforce"
-          voiceDescription="8 employees are currently on leave today, representing 3.2% of the total workforce. This is within expected absence rates. You can click this card to view detailed absence distribution by department."
-        />
-        <StatCard 
-          title="Open Positions" 
-          value="12" 
-          icon={<UserPlus size={24} />} 
-          trend={{ value: 5, isPositive: true }}
-          voiceDescription="12 open positions are currently available across departments, which is a 5% increase from last month. Consider reviewing recruitment timelines and exploring additional hiring channels to expedite the filling of critical roles."
-        />
-        <StatCard 
-          title="Pending Approvals" 
-          value="18" 
-          icon={<FileText size={24} />} 
-          description="Leave and expense requests"
-          voiceDescription="18 pending approvals waiting for your review, including leave requests and expense approvals. Consider setting aside time to review these items to maintain operational efficiency and employee satisfaction with approval turnaround times."
-        />
+        <Link to="/employees">
+          <StatCard 
+            title="Total Employees" 
+            value={isLoading ? "Loading..." : dashboardData.employees.toString()} 
+            icon={<Users size={24} />} 
+            trend={{ value: 12, isPositive: true }}
+            voiceDescription="Total of 245 employees, which is a 12% increase from last month. This trend suggests healthy organizational growth. Consider reviewing departmental distribution to ensure balanced resource allocation."
+          />
+        </Link>
+        
+        <Link to="/attendance">
+          <StatCard 
+            title="On Leave Today" 
+            value={isLoading ? "Loading..." : dashboardData.onLeave.toString()} 
+            icon={<Calendar size={24} />} 
+            description="3.2% of workforce"
+            voiceDescription="8 employees are currently on leave today, representing 3.2% of the total workforce. This is within expected absence rates. You can click this card to view detailed absence distribution by department."
+          />
+        </Link>
+        
+        <Link to="/recruitment">
+          <StatCard 
+            title="Open Positions" 
+            value={isLoading ? "Loading..." : dashboardData.openPositions.toString()} 
+            icon={<UserPlus size={24} />} 
+            trend={{ value: 5, isPositive: true }}
+            voiceDescription="12 open positions are currently available across departments, which is a 5% increase from last month. Consider reviewing recruitment timelines and exploring additional hiring channels to expedite the filling of critical roles."
+          />
+        </Link>
+        
+        <Link to="/notifications">
+          <StatCard 
+            title="Pending Approvals" 
+            value={isLoading ? "Loading..." : dashboardData.pendingApprovals.toString()} 
+            icon={<FileText size={24} />} 
+            description="Leave and expense requests"
+            voiceDescription="18 pending approvals waiting for your review, including leave requests and expense approvals. Consider setting aside time to review these items to maintain operational efficiency and employee satisfaction with approval turnaround times."
+          />
+        </Link>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
-        <EmployeeTable 
-          employees={employees} 
-          voiceDescription="Recent employee listing showing key personnel information. You can click on any employee row to view their detailed profile and employment history."
-        />
-        <ActivityLog 
-          activities={activities}
-          voiceDescription="Recent HR activities across your organization. Each entry represents an important event that may require your attention or awareness."  
-        />
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <h2 className="text-xl font-semibold">Recent Employees</h2>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={handleAddEmployeeClick} asChild>
+                <Link to="/employees/add">Add Employee</Link>
+              </Button>
+              <Button size="sm" variant="ghost" onClick={handleViewAllEmployees} asChild>
+                <Link to="/employees">View All</Link>
+              </Button>
+            </div>
+          </div>
+          <EmployeeTable 
+            employees={employees} 
+            voiceDescription="Recent employee listing showing key personnel information. You can click on any employee row to view their detailed profile and employment history."
+          />
+        </div>
+        
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <h2 className="text-xl font-semibold">Recent Activities</h2>
+            <Button size="sm" variant="ghost" onClick={handleViewAllActivities} asChild>
+              <Link to="/notifications">View All</Link>
+            </Button>
+          </div>
+          <ActivityLog 
+            activities={activities}
+            voiceDescription="Recent HR activities across your organization. Each entry represents an important event that may require your attention or awareness."  
+          />
+        </div>
       </div>
     </div>
   );

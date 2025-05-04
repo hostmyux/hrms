@@ -1,10 +1,34 @@
 
-import React from 'react';
-import { Bell, Search, User } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Bell, Search, User, X } from 'lucide-react';
 import { useVoice } from '../../contexts/VoiceContext';
+import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 export const Topbar: React.FC = () => {
   const { speak } = useVoice();
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const notificationsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (notificationsRef.current && !notificationsRef.current.contains(event.target as Node)) {
+        setNotificationsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const toggleNotifications = () => {
+    setNotificationsOpen(!notificationsOpen);
+    if (!notificationsOpen) {
+      speak("Notifications panel. Here you can view all your HR related notifications.");
+    }
+  };
 
   return (
     <header className="flex items-center h-16 px-6 border-b border-border bg-card">
@@ -12,13 +36,36 @@ export const Topbar: React.FC = () => {
         <SearchBar />
       </div>
       <div className="flex items-center gap-4">
-        <button 
-          className="p-2 rounded-full hover:bg-accent"
-          onClick={() => speak("Notifications panel. Here you can view all your HR related notifications.")}
-        >
-          <Bell size={20} />
-          <span className="absolute top-3 right-3 w-2 h-2 bg-red-500 rounded-full"></span>
-        </button>
+        <div className="relative" ref={notificationsRef}>
+          <button 
+            className="p-2 rounded-full hover:bg-accent relative"
+            onClick={toggleNotifications}
+            aria-label="View notifications"
+          >
+            <Bell size={20} />
+            <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
+          </button>
+          
+          {notificationsOpen && (
+            <div className="absolute right-0 mt-2 w-80 bg-card border border-border rounded-md shadow-lg z-50 animate-fade-in">
+              <div className="flex justify-between items-center p-4 border-b border-border">
+                <h3 className="font-medium">Notifications</h3>
+                <Link to="/notifications" className="text-sm text-primary hover:underline">
+                  View All
+                </Link>
+              </div>
+              <div className="max-h-72 overflow-y-auto">
+                {[1, 2, 3].map((item) => (
+                  <div key={item} className="p-4 border-b border-border hover:bg-muted/30 cursor-pointer">
+                    <p className="font-medium text-sm">Leave Request Approved</p>
+                    <p className="text-xs text-muted-foreground mt-1">John's vacation has been approved</p>
+                    <p className="text-xs text-muted-foreground mt-2">2 hours ago</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
         <div className="h-8 w-px bg-border"></div>
         <UserMenu />
       </div>
@@ -28,17 +75,108 @@ export const Topbar: React.FC = () => {
 
 const SearchBar: React.FC = () => {
   const { speak } = useVoice();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const navigate = useNavigate();
+  const searchRef = useRef<HTMLDivElement>(null);
+
+  const mockSearchResults = [
+    { type: 'employee', name: 'John Doe', path: '/employees/1' },
+    { type: 'employee', name: 'Jane Smith', path: '/employees/2' },
+    { type: 'document', name: 'Employee Handbook', path: '/documents/1' },
+    { type: 'job', name: 'Senior Developer', path: '/recruitment/jobs/1' }
+  ];
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setIsSearchFocused(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+  
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    
+    if (value.length > 1) {
+      // Filter mock results based on search term
+      const filtered = mockSearchResults.filter(
+        item => item.name.toLowerCase().includes(value.toLowerCase())
+      );
+      setSearchResults(filtered);
+    } else {
+      setSearchResults([]);
+    }
+  };
+  
+  const handleResultClick = (path: string) => {
+    navigate(path);
+    setSearchTerm('');
+    setIsSearchFocused(false);
+    toast.info("Navigating to search result");
+  };
+
   return (
     <div 
       className="relative max-w-md"
-      onClick={() => speak("Search across the entire HRMS system. Type employee names, departments, or any HR related queries.")}
+      ref={searchRef}
     >
       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={18} />
       <input
         type="text"
+        value={searchTerm}
+        onChange={handleSearchChange}
+        onFocus={() => {
+          setIsSearchFocused(true);
+          speak("Search across the entire HRMS system. Type employee names, departments, or any HR related queries.");
+        }}
         placeholder="Search..."
         className="pl-10 pr-4 py-2 w-full bg-accent/50 text-foreground rounded-md border border-transparent focus:border-ring focus:outline-none"
       />
+      
+      {isSearchFocused && searchTerm.length > 0 && (
+        <div className="absolute left-0 right-0 mt-2 bg-card border border-border rounded-md shadow-lg z-50 animate-fade-in max-h-72 overflow-y-auto">
+          {searchResults.length > 0 ? (
+            <>
+              {searchResults.map((result, index) => (
+                <div 
+                  key={index}
+                  className="p-3 hover:bg-muted cursor-pointer flex items-center"
+                  onClick={() => handleResultClick(result.path)}
+                >
+                  {result.type === 'employee' && <User size={16} className="mr-2 text-muted-foreground" />}
+                  {result.type === 'document' && <FileText size={16} className="mr-2 text-muted-foreground" />}
+                  {result.type === 'job' && <Briefcase size={16} className="mr-2 text-muted-foreground" />}
+                  <div>
+                    <p className="text-sm font-medium">{result.name}</p>
+                    <p className="text-xs text-muted-foreground capitalize">{result.type}</p>
+                  </div>
+                </div>
+              ))}
+            </>
+          ) : (
+            <div className="p-4 text-sm text-muted-foreground text-center">
+              No results found for "{searchTerm}"
+            </div>
+          )}
+        </div>
+      )}
+      
+      {isSearchFocused && searchTerm && (
+        <button 
+          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+          onClick={() => setSearchTerm('')}
+        >
+          <X size={16} />
+        </button>
+      )}
     </div>
   );
 };
@@ -47,6 +185,7 @@ const UserMenu: React.FC = () => {
   const [isOpen, setIsOpen] = React.useState(false);
   const { speak } = useVoice();
   const menuRef = React.useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -68,6 +207,31 @@ const UserMenu: React.FC = () => {
     }
   };
 
+  const handleMenuItemClick = (action: string) => {
+    setIsOpen(false);
+    
+    switch(action) {
+      case 'profile':
+        navigate('/settings/profile');
+        speak("View or edit your profile");
+        toast.info("Navigating to your profile");
+        break;
+      case 'settings':
+        navigate('/settings');
+        speak("Adjust your account settings");
+        toast.info("Navigating to settings");
+        break;
+      case 'signout':
+        speak("Signing out of HRMS Nexus");
+        toast.info("Signing out...");
+        // In a real app, would handle actual logout here
+        setTimeout(() => {
+          toast.success("Successfully signed out");
+        }, 1000);
+        break;
+    }
+  };
+
   return (
     <div className="relative" ref={menuRef}>
       <button 
@@ -83,30 +247,30 @@ const UserMenu: React.FC = () => {
       {isOpen && (
         <div className="absolute right-0 mt-1 w-48 rounded-md bg-card border border-border shadow-lg animate-scale-in z-10">
           <div className="py-1">
-            <a 
-              href="#" 
-              className="block px-4 py-2 text-sm hover:bg-accent"
-              onClick={() => speak("View or edit your profile")}
+            <button 
+              className="flex w-full items-center px-4 py-2 text-sm hover:bg-accent text-left"
+              onClick={() => handleMenuItemClick('profile')}
             >
               Your Profile
-            </a>
-            <a 
-              href="#" 
-              className="block px-4 py-2 text-sm hover:bg-accent"
-              onClick={() => speak("Adjust your account settings")}
+            </button>
+            <button 
+              className="flex w-full items-center px-4 py-2 text-sm hover:bg-accent text-left"
+              onClick={() => handleMenuItemClick('settings')}
             >
               Settings
-            </a>
-            <a 
-              href="#" 
-              className="block px-4 py-2 text-sm hover:bg-accent"
-              onClick={() => speak("Signing out of HRMS Nexus")}
+            </button>
+            <button 
+              className="flex w-full items-center px-4 py-2 text-sm hover:bg-accent text-left"
+              onClick={() => handleMenuItemClick('signout')}
             >
               Sign out
-            </a>
+            </button>
           </div>
         </div>
       )}
     </div>
   );
 };
+
+// Missing import for FileText and Briefcase
+import { FileText, Briefcase } from 'lucide-react';
