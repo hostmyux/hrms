@@ -5,11 +5,26 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarPlus, ChevronLeft, ChevronRight, Clock, List, Users, Calendar as CalendarIcon, X } from 'lucide-react';
-import { format, isSameDay, addDays } from 'date-fns';
+import { 
+  CalendarPlus, 
+  ChevronLeft, 
+  ChevronRight, 
+  Clock, 
+  List, 
+  Users, 
+  Calendar as CalendarIcon, 
+  X,
+  Filter,
+  Search
+} from 'lucide-react';
+import { format, isSameDay, addDays, parseISO, isValid, isToday } from 'date-fns';
 import { toast } from 'sonner';
+import { Input } from '@/components/ui/input';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { EventForm } from '@/components/calendar/EventForm';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-interface Event {
+export interface Event {
   id: string;
   title: string;
   description: string;
@@ -25,6 +40,11 @@ const Calendar: React.FC = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [mode, setMode] = useState<'month' | 'day'>('month');
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [showEventForm, setShowEventForm] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<Event | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterType, setFilterType] = useState<string | null>(null);
+  const isMobile = useIsMobile();
 
   // Sample event data
   useEffect(() => {
@@ -71,36 +91,74 @@ const Calendar: React.FC = () => {
     ];
 
     setEvents(sampleEvents);
-    speak("Calendar page loaded. You have 5 upcoming events this week.");
+    speak("Calendar page loaded. You have 5 upcoming events this week. Use the controls to add new events, switch between month and day view, or search for specific events.");
   }, [speak]);
 
   const handleDateChange = (newDate: Date | undefined) => {
     if (newDate) {
       setDate(newDate);
+      speak(`Date changed to ${format(newDate, 'MMMM d, yyyy')}`);
     }
   };
 
   const getDayEvents = (day: Date) => {
-    return events.filter(event => isSameDay(new Date(event.date), day));
+    return events
+      .filter(event => isSameDay(new Date(event.date), day))
+      .filter(event => {
+        if (searchTerm) {
+          return event.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                 event.description.toLowerCase().includes(searchTerm.toLowerCase());
+        }
+        return true;
+      })
+      .filter(event => {
+        if (filterType) {
+          return event.type === filterType;
+        }
+        return true;
+      });
   };
 
   const addNewEvent = () => {
-    const newEvent: Event = {
-      id: (events.length + 1).toString(),
-      title: 'New Event',
-      description: 'Event Description',
-      date: date,
-      type: 'reminder'
-    };
-    
-    setEvents([...events, newEvent]);
-    toast.success("New event added");
+    setEditingEvent(null);
+    setShowEventForm(true);
+    speak("Adding a new event. Please fill in the event details.");
+  };
+
+  const editEvent = (event: Event) => {
+    setEditingEvent(event);
+    setSelectedEvent(null);
+    setShowEventForm(true);
+    speak("Editing event. You can modify the event details.");
+  };
+
+  const handleSaveEvent = (eventData: Omit<Event, 'id'>) => {
+    if (editingEvent) {
+      // Update existing event
+      const updatedEvents = events.map(event => 
+        event.id === editingEvent.id ? { ...eventData, id: event.id } : event
+      );
+      setEvents(updatedEvents);
+      toast.success("Event updated successfully");
+      speak("Event has been updated successfully");
+    } else {
+      // Add new event
+      const newEvent: Event = {
+        ...eventData,
+        id: (events.length + 1).toString(),
+      };
+      setEvents([...events, newEvent]);
+      toast.success("New event added");
+      speak("New event has been added to your calendar");
+    }
+    setShowEventForm(false);
   };
 
   const deleteEvent = (id: string) => {
     setEvents(events.filter(event => event.id !== id));
     setSelectedEvent(null);
     toast.success("Event deleted");
+    speak("Event has been deleted from your calendar");
   };
 
   const formatTime = (date: Date) => {
@@ -125,6 +183,21 @@ const Calendar: React.FC = () => {
     }
   };
 
+  const filteredEvents = events.filter(event => {
+    let match = true;
+    
+    if (searchTerm) {
+      match = event.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+              event.description.toLowerCase().includes(searchTerm.toLowerCase());
+    }
+    
+    if (match && filterType) {
+      match = event.type === filterType;
+    }
+    
+    return match;
+  });
+
   return (
     <div className="space-y-6">
       <div>
@@ -134,8 +207,44 @@ const Calendar: React.FC = () => {
         </p>
       </div>
       
-      <div className="flex flex-col md:flex-row gap-6">
-        <div className="md:w-64">
+      {/* Search and filters */}
+      <div className="flex flex-wrap gap-4 items-center">
+        <div className="flex-1 min-w-[200px]">
+          <div className="relative">
+            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search events..."
+              className="pl-8"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              aria-label="Search events"
+            />
+          </div>
+        </div>
+        <div className="w-[150px]">
+          <Select value={filterType || ""} onValueChange={(value) => setFilterType(value || null)}>
+            <SelectTrigger aria-label="Filter by type">
+              <SelectValue placeholder="Filter type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">All types</SelectItem>
+              <SelectItem value="meeting">Meetings</SelectItem>
+              <SelectItem value="task">Tasks</SelectItem>
+              <SelectItem value="reminder">Reminders</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <Button 
+          className="whitespace-nowrap"
+          onClick={addNewEvent}
+        >
+          <CalendarPlus className="h-4 w-4 mr-2" />
+          Add Event
+        </Button>
+      </div>
+      
+      <div className="flex flex-col lg:flex-row gap-6">
+        <div className="lg:w-64 w-full">
           <Card>
             <CardHeader>
               <CardTitle>Calendar</CardTitle>
@@ -146,16 +255,16 @@ const Calendar: React.FC = () => {
                 mode="single"
                 selected={date}
                 onSelect={handleDateChange}
-                className="border rounded-md"
+                className="border rounded-md pointer-events-auto"
                 components={{
                   DayContent: (props) => {
                     const day = new Date(props.date);
                     const hasEvents = events.some(event => isSameDay(new Date(event.date), day));
                     return (
-                      <div className="relative">
-                        <div>{format(day, 'd')}</div>
+                      <div className="relative flex items-center justify-center">
+                        <div className={isToday(day) ? "font-bold" : ""}>{format(day, 'd')}</div>
                         {hasEvents && (
-                          <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-primary rounded-full"/>
+                          <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-primary rounded-full"/>
                         )}
                       </div>
                     );
@@ -166,21 +275,52 @@ const Calendar: React.FC = () => {
                 <Button 
                   variant="outline" 
                   className="w-full flex items-center gap-2"
-                  onClick={() => setMode(mode === 'month' ? 'day' : 'month')}
+                  onClick={() => {
+                    setMode(mode === 'month' ? 'day' : 'month');
+                    speak(`Switched to ${mode === 'month' ? 'day' : 'month'} view`);
+                  }}
+                  aria-label={`Switch to ${mode === 'month' ? 'day' : 'month'} view`}
                 >
                   <CalendarIcon className="h-4 w-4" />
                   {mode === 'month' ? 'Day View' : 'Month View'}
                 </Button>
-                <Button 
-                  className="w-full flex items-center gap-2"
-                  onClick={addNewEvent}
-                >
-                  <CalendarPlus className="h-4 w-4" />
-                  Add Event
-                </Button>
               </div>
             </CardContent>
           </Card>
+          
+          {!isMobile && (
+            <Card className="mt-4">
+              <CardHeader>
+                <CardTitle>Upcoming Events</CardTitle>
+                <CardDescription>Next 3 events</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-0">
+                {filteredEvents.length > 0 ? (
+                  <div className="space-y-2">
+                    {filteredEvents.slice(0, 3).map((event) => (
+                      <div 
+                        key={event.id}
+                        className="p-2 text-sm rounded-md cursor-pointer hover:bg-accent/50 transition-colors flex items-start gap-2"
+                        onClick={() => setSelectedEvent(event)}
+                      >
+                        <div className={`mt-0.5 p-1 rounded-full ${getEventTypeColor(event.type)}`}>
+                          {getEventTypeIcon(event.type)}
+                        </div>
+                        <div>
+                          <p className="font-medium">{event.title}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {format(new Date(event.date), 'MMM d, yyyy')} at {formatTime(new Date(event.date))}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-center py-4 text-muted-foreground">No upcoming events</p>
+                )}
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         <div className="flex-1">
@@ -207,6 +347,7 @@ const Calendar: React.FC = () => {
                     }
                     return newDate;
                   })}
+                  aria-label={mode === 'month' ? "Previous month" : "Previous day"}
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
@@ -222,6 +363,7 @@ const Calendar: React.FC = () => {
                     }
                     return newDate;
                   })}
+                  aria-label={mode === 'month' ? "Next month" : "Next day"}
                 >
                   <ChevronRight className="h-4 w-4" />
                 </Button>
@@ -250,6 +392,19 @@ const Calendar: React.FC = () => {
                                 </CardDescription>
                               </div>
                             </div>
+                            <div className="flex gap-2">
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  editEvent(event);
+                                }}
+                                aria-label={`Edit ${event.title}`}
+                              >
+                                Edit
+                              </Button>
+                            </div>
                           </div>
                         </CardHeader>
                       </Card>
@@ -258,11 +413,19 @@ const Calendar: React.FC = () => {
                     <div className="flex flex-col items-center justify-center h-32">
                       <CalendarIcon className="h-10 w-10 text-muted-foreground mb-2" />
                       <p className="text-muted-foreground">No events scheduled for this day</p>
+                      <Button 
+                        variant="outline"
+                        className="mt-4"
+                        onClick={addNewEvent}
+                      >
+                        <CalendarPlus className="h-4 w-4 mr-2" />
+                        Add Event
+                      </Button>
                     </div>
                   )}
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-${isMobile ? '1' : '3'} gap-4`}>
                   {[...Array(7)].map((_, index) => {
                     const day = addDays(date, index);
                     const dayEvents = getDayEvents(day);
@@ -275,7 +438,7 @@ const Calendar: React.FC = () => {
                         <CardHeader className="pb-2">
                           <CardTitle className="text-base">{format(day, 'EEEE, MMM d')}</CardTitle>
                         </CardHeader>
-                        <CardContent className="pb-3 pt-0">
+                        <CardContent className="pb-3 pt-0 max-h-[230px] overflow-y-auto">
                           {dayEvents.length > 0 ? (
                             <div className="space-y-2">
                               {dayEvents.map((event) => (
@@ -287,8 +450,8 @@ const Calendar: React.FC = () => {
                                   <div className={`mt-0.5 p-1 rounded-full ${getEventTypeColor(event.type)}`}>
                                     {getEventTypeIcon(event.type)}
                                   </div>
-                                  <div>
-                                    <p className="font-medium">{event.title}</p>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="font-medium truncate">{event.title}</p>
                                     <p className="text-xs text-muted-foreground">{formatTime(new Date(event.date))}</p>
                                   </div>
                                 </div>
@@ -308,6 +471,7 @@ const Calendar: React.FC = () => {
         </div>
       </div>
 
+      {/* Event details popover */}
       {selectedEvent && (
         <Popover open={!!selectedEvent} onOpenChange={() => setSelectedEvent(null)}>
           <PopoverContent className="w-80" align="center">
@@ -322,6 +486,7 @@ const Calendar: React.FC = () => {
                 variant="ghost" 
                 size="icon" 
                 onClick={() => setSelectedEvent(null)}
+                aria-label="Close event details"
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -347,7 +512,16 @@ const Calendar: React.FC = () => {
                   </ul>
                 </div>
               )}
-              <div className="pt-2 flex justify-end">
+              <div className="pt-2 flex justify-between">
+                <Button 
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    editEvent(selectedEvent);
+                  }}
+                >
+                  Edit Event
+                </Button>
                 <Button 
                   variant="destructive"
                   size="sm"
@@ -360,6 +534,14 @@ const Calendar: React.FC = () => {
           </PopoverContent>
         </Popover>
       )}
+
+      {/* Event form */}
+      <EventForm
+        isOpen={showEventForm}
+        onClose={() => setShowEventForm(false)}
+        onSave={handleSaveEvent}
+        event={editingEvent}
+      />
     </div>
   );
 };

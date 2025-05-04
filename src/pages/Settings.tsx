@@ -29,6 +29,7 @@ import {
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { Calendar, Link, Settings as SettingsIcon, Integration } from 'lucide-react';
 
 const profileFormSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -45,6 +46,13 @@ const Settings: React.FC = () => {
   const [isVoiceEnabled, setIsVoiceEnabled] = useState(true);
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
+  
+  // Integration state
+  const [googleCalendarIntegration, setGoogleCalendarIntegration] = useState(false);
+  const [slackIntegration, setSlackIntegration] = useState(false);
+  const [teamsIntegration, setTeamsIntegration] = useState(false);
+  const [zapierIntegration, setZapierIntegration] = useState(false);
+  const [webhookUrl, setWebhookUrl] = useState('');
 
   // Profile form
   const form = useForm<z.infer<typeof profileFormSchema>>({
@@ -58,7 +66,7 @@ const Settings: React.FC = () => {
   });
 
   useEffect(() => {
-    speak("Settings module loaded. Here you can customize your account, notifications, and system preferences.");
+    speak("Settings module loaded. Here you can customize your account, notifications, system preferences, and third-party integrations.");
   }, [speak]);
 
   const handleTabChange = (value: string) => {
@@ -68,7 +76,8 @@ const Settings: React.FC = () => {
       'profile': "Profile settings. Update your personal information and account details.",
       'notifications': "Notification settings. Configure how and when you receive alerts and updates.",
       'appearance': "Appearance settings. Customize the look and feel of your interface.",
-      'security': "Security settings. Manage your password and security preferences."
+      'security': "Security settings. Manage your password and security preferences.",
+      'integrations': "Integration settings. Connect the HR system with third-party services and applications.",
     };
     
     speak(tabMessages[value as keyof typeof tabMessages] || "");
@@ -107,6 +116,44 @@ const Settings: React.FC = () => {
     toast.success("Password changed successfully");
   };
 
+  const handleToggleIntegration = (integration: string, currentState: boolean) => {
+    switch (integration) {
+      case 'google-calendar':
+        setGoogleCalendarIntegration(!currentState);
+        toast.success(`Google Calendar integration ${!currentState ? 'enabled' : 'disabled'}`);
+        speak(`Google Calendar integration ${!currentState ? 'enabled' : 'disabled'}`);
+        break;
+      case 'slack':
+        setSlackIntegration(!currentState);
+        toast.success(`Slack integration ${!currentState ? 'enabled' : 'disabled'}`);
+        speak(`Slack integration ${!currentState ? 'enabled' : 'disabled'}`);
+        break;
+      case 'teams':
+        setTeamsIntegration(!currentState);
+        toast.success(`Microsoft Teams integration ${!currentState ? 'enabled' : 'disabled'}`);
+        speak(`Microsoft Teams integration ${!currentState ? 'enabled' : 'disabled'}`);
+        break;
+      case 'zapier':
+        setZapierIntegration(!currentState);
+        toast.success(`Zapier integration ${!currentState ? 'enabled' : 'disabled'}`);
+        speak(`Zapier integration ${!currentState ? 'enabled' : 'disabled'}`);
+        break;
+      default:
+        break;
+    }
+  };
+
+  const handleSaveWebhook = () => {
+    if (!webhookUrl.trim()) {
+      toast.error("Please enter a valid webhook URL");
+      speak("Please enter a valid webhook URL");
+      return;
+    }
+    
+    toast.success("Webhook URL saved successfully");
+    speak("Webhook URL saved successfully");
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -120,11 +167,12 @@ const Settings: React.FC = () => {
       </div>
       
       <Tabs defaultValue="profile" value={activeTab} onValueChange={handleTabChange} className="space-y-4">
-        <TabsList>
+        <TabsList className="flex flex-wrap">
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
           <TabsTrigger value="appearance">Appearance</TabsTrigger>
           <TabsTrigger value="security">Security</TabsTrigger>
+          <TabsTrigger value="integrations">Integrations</TabsTrigger>
         </TabsList>
         
         <TabsContent value="profile" className="space-y-4">
@@ -454,6 +502,199 @@ const Settings: React.FC = () => {
             <CardFooter>
               <Button variant="outline" className="w-full">Save security settings</Button>
             </CardFooter>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="integrations" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Integration className="h-5 w-5 mr-2" />
+                Third-Party Integrations
+              </CardTitle>
+              <CardDescription>
+                Connect your HR system with other tools and services
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-4">
+                {/* Google Calendar integration */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-md border">
+                  <div className="flex items-start md:items-center gap-3">
+                    <div className="bg-blue-100 p-2 rounded-md">
+                      <Calendar className="h-6 w-6 text-blue-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-medium">Google Calendar</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Sync your HR events with Google Calendar
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch 
+                      checked={googleCalendarIntegration} 
+                      onCheckedChange={() => handleToggleIntegration('google-calendar', googleCalendarIntegration)} 
+                    />
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      disabled={!googleCalendarIntegration}
+                    >
+                      Configure
+                    </Button>
+                  </div>
+                </div>
+                
+                {/* Slack integration */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-md border">
+                  <div className="flex items-start md:items-center gap-3">
+                    <div className="bg-purple-100 p-2 rounded-md">
+                      <Link className="h-6 w-6 text-purple-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-medium">Slack</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Send HR notifications to Slack channels
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch 
+                      checked={slackIntegration} 
+                      onCheckedChange={() => handleToggleIntegration('slack', slackIntegration)} 
+                    />
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      disabled={!slackIntegration}
+                    >
+                      Configure
+                    </Button>
+                  </div>
+                </div>
+                
+                {/* Microsoft Teams integration */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-md border">
+                  <div className="flex items-start md:items-center gap-3">
+                    <div className="bg-blue-100 p-2 rounded-md">
+                      <Link className="h-6 w-6 text-blue-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-medium">Microsoft Teams</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Connect HR system with Microsoft Teams
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch 
+                      checked={teamsIntegration} 
+                      onCheckedChange={() => handleToggleIntegration('teams', teamsIntegration)} 
+                    />
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      disabled={!teamsIntegration}
+                    >
+                      Configure
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Zapier integration */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-md border">
+                  <div className="flex items-start md:items-center gap-3">
+                    <div className="bg-orange-100 p-2 rounded-md">
+                      <Integration className="h-6 w-6 text-orange-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-medium">Zapier</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Automate workflows with 3000+ apps using Zapier
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch 
+                      checked={zapierIntegration} 
+                      onCheckedChange={() => handleToggleIntegration('zapier', zapierIntegration)} 
+                    />
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      disabled={!zapierIntegration}
+                    >
+                      Configure
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Webhook URL configuration */}
+                {zapierIntegration && (
+                  <div className="p-4 rounded-md border bg-muted/30 space-y-3">
+                    <h4 className="text-sm font-medium">Zapier Webhook URL</h4>
+                    <div className="flex gap-2">
+                      <Input 
+                        placeholder="Enter your Zapier webhook URL" 
+                        value={webhookUrl}
+                        onChange={(e) => setWebhookUrl(e.target.value)}
+                        className="flex-1"
+                      />
+                      <Button onClick={handleSaveWebhook}>Save</Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      This webhook will be triggered for important HR events and activities
+                    </p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Button variant="outline" className="w-full">Save integration settings</Button>
+            </CardFooter>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <SettingsIcon className="h-5 w-5 mr-2" />
+                API Access
+              </CardTitle>
+              <CardDescription>
+                Manage API credentials for external systems
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h4 className="text-sm font-medium">API Access</h4>
+                    <p className="text-xs text-muted-foreground">
+                      Enable API access to your HR data
+                    </p>
+                  </div>
+                  <Switch />
+                </div>
+                
+                <div className="p-4 border rounded-md bg-muted/20">
+                  <h4 className="text-sm font-medium mb-2">API Key</h4>
+                  <div className="bg-muted p-2 rounded text-sm font-mono mb-2">
+                    ••••••••••••••••••••••••••••••
+                  </div>
+                  <div className="flex justify-end">
+                    <Button variant="outline" size="sm">
+                      Regenerate Key
+                    </Button>
+                  </div>
+                </div>
+                
+                <p className="text-xs text-muted-foreground">
+                  Warning: Regenerating your API key will invalidate your existing key and require
+                  updating any integrations using the old key.
+                </p>
+              </div>
+            </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
