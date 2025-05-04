@@ -1,1188 +1,822 @@
-
-import React, { useState, useEffect } from 'react';
-import { useToast } from '@/hooks/use-toast';
-import { useVoice } from '../../contexts/VoiceContext';
-import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Pagination } from '@/components/ui/pagination';
-import {
-  Search,
-  UserPlus,
-  Filter,
-  MoreHorizontal,
-  Eye,
-  Pencil,
-  Trash2,
-  ChevronDown,
-  Check,
-  X,
-  User,
-  Mail,
-  Phone,
-  Briefcase,
-  MapPin,
-  Calendar,
-} from 'lucide-react';
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import { toast } from 'sonner';
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { useForm } from 'react-hook-form';
+import { Edit, Trash2, Plus, Search, Eye, UserPlus } from 'lucide-react';
+import { useVoice } from '../../contexts/VoiceContext';
+import { toast } from 'sonner';
 
-// Employee type definition
-type Employee = {
+interface Employee {
   id: string;
   firstName: string;
   lastName: string;
   email: string;
   phone: string;
-  department: string;
   designation: string;
+  department: string;
   location: string;
   joiningDate: string;
   employeeId: string;
-  status: 'active' | 'inactive' | 'onLeave' | 'probation';
-  imageUrl?: string;
+  status: 'active' | 'onLeave' | 'inactive' | 'probation';
+}
+
+interface EmployeeFormData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  designation: string;
+  department: string;
+  location: string;
+  joiningDate: string;
+  employeeId: string;
+  status: 'active' | 'onLeave' | 'inactive' | 'probation';
+}
+
+const filterEmployees = (employees: Employee[], query: string): Employee[] => {
+  const lowerCaseQuery = query.toLowerCase();
+  return employees.filter(employee =>
+    employee.firstName.toLowerCase().includes(lowerCaseQuery) ||
+    employee.lastName.toLowerCase().includes(lowerCaseQuery) ||
+    employee.email.toLowerCase().includes(lowerCaseQuery) ||
+    employee.designation.toLowerCase().includes(lowerCaseQuery) ||
+    employee.department.toLowerCase().includes(lowerCaseQuery)
+  );
 };
 
-// Form schema
-const employeeSchema = z.object({
-  firstName: z.string().min(2, { message: "First name must be at least 2 characters." }),
-  lastName: z.string().min(2, { message: "Last name must be at least 2 characters." }),
-  email: z.string().email({ message: "Please enter a valid email address." }),
-  phone: z.string().min(10, { message: "Phone number must be at least 10 characters." }),
-  designation: z.string().min(2, { message: "Designation must be at least 2 characters." }),
-  department: z.string().min(2, { message: "Department must be at least 2 characters." }),
-  location: z.string().min(2, { message: "Location must be at least 2 characters." }),
-  joiningDate: z.string(),
-  employeeId: z.string().min(3, { message: "Employee ID must be at least 3 characters." }),
-  status: z.enum(['active', 'inactive', 'onLeave', 'probation']),
-});
+const itemsPerPage = 5;
 
-// Mock data fetching function (replace with actual API call)
-const fetchEmployees = async (): Promise<Employee[]> => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 800));
-  
-  return [
+export const EmployeeDirectory: React.FC = () => {
+  const { speak } = useVoice();
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [employees, setEmployees] = useState<Employee[]>([
     {
       id: '1',
       firstName: 'John',
       lastName: 'Doe',
       email: 'john.doe@example.com',
-      phone: '+1 (555) 123-4567',
+      phone: '123-456-7890',
+      designation: 'Software Engineer',
       department: 'Engineering',
-      designation: 'Senior Developer',
       location: 'New York',
-      joiningDate: '2021-06-12',
-      employeeId: 'EMP001',
-      status: 'active'
+      joiningDate: '2022-01-01',
+      employeeId: 'E001',
+      status: 'active',
     },
     {
       id: '2',
       firstName: 'Jane',
       lastName: 'Smith',
       email: 'jane.smith@example.com',
-      phone: '+1 (555) 987-6543',
-      department: 'Marketing',
+      phone: '987-654-3210',
       designation: 'Marketing Manager',
-      location: 'San Francisco',
-      joiningDate: '2020-03-15',
-      employeeId: 'EMP002',
-      status: 'active'
+      department: 'Marketing',
+      location: 'Los Angeles',
+      joiningDate: '2022-02-15',
+      employeeId: 'E002',
+      status: 'active',
     },
     {
       id: '3',
-      firstName: 'Robert',
+      firstName: 'Alice',
       lastName: 'Johnson',
-      email: 'robert.johnson@example.com',
-      phone: '+1 (555) 456-7890',
-      department: 'HR',
+      email: 'alice.johnson@example.com',
+      phone: '555-123-4567',
       designation: 'HR Specialist',
+      department: 'Human Resources',
       location: 'Chicago',
-      joiningDate: '2022-01-10',
-      employeeId: 'EMP003',
-      status: 'onLeave'
+      joiningDate: '2022-03-10',
+      employeeId: 'E003',
+      status: 'onLeave',
     },
     {
       id: '4',
-      firstName: 'Maria',
-      lastName: 'Garcia',
-      email: 'maria.garcia@example.com',
-      phone: '+1 (555) 234-5678',
-      department: 'Finance',
+      firstName: 'Bob',
+      lastName: 'Williams',
+      email: 'bob.williams@example.com',
+      phone: '777-888-9999',
       designation: 'Financial Analyst',
-      location: 'Boston',
-      joiningDate: '2021-09-05',
-      employeeId: 'EMP004',
-      status: 'active'
+      department: 'Finance',
+      location: 'Houston',
+      joiningDate: '2022-04-01',
+      employeeId: 'E004',
+      status: 'active',
     },
     {
       id: '5',
-      firstName: 'David',
-      lastName: 'Chen',
-      email: 'david.chen@example.com',
-      phone: '+1 (555) 345-6789',
-      department: 'Engineering',
-      designation: 'Frontend Developer',
-      location: 'Seattle',
-      joiningDate: '2022-03-20',
-      employeeId: 'EMP005',
-      status: 'active'
+      firstName: 'Emily',
+      lastName: 'Brown',
+      email: 'emily.brown@example.com',
+      phone: '111-222-3333',
+      designation: 'Sales Representative',
+      department: 'Sales',
+      location: 'Miami',
+      joiningDate: '2022-05-05',
+      employeeId: 'E005',
+      status: 'inactive',
     },
     {
       id: '6',
-      firstName: 'Sarah',
-      lastName: 'Williams',
-      email: 'sarah.williams@example.com',
-      phone: '+1 (555) 456-7891',
-      department: 'Marketing',
-      designation: 'Content Specialist',
+      firstName: 'David',
+      lastName: 'Lee',
+      email: 'david.lee@example.com',
+      phone: '444-555-6666',
+      designation: 'Project Manager',
+      department: 'Project Management',
       location: 'San Francisco',
-      joiningDate: '2021-11-15',
-      employeeId: 'EMP006',
-      status: 'active'
+      joiningDate: '2022-06-20',
+      employeeId: 'E006',
+      status: 'probation',
     },
     {
       id: '7',
-      firstName: 'Michael',
-      lastName: 'Brown',
-      email: 'michael.brown@example.com',
-      phone: '+1 (555) 567-8901',
-      department: 'Product',
-      designation: 'Product Manager',
-      location: 'New York',
-      joiningDate: '2020-08-01',
-      employeeId: 'EMP007',
-      status: 'onLeave'
+      firstName: 'Olivia',
+      lastName: 'Garcia',
+      email: 'olivia.garcia@example.com',
+      phone: '222-333-4444',
+      designation: 'Data Scientist',
+      department: 'Data Science',
+      location: 'Seattle',
+      joiningDate: '2022-07-12',
+      employeeId: 'E007',
+      status: 'active',
     },
     {
       id: '8',
-      firstName: 'Jennifer',
-      lastName: 'Taylor',
-      email: 'jennifer.taylor@example.com',
-      phone: '+1 (555) 678-9012',
+      firstName: 'Liam',
+      lastName: 'Martinez',
+      email: 'liam.martinez@example.com',
+      phone: '666-777-8888',
+      designation: 'UX Designer',
       department: 'Design',
-      designation: 'UI/UX Designer',
       location: 'Austin',
-      joiningDate: '2022-02-10',
-      employeeId: 'EMP008',
-      status: 'active'
+      joiningDate: '2022-08-01',
+      employeeId: 'E008',
+      status: 'active',
     },
     {
       id: '9',
-      firstName: 'James',
-      lastName: 'Miller',
-      email: 'james.miller@example.com',
-      phone: '+1 (555) 789-0123',
-      department: 'Sales',
-      designation: 'Sales Representative',
-      location: 'Chicago',
-      joiningDate: '2021-04-18',
-      employeeId: 'EMP009',
-      status: 'active'
+      firstName: 'Sophia',
+      lastName: 'Anderson',
+      email: 'sophia.anderson@example.com',
+      phone: '888-999-0000',
+      designation: 'Business Analyst',
+      department: 'Analytics',
+      location: 'Boston',
+      joiningDate: '2022-09-15',
+      employeeId: 'E009',
+      status: 'active',
     },
     {
       id: '10',
-      firstName: 'Patricia',
-      lastName: 'Wilson',
-      email: 'patricia.wilson@example.com',
-      phone: '+1 (555) 890-1234',
-      department: 'HR',
-      designation: 'Recruitment Specialist',
+      firstName: 'Noah',
+      lastName: 'Thomas',
+      email: 'noah.thomas@example.com',
+      phone: '333-444-5555',
+      designation: 'IT Support Specialist',
+      department: 'IT',
       location: 'Denver',
-      joiningDate: '2022-06-22',
-      employeeId: 'EMP010',
-      status: 'probation'
-    },
-    {
-      id: '11',
-      firstName: 'Thomas',
-      lastName: 'Anderson',
-      email: 'thomas.anderson@example.com',
-      phone: '+1 (555) 901-2345',
-      department: 'Engineering',
-      designation: 'Backend Developer',
-      location: 'San Jose',
-      joiningDate: '2021-08-14',
-      employeeId: 'EMP011',
-      status: 'active'
-    },
-    {
-      id: '12',
-      firstName: 'Elizabeth',
-      lastName: 'Martinez',
-      email: 'elizabeth.martinez@example.com',
-      phone: '+1 (555) 012-3456',
-      department: 'Finance',
-      designation: 'Accountant',
-      location: 'Miami',
-      joiningDate: '2022-01-30',
-      employeeId: 'EMP012',
-      status: 'inactive'
+      joiningDate: '2022-10-10',
+      employeeId: 'E010',
+      status: 'active',
     }
-  ];
-};
+  ]);
 
-export const EmployeeDirectory: React.FC = () => {
-  const { toast } = useToast();
-  const { speak } = useVoice();
-  const [employees, setEmployees] = useState<Employee[]>([]);
-  const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [deptFilter, setDeptFilter] = useState('all');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [sortField, setSortField] = useState<keyof Employee>('lastName');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [isAddEmployeeOpen, setIsAddEmployeeOpen] = useState(false);
-  const [isEditEmployeeOpen, setIsEditEmployeeOpen] = useState(false);
-  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
-  const [isViewEmployeeOpen, setIsViewEmployeeOpen] = useState(false);
-  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
-  const itemsPerPage = 10;
-
-  const form = useForm<z.infer<typeof employeeSchema>>({
-    resolver: zodResolver(employeeSchema),
-    defaultValues: {
-      firstName: "",
-      lastName: "",
-      email: "",
-      phone: "",
-      designation: "",
-      department: "",
-      location: "",
-      joiningDate: new Date().toISOString().split('T')[0],
-      employeeId: "",
-      status: "active",
-    },
-  });
-
-  const editForm = useForm<z.infer<typeof employeeSchema>>({
-    resolver: zodResolver(employeeSchema),
-    defaultValues: {
-      firstName: "",
-      lastName: "",
-      email: "",
-      phone: "",
-      designation: "",
-      department: "",
-      location: "",
-      joiningDate: "",
-      employeeId: "",
-      status: "active",
-    },
-  });
-
-  // Load employees on component mount
-  useEffect(() => {
-    const loadEmployees = async () => {
-      try {
-        const data = await fetchEmployees();
-        setEmployees(data);
-        setFilteredEmployees(data);
-        speak("Employee directory loaded. You can search, filter, and manage employee records here.");
-      } catch (error) {
-        toast({
-          title: "Error loading employees",
-          description: "Failed to load employee directory. Please try again later.",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadEmployees();
-  }, [speak, toast]);
-
-  // Reset form when add employee sheet opens
-  useEffect(() => {
-    if (isAddEmployeeOpen) {
-      form.reset({
-        firstName: "",
-        lastName: "",
-        email: "",
-        phone: "",
-        designation: "",
-        department: "",
-        location: "",
-        joiningDate: new Date().toISOString().split('T')[0],
-        employeeId: `EMP${String(employees.length + 1).padStart(3, '0')}`,
-        status: "active",
-      });
-      speak("Add new employee form is open. Fill in the employee details and submit to create a new record.");
-    }
-  }, [isAddEmployeeOpen, form, employees.length, speak]);
-
-  // Populate edit form when employee is selected
-  useEffect(() => {
-    if (selectedEmployee && isEditEmployeeOpen) {
-      editForm.reset({
-        firstName: selectedEmployee.firstName,
-        lastName: selectedEmployee.lastName,
-        email: selectedEmployee.email,
-        phone: selectedEmployee.phone,
-        designation: selectedEmployee.designation,
-        department: selectedEmployee.department,
-        location: selectedEmployee.location,
-        joiningDate: selectedEmployee.joiningDate,
-        employeeId: selectedEmployee.employeeId,
-        status: selectedEmployee.status,
-      });
-      speak(`Editing employee ${selectedEmployee.firstName} ${selectedEmployee.lastName}. Update any fields as needed and save changes.`);
-    }
-  }, [selectedEmployee, isEditEmployeeOpen, editForm, speak]);
-
-  // Filter and sort employees when search query, filters, or sort parameters change
-  useEffect(() => {
-    let result = [...employees];
-    
-    // Apply search
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      result = result.filter(emp => 
-        emp.firstName.toLowerCase().includes(query) ||
-        emp.lastName.toLowerCase().includes(query) ||
-        emp.email.toLowerCase().includes(query) ||
-        emp.employeeId.toLowerCase().includes(query)
-      );
-    }
-    
-    // Apply department filter
-    if (deptFilter !== 'all') {
-      result = result.filter(emp => emp.department === deptFilter);
-    }
-    
-    // Apply status filter
-    if (statusFilter !== 'all') {
-      result = result.filter(emp => emp.status === statusFilter);
-    }
-    
-    // Apply sorting
-    result.sort((a, b) => {
-      const aValue = a[sortField]?.toString().toLowerCase() || '';
-      const bValue = b[sortField]?.toString().toLowerCase() || '';
-      
-      if (sortDirection === 'asc') {
-        return aValue.localeCompare(bValue);
-      } else {
-        return bValue.localeCompare(aValue);
-      }
-    });
-    
-    setFilteredEmployees(result);
-    // Only reset page if filters/search changed, not on initial load
-    if (!isLoading) {
-      setCurrentPage(1);
-    }
-  }, [employees, searchQuery, deptFilter, statusFilter, sortField, sortDirection, isLoading]);
-
-  // Handle sort toggle
-  const handleSort = (field: keyof Employee) => {
-    if (sortField === field) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortDirection('asc');
-    }
-  };
-
-  // Get status badge style
-  const getStatusBadge = (status: Employee['status']) => {
-    switch (status) {
-      case 'active':
-        return (
-          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-            <Check className="w-3 h-3 mr-1" /> Active
-          </span>
-        );
-      case 'inactive':
-        return (
-          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-            <X className="w-3 h-3 mr-1" /> Inactive
-          </span>
-        );
-      case 'onLeave':
-        return (
-          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
-            <Calendar className="w-3 h-3 mr-1" /> On Leave
-          </span>
-        );
-      case 'probation':
-        return (
-          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-            <Calendar className="w-3 h-3 mr-1" /> Probation
-          </span>
-        );
-    }
-  };
-
-  // Format date for display
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString();
-  };
-
-  // Calculate pagination
-  const totalPages = Math.ceil(filteredEmployees.length / itemsPerPage);
+  const filteredEmployees = filterEmployees(employees, searchQuery);
+  const pageCount = Math.ceil(filteredEmployees.length / itemsPerPage);
   const paginatedEmployees = filteredEmployees.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
-  // View employee details
-  const handleViewEmployee = (employee: Employee) => {
-    setSelectedEmployee(employee);
-    setIsViewEmployeeOpen(true);
-    speak(`Viewing profile for ${employee.firstName} ${employee.lastName}. Here you can see all their details.`);
+  const form = useForm<Employee>({
+    defaultValues: {
+      id: '',
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+      designation: '',
+      department: '',
+      location: '',
+      joiningDate: '',
+      employeeId: '',
+      status: 'active',
+    }
+  });
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    setCurrentPage(1);
   };
 
-  // Edit employee
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+  };
+
+  const handleAddEmployee = () => {
+    setIsAddDialogOpen(true);
+    form.reset({
+      id: '',
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+      designation: '',
+      department: '',
+      location: '',
+      joiningDate: '',
+      employeeId: '',
+      status: 'active',
+    });
+    speak("Opening the add employee form. Please fill out all required fields to create a new employee record. You'll need to provide personal details, contact information, and job-related information.");
+  };
+
   const handleEditEmployee = (employee: Employee) => {
     setSelectedEmployee(employee);
-    setIsEditEmployeeOpen(true);
+    setIsEditDialogOpen(true);
+    form.reset(employee);
+    speak(`Editing employee record for ${employee.firstName} ${employee.lastName}. You can update any of the fields and save changes when ready.`);
   };
 
-  // Delete employee
   const handleDeleteEmployee = (employee: Employee) => {
     setSelectedEmployee(employee);
-    setIsDeleteConfirmOpen(true);
-    speak(`Confirm deletion of ${employee.firstName} ${employee.lastName}'s profile. This action cannot be undone.`);
-  };
-  
-  // Confirm delete employee
-  const confirmDeleteEmployee = () => {
-    if (!selectedEmployee) return;
-    
-    const updatedEmployees = employees.filter(emp => emp.id !== selectedEmployee.id);
-    setEmployees(updatedEmployees);
-    setIsDeleteConfirmOpen(false);
-    setSelectedEmployee(null);
-    toast.success("Employee deleted", {
-      description: `${selectedEmployee.firstName} ${selectedEmployee.lastName} has been removed from the directory.`
-    });
-    speak(`${selectedEmployee.firstName} ${selectedEmployee.lastName}'s profile has been successfully deleted.`);
+    setIsDeleteDialogOpen(true);
+    speak(`Confirming deletion of employee record for ${employee.firstName} ${employee.lastName}. This action cannot be undone.`);
   };
 
-  // Add new employee
-  const onSubmitNewEmployee = (values: z.infer<typeof employeeSchema>) => {
-    const newEmployee: Employee = {
-      id: String(employees.length + 1),
-      ...values
+  const handleViewEmployee = (employee: Employee) => {
+    setSelectedEmployee(employee);
+    setIsViewDialogOpen(true);
+    speak(`Viewing detailed employee information for ${employee.firstName} ${employee.lastName}, ${employee.designation} in the ${employee.department} department.`);
+  };
+
+  const onSubmitAdd = (data: Employee) => {
+    const newEmployee = {
+      ...data,
+      id: Date.now().toString(),
+    };
+    setEmployees(prev => [...prev, newEmployee]);
+    setIsAddDialogOpen(false);
+    toast(`Employee ${data.firstName} ${data.lastName} has been added successfully.`);
+    speak(`Employee ${data.firstName} ${data.lastName} has been added successfully to the system.`);
+  };
+
+  const onSubmitEdit = (data: Employee) => {
+    if (!selectedEmployee) return;
+    
+    const updatedEmployee: Employee = {
+      ...data,
+      id: selectedEmployee.id,
     };
     
-    setEmployees([...employees, newEmployee]);
-    setIsAddEmployeeOpen(false);
-    toast.success("Employee added", {
-      description: `${values.firstName} ${values.lastName} has been added to the directory.`
-    });
-    speak(`New employee ${values.firstName} ${values.lastName} has been successfully added to the directory.`);
+    setEmployees(prev => prev.map(emp => emp.id === selectedEmployee.id ? updatedEmployee : emp));
+    setIsEditDialogOpen(false);
+    toast(`Employee ${data.firstName} ${data.lastName}'s information has been updated.`);
+    speak(`Employee ${data.firstName} ${data.lastName}'s information has been successfully updated.`);
   };
 
-  // Update employee
-  const onSubmitUpdateEmployee = (values: z.infer<typeof employeeSchema>) => {
+  const onConfirmDelete = () => {
     if (!selectedEmployee) return;
     
-    const updatedEmployees = employees.map(emp => 
-      emp.id === selectedEmployee.id ? { ...emp, ...values } : emp
-    );
-    
-    setEmployees(updatedEmployees);
-    setIsEditEmployeeOpen(false);
-    setSelectedEmployee(null);
-    toast.success("Employee updated", {
-      description: `${values.firstName} ${values.lastName}'s information has been updated.`
-    });
-    speak(`${values.firstName} ${values.lastName}'s information has been successfully updated.`);
+    setEmployees(prev => prev.filter(emp => emp.id !== selectedEmployee.id));
+    setIsDeleteDialogOpen(false);
+    toast(`Employee ${selectedEmployee.firstName} ${selectedEmployee.lastName} has been removed.`);
+    speak(`Employee ${selectedEmployee.firstName} ${selectedEmployee.lastName} has been successfully removed from the system.`);
   };
 
-  // Get unique departments for filter
-  const departments = ['all', ...new Set(employees.map(emp => emp.department))];
-
-  // Render loading state
-  if (isLoading) {
-    return (
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex items-center justify-center p-8">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
-    <Card>
-      <CardContent className="pt-6 space-y-6">
-        {/* Header with actions */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div className="flex items-center">
-            <User className="h-5 w-5 text-primary mr-2" />
-            <h3 className="text-lg font-medium">Employee Directory</h3>
-            <div className="ml-3 flex items-center bg-muted text-muted-foreground text-xs px-2 py-1 rounded">
-              {filteredEmployees.length} employees
-            </div>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
-            <div className="relative">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="Search employees..."
-                className="w-full sm:w-[250px] pl-8"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-            <Button onClick={() => setIsAddEmployeeOpen(true)}>
-              <UserPlus className="mr-2 h-4 w-4" />
-              Add Employee
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-semibold tracking-tight">Employee Directory</h2>
+        <Button onClick={handleAddEmployee}>
+          <UserPlus className="mr-2 h-4 w-4" />
+          Add Employee
+        </Button>
+      </div>
+
+      <div className="flex items-center space-x-2">
+        <Input
+          type="text"
+          placeholder="Search employees..."
+          value={searchQuery}
+          onChange={handleSearch}
+        />
+        <Search className="h-5 w-5 text-gray-500" />
+      </div>
+
+      <Table>
+        <TableCaption>A list of your employees.</TableCaption>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Employee ID</TableHead>
+            <TableHead>First Name</TableHead>
+            <TableHead>Last Name</TableHead>
+            <TableHead>Email</TableHead>
+            <TableHead>Phone</TableHead>
+            <TableHead>Designation</TableHead>
+            <TableHead>Department</TableHead>
+            <TableHead>Location</TableHead>
+            <TableHead>Joining Date</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {paginatedEmployees.map((employee) => (
+            <TableRow key={employee.id}>
+              <TableCell>{employee.employeeId}</TableCell>
+              <TableCell>{employee.firstName}</TableCell>
+              <TableCell>{employee.lastName}</TableCell>
+              <TableCell>{employee.email}</TableCell>
+              <TableCell>{employee.phone}</TableCell>
+              <TableCell>{employee.designation}</TableCell>
+              <TableCell>{employee.department}</TableCell>
+              <TableCell>{employee.location}</TableCell>
+              <TableCell>{employee.joiningDate}</TableCell>
+              <TableCell>{employee.status}</TableCell>
+              <TableCell className="text-right">
+                <div className="flex justify-end gap-2">
+                  <Button variant="ghost" size="icon" onClick={() => handleViewEmployee(employee)}>
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={() => handleEditEmployee(employee)}>
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={() => handleDeleteEmployee(employee)}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+
+      <div className="flex justify-between items-center">
+        <p className="text-sm text-gray-500">
+          Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredEmployees.length)} of {filteredEmployees.length} employees
+        </p>
+        <div className="flex items-center space-x-2">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={currentPage === 1}
+            onClick={() => handlePageChange(currentPage - 1)}
+          >
+            Previous
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={currentPage === pageCount || pageCount === 0}
+            onClick={() => handlePageChange(currentPage + 1)}
+          >
+            Next
+          </Button>
+        </div>
+      </div>
+
+      {/* Add Employee Dialog */}
+      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+        <DialogContent className="sm:max-w-[625px]">
+          <DialogHeader>
+            <DialogTitle>Add Employee</DialogTitle>
+            <DialogDescription>
+              Create a new employee record.
+            </DialogDescription>
+          </DialogHeader>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmitAdd)} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="firstName"
+                  rules={{ required: 'First name is required.' }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>First Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="First name" {...field} />
+                      </FormControl>
+                      <FormMessage>{form.formState.errors.firstName?.message}</FormMessage>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="lastName"
+                  rules={{ required: 'Last name is required.' }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Last Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Last name" {...field} />
+                      </FormControl>
+                      <FormMessage>{form.formState.errors.lastName?.message}</FormMessage>
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="email"
+                  rules={{
+                    required: 'Email is required.',
+                    pattern: {
+                      value: /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
+                      message: 'Invalid email format.',
+                    },
+                  }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Email" {...field} />
+                      </FormControl>
+                      <FormMessage>{form.formState.errors.email?.message}</FormMessage>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="phone"
+                  rules={{ required: 'Phone number is required.' }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Phone Number</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Phone number" {...field} />
+                      </FormControl>
+                      <FormMessage>{form.formState.errors.phone?.message}</FormMessage>
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="designation"
+                  rules={{ required: 'Designation is required.' }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Designation</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Designation" {...field} />
+                      </FormControl>
+                      <FormMessage>{form.formState.errors.designation?.message}</FormMessage>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="department"
+                  rules={{ required: 'Department is required.' }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Department</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Department" {...field} />
+                      </FormControl>
+                      <FormMessage>{form.formState.errors.department?.message}</FormMessage>
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="location"
+                  rules={{ required: 'Location is required.' }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Location</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Location" {...field} />
+                      </FormControl>
+                      <FormMessage>{form.formState.errors.location?.message}</FormMessage>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="joiningDate"
+                  rules={{ required: 'Joining date is required.' }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Joining Date</FormLabel>
+                      <FormControl>
+                        <Input type="date" {...field} />
+                      </FormControl>
+                      <FormMessage>{form.formState.errors.joiningDate?.message}</FormMessage>
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="employeeId"
+                  rules={{ required: 'Employee ID is required.' }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Employee ID</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Employee ID" {...field} />
+                      </FormControl>
+                      <FormMessage>{form.formState.errors.employeeId?.message}</FormMessage>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="status"
+                  rules={{ required: 'Status is required.' }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Status</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a status" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="active">Active</SelectItem>
+                          <SelectItem value="onLeave">On Leave</SelectItem>
+                          <SelectItem value="inactive">Inactive</SelectItem>
+                          <SelectItem value="probation">Probation</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage>{form.formState.errors.status?.message}</FormMessage>
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <DialogFooter>
+                <Button type="button" variant="secondary" onClick={() => setIsAddDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit">Add Employee</Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Employee Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="sm:max-w-[625px]">
+          <DialogHeader>
+            <DialogTitle>Edit Employee</DialogTitle>
+            <DialogDescription>
+              Edit employee record.
+            </DialogDescription>
+          </DialogHeader>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmitEdit)} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="firstName"
+                  rules={{ required: 'First name is required.' }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>First Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="First name" {...field} />
+                      </FormControl>
+                      <FormMessage>{form.formState.errors.firstName?.message}</FormMessage>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="lastName"
+                  rules={{ required: 'Last name is required.' }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Last Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Last name" {...field} />
+                      </FormControl>
+                      <FormMessage>{form.formState.errors.lastName?.message}</FormMessage>
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="email"
+                  rules={{
+                    required: 'Email is required.',
+                    pattern: {
+                      value: /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
+                      message: 'Invalid email format.',
+                    },
+                  }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Email" {...field} />
+                      </FormControl>
+                      <FormMessage>{form.formState.errors.email?.message}</FormMessage>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="phone"
+                  rules={{ required: 'Phone number is required.' }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Phone Number</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Phone number" {...field} />
+                      </FormControl>
+                      <FormMessage>{form.formState.errors.phone?.message}</FormMessage>
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="designation"
+                  rules={{ required: 'Designation is required.' }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Designation</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Designation" {...field} />
+                      </FormControl>
+                      <FormMessage>{form.formState.errors.designation?.message}</FormMessage>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="department"
+                  rules={{ required: 'Department is required.' }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Department</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Department" {...field} />
+                      </FormControl>
+                      <FormMessage>{form.formState.errors.department?.message}</FormMessage>
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="location"
+                  rules={{ required: 'Location is required.' }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Location</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Location" {...field} />
+                      </FormControl>
+                      <FormMessage>{form.formState.errors.location?.message}</FormMessage>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="joiningDate"
+                  rules={{ required: 'Joining date is required.' }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Joining Date</FormLabel>
+                      <FormControl>
+                        <Input type="date" {...field} />
+                      </FormControl>
+                      <FormMessage>{form.formState.errors.joiningDate?.message}</FormMessage>
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="employeeId"
+                  rules={{ required: 'Employee ID is required.' }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Employee ID</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Employee ID" {...field} />
+                      </FormControl>
+                      <FormMessage>{form.formState.errors.employeeId?.message}</FormMessage>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="status"
+                  rules={{ required: 'Status is required.' }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Status</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a status" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="active">Active</SelectItem>
+                          <SelectItem value="onLeave">On Leave</SelectItem>
+                          <SelectItem value="inactive">Inactive</SelectItem>
+                          <SelectItem value="probation">Probation</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage>{form.formState.errors.status?.message}</FormMessage>
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <DialogFooter>
+                <Button type="button" variant="secondary" onClick={() => setIsEditDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit">Update Employee</Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Employee Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Delete Employee</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete {selectedEmployee?.firstName} {selectedEmployee?.lastName}? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button type="button" variant="secondary" onClick={() => setIsDeleteDialogOpen(false)}>
+              Cancel
             </Button>
-          </div>
-        </div>
+            <Button type="submit" variant="destructive" onClick={onConfirmDelete}>
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
-        {/* Filters */}
-        <div className="flex flex-col sm:flex-row gap-2">
-          <div className="flex items-center gap-2">
-            <Filter className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm">Filters:</span>
-          </div>
-          <div className="grid grid-cols-2 sm:flex gap-2">
-            <Select value={deptFilter} onValueChange={setDeptFilter}>
-              <SelectTrigger className="w-full sm:w-[150px]">
-                <SelectValue placeholder="Department" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Departments</SelectItem>
-                {departments.filter(d => d !== 'all').map(dept => (
-                  <SelectItem key={dept} value={dept}>{dept}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full sm:w-[150px]">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="inactive">Inactive</SelectItem>
-                <SelectItem value="onLeave">On Leave</SelectItem>
-                <SelectItem value="probation">Probation</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        {/* Employee Table */}
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[250px]">
-                  <button 
-                    className="flex items-center hover:text-primary"
-                    onClick={() => handleSort('lastName')}
-                  >
-                    Employee Name
-                    {sortField === 'lastName' && (
-                      sortDirection === 'asc' 
-                        ? <ChevronDown className="ml-1 h-4 w-4" /> 
-                        : <ChevronDown className="ml-1 h-4 w-4 rotate-180" />
-                    )}
-                  </button>
-                </TableHead>
-                <TableHead>ID</TableHead>
-                <TableHead>
-                  <button 
-                    className="flex items-center hover:text-primary"
-                    onClick={() => handleSort('department')}
-                  >
-                    Department
-                    {sortField === 'department' && (
-                      sortDirection === 'asc' 
-                        ? <ChevronDown className="ml-1 h-4 w-4" /> 
-                        : <ChevronDown className="ml-1 h-4 w-4 rotate-180" />
-                    )}
-                  </button>
-                </TableHead>
-                <TableHead>Designation</TableHead>
-                <TableHead>Location</TableHead>
-                <TableHead>Join Date</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paginatedEmployees.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8">
-                    <div className="flex flex-col items-center justify-center text-muted-foreground">
-                      <User size={48} strokeWidth={1.5} className="mb-2" />
-                      {searchQuery || deptFilter !== 'all' || statusFilter !== 'all' ? (
-                        <p>No employees match your search criteria.</p>
-                      ) : (
-                        <p>No employees found. Add your first employee record.</p>
-                      )}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ) : (
-                paginatedEmployees.map((employee) => (
-                  <TableRow key={employee.id}>
-                    <TableCell className="font-medium">
-                      {employee.firstName} {employee.lastName}
-                    </TableCell>
-                    <TableCell>{employee.employeeId}</TableCell>
-                    <TableCell>{employee.department}</TableCell>
-                    <TableCell>{employee.designation}</TableCell>
-                    <TableCell>{employee.location}</TableCell>
-                    <TableCell>{formatDate(employee.joiningDate)}</TableCell>
-                    <TableCell>{getStatusBadge(employee.status)}</TableCell>
-                    <TableCell>
-                      <div className="flex justify-end">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleViewEmployee(employee)}>
-                              <Eye className="mr-2 h-4 w-4" />
-                              View Profile
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleEditEmployee(employee)}>
-                              <Pencil className="mr-2 h-4 w-4" />
-                              Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem 
-                              className="text-destructive focus:text-destructive"
-                              onClick={() => handleDeleteEmployee(employee)}
-                            >
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
-
-        {/* Pagination */}
-        {filteredEmployees.length > 0 && (
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-muted-foreground">
-              Showing <span className="font-medium">{(currentPage - 1) * itemsPerPage + 1}</span> to{" "}
-              <span className="font-medium">
-                {Math.min(currentPage * itemsPerPage, filteredEmployees.length)}
-              </span>{" "}
-              of <span className="font-medium">{filteredEmployees.length}</span> employees
-            </p>
-            <Pagination
-              totalPages={totalPages}
-              currentPage={currentPage}
-              onPageChange={setCurrentPage}
-            />
-          </div>
-        )}
-
-        {/* Add Employee Sheet */}
-        <Sheet open={isAddEmployeeOpen} onOpenChange={setIsAddEmployeeOpen}>
-          <SheetContent className="sm:max-w-md overflow-y-auto">
-            <SheetHeader>
-              <SheetTitle>Add New Employee</SheetTitle>
-              <SheetDescription>
-                Fill out the form below to add a new employee to the directory.
-              </SheetDescription>
-            </SheetHeader>
-            <div className="py-4">
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmitNewEmployee)} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="firstName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>First Name</FormLabel>
-                          <FormControl>
-                            <Input placeholder="John" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="lastName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Last Name</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Doe" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email</FormLabel>
-                        <FormControl>
-                          <Input type="email" placeholder="john.doe@example.com" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="phone"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Phone</FormLabel>
-                        <FormControl>
-                          <Input placeholder="+1 (555) 123-4567" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="department"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Department</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Engineering" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="designation"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Designation</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Senior Developer" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <FormField
-                    control={form.control}
-                    name="location"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Location</FormLabel>
-                        <FormControl>
-                          <Input placeholder="New York" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="joiningDate"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Joining Date</FormLabel>
-                        <FormControl>
-                          <Input type="date" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="employeeId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Employee ID</FormLabel>
-                        <FormControl>
-                          <Input placeholder="EMP001" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="status"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Status</FormLabel>
-                        <Select
-                          value={field.value}
-                          onValueChange={field.onChange}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select status" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="active">Active</SelectItem>
-                            <SelectItem value="inactive">Inactive</SelectItem>
-                            <SelectItem value="onLeave">On Leave</SelectItem>
-                            <SelectItem value="probation">Probation</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <div className="pt-4 flex justify-end">
-                    <Button type="submit">Add Employee</Button>
-                  </div>
-                </form>
-              </Form>
+      {/* View Employee Dialog */}
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Employee Details</DialogTitle>
+            <DialogDescription>
+              View employee record.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-lg font-medium">{selectedEmployee?.firstName} {selectedEmployee?.lastName}</h3>
+              <p className="text-sm text-muted-foreground">{selectedEmployee?.designation} - {selectedEmployee?.department}</p>
             </div>
-          </SheetContent>
-        </Sheet>
-
-        {/* Edit Employee Dialog */}
-        <Dialog open={isEditEmployeeOpen} onOpenChange={setIsEditEmployeeOpen}>
-          <DialogContent className="sm:max-w-md overflow-y-auto max-h-[90vh]">
-            <DialogHeader>
-              <DialogTitle>Edit Employee</DialogTitle>
-              <DialogDescription>
-                Update employee information using the form below.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="py-4">
-              <Form {...editForm}>
-                <form onSubmit={editForm.handleSubmit(onSubmitUpdateEmployee)} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={editForm.control}
-                      name="firstName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>First Name</FormLabel>
-                          <FormControl>
-                            <Input placeholder="John" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={editForm.control}
-                      name="lastName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Last Name</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Doe" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <FormField
-                    control={editForm.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email</FormLabel>
-                        <FormControl>
-                          <Input type="email" placeholder="john.doe@example.com" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={editForm.control}
-                    name="phone"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Phone</FormLabel>
-                        <FormControl>
-                          <Input placeholder="+1 (555) 123-4567" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={editForm.control}
-                      name="department"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Department</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Engineering" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={editForm.control}
-                      name="designation"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Designation</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Senior Developer" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <FormField
-                    control={editForm.control}
-                    name="location"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Location</FormLabel>
-                        <FormControl>
-                          <Input placeholder="New York" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={editForm.control}
-                    name="joiningDate"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Joining Date</FormLabel>
-                        <FormControl>
-                          <Input type="date" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={editForm.control}
-                    name="employeeId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Employee ID</FormLabel>
-                        <FormControl>
-                          <Input placeholder="EMP001" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={editForm.control}
-                    name="status"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Status</FormLabel>
-                        <Select
-                          value={field.value}
-                          onValueChange={field.onChange}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select status" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="active">Active</SelectItem>
-                            <SelectItem value="inactive">Inactive</SelectItem>
-                            <SelectItem value="onLeave">On Leave</SelectItem>
-                            <SelectItem value="probation">Probation</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <DialogFooter className="pt-4">
-                    <Button variant="outline" type="button" onClick={() => setIsEditEmployeeOpen(false)}>Cancel</Button>
-                    <Button type="submit">Save Changes</Button>
-                  </DialogFooter>
-                </form>
-              </Form>
+            <div className="space-y-2">
+              <h4 className="text-sm font-semibold">Contact Information</h4>
+              <p className="text-sm">Email: {selectedEmployee?.email}</p>
+              <p className="text-sm">Phone: {selectedEmployee?.phone}</p>
             </div>
-          </DialogContent>
-        </Dialog>
-
-        {/* View Employee Dialog */}
-        <Dialog open={isViewEmployeeOpen} onOpenChange={setIsViewEmployeeOpen}>
-          <DialogContent className="sm:max-w-lg">
-            <DialogHeader>
-              <DialogTitle>Employee Details</DialogTitle>
-              {selectedEmployee && (
-                <DialogDescription>
-                  Complete profile information for {selectedEmployee.firstName} {selectedEmployee.lastName}
-                </DialogDescription>
-              )}
-            </DialogHeader>
-            {selectedEmployee && (
-              <div className="py-4">
-                <div className="flex flex-col md:flex-row items-start md:items-center gap-4 mb-6">
-                  <div className="w-20 h-20 flex items-center justify-center bg-primary/10 rounded-full">
-                    <User size={32} className="text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-semibold">{selectedEmployee.firstName} {selectedEmployee.lastName}</h3>
-                    <p className="text-muted-foreground">{selectedEmployee.designation}</p>
-                    <div className="mt-2">{getStatusBadge(selectedEmployee.status)}</div>
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-3">
-                    <div>
-                      <h4 className="text-sm font-medium text-muted-foreground">Contact Information</h4>
-                      <div className="mt-2 space-y-2">
-                        <div className="flex items-center">
-                          <Mail className="h-4 w-4 mr-2 text-muted-foreground" />
-                          <span>{selectedEmployee.email}</span>
-                        </div>
-                        <div className="flex items-center">
-                          <Phone className="h-4 w-4 mr-2 text-muted-foreground" />
-                          <span>{selectedEmployee.phone}</span>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <h4 className="text-sm font-medium text-muted-foreground">Location</h4>
-                      <div className="mt-2">
-                        <div className="flex items-center">
-                          <MapPin className="h-4 w-4 mr-2 text-muted-foreground" />
-                          <span>{selectedEmployee.location}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-3">
-                    <div>
-                      <h4 className="text-sm font-medium text-muted-foreground">Employment Details</h4>
-                      <div className="mt-2 space-y-2">
-                        <div className="flex items-center">
-                          <Briefcase className="h-4 w-4 mr-2 text-muted-foreground" />
-                          <span>{selectedEmployee.department}</span>
-                        </div>
-                        <div className="flex items-center">
-                          <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
-                          <span>Joined on {formatDate(selectedEmployee.joiningDate)}</span>
-                        </div>
-                        <div className="flex items-center">
-                          <User className="h-4 w-4 mr-2 text-muted-foreground" />
-                          <span>ID: {selectedEmployee.employeeId}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsViewEmployeeOpen(false)}>Close</Button>
-              {selectedEmployee && (
-                <>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => {
-                      setIsViewEmployeeOpen(false);
-                      handleEditEmployee(selectedEmployee);
-                    }}
-                  >
-                    <Pencil className="h-4 w-4 mr-2" />
-                    Edit
-                  </Button>
-                  <Button 
-                    variant="destructive" 
-                    onClick={() => {
-                      setIsViewEmployeeOpen(false);
-                      handleDeleteEmployee(selectedEmployee);
-                    }}
-                  >
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Delete
-                  </Button>
-                </>
-              )}
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        {/* Delete Confirmation Dialog */}
-        <Dialog open={isDeleteConfirmOpen} onOpenChange={setIsDeleteConfirmOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Confirm Deletion</DialogTitle>
-              <DialogDescription>
-                Are you sure you want to delete this employee? This action cannot be undone.
-              </DialogDescription>
-            </DialogHeader>
-            {selectedEmployee && (
-              <div className="py-4">
-                <p className="font-medium">{selectedEmployee.firstName} {selectedEmployee.lastName}</p>
-                <p className="text-sm text-muted-foreground">{selectedEmployee.designation} • {selectedEmployee.department}</p>
-              </div>
-            )}
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsDeleteConfirmOpen(false)}>Cancel</Button>
-              <Button variant="destructive" onClick={confirmDeleteEmployee}>
-                Delete Employee
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </CardContent>
-    </Card>
+            <div className="space-y-2">
+              <h4 className="text-sm font-semibold">Employment Details</h4>
+              <p className="text-sm">Employee ID: {selectedEmployee?.employeeId}</p>
+              <p className="text-sm">Joining Date: {selectedEmployee?.joiningDate}</p>
+              <p className="text-sm">Location: {selectedEmployee?.location}</p>
+              <p className="text-sm">Status: {selectedEmployee?.status}</p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="secondary" onClick={() => setIsViewDialogOpen(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 };

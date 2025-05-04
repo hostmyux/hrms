@@ -1,15 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Users, Clock, Calendar, FileText, UserPlus, BarChart } from 'lucide-react';
-import { StatCard } from '../components/dashboard/StatCard';
-import { EmployeeTable } from '../components/dashboard/EmployeeTable';
-import { ActivityLog } from '../components/dashboard/ActivityLog';
+import { useNavigate } from 'react-router-dom';
 import { useVoice } from '../contexts/VoiceContext';
 import { VoiceControls } from '../components/shared/VoiceControls';
-import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
+import { DashboardStats } from '../components/dashboard/DashboardStats';
+import { QuickAccessCards } from '../components/dashboard/QuickAccessCards';
+import { RecentContent } from '../components/dashboard/RecentContent';
 
 // Mock data
 const employees = [
@@ -165,130 +162,24 @@ const Dashboard: React.FC = () => {
         <VoiceControls />
       </div>
       
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <div 
-          onClick={() => handleCardClick("employees", "Navigating to employees directory where you can manage all employee records and profiles.")} 
-          className="cursor-pointer"
-        >
-          <StatCard 
-            title="Total Employees" 
-            value={isLoading ? "Loading..." : dashboardData.employees.toString()} 
-            icon={<Users size={24} />} 
-            trend={{ value: 12, isPositive: true }}
-            voiceDescription="Total of 245 employees, which is a 12% increase from last month. This trend suggests healthy organizational growth. Consider reviewing departmental distribution to ensure balanced resource allocation."
-          />
-        </div>
-        
-        <div 
-          onClick={() => handleCardClick("attendance", "Navigating to attendance section where you can view employee leave status and manage time-off requests.")} 
-          className="cursor-pointer"
-        >
-          <StatCard 
-            title="On Leave Today" 
-            value={isLoading ? "Loading..." : dashboardData.onLeave.toString()} 
-            icon={<Calendar size={24} />} 
-            description="3.2% of workforce"
-            voiceDescription="8 employees are currently on leave today, representing 3.2% of the total workforce. This is within expected absence rates. You can click this card to view detailed absence distribution by department."
-          />
-        </div>
-        
-        <div 
-          onClick={() => handleCardClick("recruitment", "Navigating to recruitment section where you can manage job postings and view candidates.")} 
-          className="cursor-pointer"
-        >
-          <StatCard 
-            title="Open Positions" 
-            value={isLoading ? "Loading..." : dashboardData.openPositions.toString()} 
-            icon={<UserPlus size={24} />} 
-            trend={{ value: 5, isPositive: true }}
-            voiceDescription="12 open positions are currently available across departments, which is a 5% increase from last month. Consider reviewing recruitment timelines and exploring additional hiring channels to expedite the filling of critical roles."
-          />
-        </div>
-        
-        <div 
-          onClick={() => handleCardClick("notifications", "Navigating to notifications center where you can review and approve pending requests.")} 
-          className="cursor-pointer"
-        >
-          <StatCard 
-            title="Pending Approvals" 
-            value={isLoading ? "Loading..." : dashboardData.pendingApprovals.toString()} 
-            icon={<FileText size={24} />} 
-            description="Leave and expense requests"
-            voiceDescription="18 pending approvals waiting for your review, including leave requests and expense approvals. Consider setting aside time to review these items to maintain operational efficiency and employee satisfaction with approval turnaround times."
-          />
-        </div>
-      </div>
-
-      <div className="grid gap-6 md:grid-cols-2">
-        <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold">Recent Employees</h2>
-            <div className="flex gap-2">
-              <Button size="sm" variant="outline" onClick={handleAddEmployeeClick}>
-                <UserPlus className="mr-2 h-4 w-4" />
-                Add Employee
-              </Button>
-              <Button size="sm" variant="ghost" onClick={handleViewAllEmployees}>
-                View All
-              </Button>
-            </div>
-          </div>
-          <EmployeeTable 
-            employees={employees} 
-            voiceDescription="Recent employee listing showing key personnel information. You can click on any employee row to view their detailed profile and employment history."
-          />
-        </div>
-        
-        <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold">Recent Activities</h2>
-            <Button size="sm" variant="ghost" onClick={handleViewAllActivities}>
-              View All
-            </Button>
-          </div>
-          <ActivityLog 
-            activities={activities}
-            voiceDescription="Recent HR activities across your organization. Each entry represents an important event that may require your attention or awareness."  
-          />
-        </div>
-      </div>
+      <DashboardStats 
+        isLoading={isLoading} 
+        dashboardData={dashboardData} 
+        onCardClick={handleCardClick}
+      />
+      
+      <RecentContent 
+        employees={employees} 
+        activities={activities}
+        onAddEmployeeClick={handleAddEmployeeClick}
+        onViewAllEmployees={handleViewAllEmployees}
+        onViewAllActivities={handleViewAllActivities}
+      />
       
       {/* Quick Access Shortcuts */}
       <div className="space-y-4">
         <h2 className="text-xl font-semibold">Quick Access</h2>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleCardClick("attendance", "Navigating to leave management screen where you can review and manage employee leave requests.")}>
-            <CardContent className="p-4 flex flex-col items-center justify-center text-center">
-              <Calendar className="h-8 w-8 text-primary mb-2" />
-              <h3 className="font-medium">Leave Management</h3>
-              <p className="text-sm text-muted-foreground">Approve and manage leave requests</p>
-            </CardContent>
-          </Card>
-          
-          <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleCardClick("performance", "Navigating to performance goals section where you can set and track employee objectives.")}>
-            <CardContent className="p-4 flex flex-col items-center justify-center text-center">
-              <BarChart className="h-8 w-8 text-primary mb-2" />
-              <h3 className="font-medium">Performance Goals</h3>
-              <p className="text-sm text-muted-foreground">Create and manage goals</p>
-            </CardContent>
-          </Card>
-          
-          <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleCardClick("payroll", "Navigating to payroll management where you can run payroll processes and review compensation reports.")}>
-            <CardContent className="p-4 flex flex-col items-center justify-center text-center">
-              <FileText className="h-8 w-8 text-primary mb-2" />
-              <h3 className="font-medium">Payroll</h3>
-              <p className="text-sm text-muted-foreground">Process employee payments</p>
-            </CardContent>
-          </Card>
-          
-          <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleCardClick("recruitment", "Navigating to recruitment section where you can manage job listings and review candidates.")}>
-            <CardContent className="p-4 flex flex-col items-center justify-center text-center">
-              <UserPlus className="h-8 w-8 text-primary mb-2" />
-              <h3 className="font-medium">Recruitment</h3>
-              <p className="text-sm text-muted-foreground">Manage hiring pipeline</p>
-            </CardContent>
-          </Card>
-        </div>
+        <QuickAccessCards onCardClick={handleCardClick} />
       </div>
     </div>
   );

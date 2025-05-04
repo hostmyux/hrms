@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useVoice } from '../contexts/VoiceContext';
 import { VoiceControls } from '../components/shared/VoiceControls';
@@ -81,11 +80,7 @@ const Payroll: React.FC = () => {
     };
     
     speak(tabMessages[value as keyof typeof tabMessages] || "");
-    toast({
-      title: `${value.charAt(0).toUpperCase() + value.slice(1)} View`,
-      description: tabMessages[value as keyof typeof tabMessages] || "",
-      duration: 3000,
-    });
+    toast(tabMessages[value as keyof typeof tabMessages] || "");
   };
   
   const handleAddSalaryComponent = () => {
@@ -108,35 +103,23 @@ const Payroll: React.FC = () => {
   
   const onSubmitSalaryComponent = (data: SalaryComponentFormData) => {
     setIsAddComponentOpen(false);
-    toast({
-      title: "Component Added",
-      description: `${data.name} has been added to the salary structure.`
-    });
+    toast(`${data.name} has been added to the salary structure.`);
     speak(`Salary component successfully added. The new ${data.type} component "${data.name}" has been added to the compensation structure.`);
   };
   
   const onSubmitRunPayroll = (data: RunPayrollFormData) => {
     setIsRunPayrollOpen(false);
-    toast({
-      title: "Payroll Process Started",
-      description: `Payroll calculation for ${data.period} has been initiated.`
-    });
+    toast(`Payroll calculation for ${data.period} has been initiated.`);
     speak(`Payroll process has started. The system is now calculating compensation for all employees for the ${data.period} period. You will be notified when the process is complete and ready for review.`);
     
     // Simulate payroll processing completion after 3 seconds
     setTimeout(() => {
-      toast({
-        title: "Payroll Ready for Review",
-        description: `${data.perio} payroll calculations are complete and ready for review.`
-      });
+      toast(`${data.period} payroll calculations are complete and ready for review.`);
     }, 3000);
   };
   
   const handleDownloadPayrollPdf = () => {
-    toast({
-      title: "PDF Generated",
-      description: "Payroll report has been downloaded as PDF."
-    });
+    toast("Payroll report has been downloaded as PDF.");
     speak("Payroll PDF generated. The comprehensive payroll report has been downloaded to your device and contains detailed compensation information for all employees.");
     
     if (isViewPayrollOpen) {
