@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Users, Clock, Calendar, FileText, UserPlus, BarChart } from 'lucide-react';
 import { StatCard } from '../components/dashboard/StatCard';
 import { EmployeeTable } from '../components/dashboard/EmployeeTable';
@@ -108,6 +108,7 @@ const activities = [
 ];
 
 const Dashboard: React.FC = () => {
+  const navigate = useNavigate();
   const { speak } = useVoice();
   const [isLoading, setIsLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState({
@@ -131,16 +132,25 @@ const Dashboard: React.FC = () => {
   const handleAddEmployeeClick = () => {
     toast.info("Navigating to add employee form");
     speak("Opening employee creation form where you can add a new team member.");
+    navigate("/employees");
   };
 
   const handleViewAllEmployees = () => {
     toast.info("Navigating to employees section");
     speak("Navigating to the full employee directory where you can view and manage all staff records.");
+    navigate("/employees");
   };
 
   const handleViewAllActivities = () => {
     toast.info("Navigating to notifications center");
     speak("Opening the notifications center where you can review all recent system activities.");
+    navigate("/notifications");
+  };
+
+  const handleCardClick = (destination: string, message: string) => {
+    toast.info(`Navigating to ${destination}`);
+    speak(message);
+    navigate(`/${destination}`);
   };
 
   return (
@@ -156,7 +166,7 @@ const Dashboard: React.FC = () => {
       </div>
       
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <Link to="/employees">
+        <div onClick={() => handleCardClick("employees", "Navigating to employees directory where you can manage all employee records and profiles.")} className="cursor-pointer">
           <StatCard 
             title="Total Employees" 
             value={isLoading ? "Loading..." : dashboardData.employees.toString()} 
@@ -164,9 +174,9 @@ const Dashboard: React.FC = () => {
             trend={{ value: 12, isPositive: true }}
             voiceDescription="Total of 245 employees, which is a 12% increase from last month. This trend suggests healthy organizational growth. Consider reviewing departmental distribution to ensure balanced resource allocation."
           />
-        </Link>
+        </div>
         
-        <Link to="/attendance">
+        <div onClick={() => handleCardClick("attendance", "Navigating to attendance section where you can view employee leave status and manage time-off requests.")} className="cursor-pointer">
           <StatCard 
             title="On Leave Today" 
             value={isLoading ? "Loading..." : dashboardData.onLeave.toString()} 
@@ -174,9 +184,9 @@ const Dashboard: React.FC = () => {
             description="3.2% of workforce"
             voiceDescription="8 employees are currently on leave today, representing 3.2% of the total workforce. This is within expected absence rates. You can click this card to view detailed absence distribution by department."
           />
-        </Link>
+        </div>
         
-        <Link to="/recruitment">
+        <div onClick={() => handleCardClick("recruitment", "Navigating to recruitment section where you can manage job postings and view candidates.")} className="cursor-pointer">
           <StatCard 
             title="Open Positions" 
             value={isLoading ? "Loading..." : dashboardData.openPositions.toString()} 
@@ -184,9 +194,9 @@ const Dashboard: React.FC = () => {
             trend={{ value: 5, isPositive: true }}
             voiceDescription="12 open positions are currently available across departments, which is a 5% increase from last month. Consider reviewing recruitment timelines and exploring additional hiring channels to expedite the filling of critical roles."
           />
-        </Link>
+        </div>
         
-        <Link to="/notifications">
+        <div onClick={() => handleCardClick("notifications", "Navigating to notifications center where you can review and approve pending requests.")} className="cursor-pointer">
           <StatCard 
             title="Pending Approvals" 
             value={isLoading ? "Loading..." : dashboardData.pendingApprovals.toString()} 
@@ -194,7 +204,7 @@ const Dashboard: React.FC = () => {
             description="Leave and expense requests"
             voiceDescription="18 pending approvals waiting for your review, including leave requests and expense approvals. Consider setting aside time to review these items to maintain operational efficiency and employee satisfaction with approval turnaround times."
           />
-        </Link>
+        </div>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
@@ -202,11 +212,12 @@ const Dashboard: React.FC = () => {
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-semibold">Recent Employees</h2>
             <div className="flex gap-2">
-              <Button size="sm" variant="outline" onClick={handleAddEmployeeClick} asChild>
-                <Link to="/employees/add">Add Employee</Link>
+              <Button size="sm" variant="outline" onClick={handleAddEmployeeClick}>
+                <UserPlus className="mr-2 h-4 w-4" />
+                Add Employee
               </Button>
-              <Button size="sm" variant="ghost" onClick={handleViewAllEmployees} asChild>
-                <Link to="/employees">View All</Link>
+              <Button size="sm" variant="ghost" onClick={handleViewAllEmployees}>
+                View All
               </Button>
             </div>
           </div>
@@ -219,8 +230,8 @@ const Dashboard: React.FC = () => {
         <div className="space-y-4">
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-semibold">Recent Activities</h2>
-            <Button size="sm" variant="ghost" onClick={handleViewAllActivities} asChild>
-              <Link to="/notifications">View All</Link>
+            <Button size="sm" variant="ghost" onClick={handleViewAllActivities}>
+              View All
             </Button>
           </div>
           <ActivityLog 

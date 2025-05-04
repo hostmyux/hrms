@@ -15,6 +15,14 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { UserPlus, FileText, Users, Briefcase, Upload, Eye, Pencil, Trash2, Check } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { toast } from 'sonner';
+import { Textarea } from '@/components/ui/textarea';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
 
 // Define form schema
 const employeeProfileSchema = z.object({
@@ -25,6 +33,25 @@ const employeeProfileSchema = z.object({
   position: z.string().min(2, { message: "Position must be at least 2 characters." }),
   department: z.string().min(2, { message: "Department must be at least 2 characters." }),
   joiningDate: z.string(),
+});
+
+const onboardingPlanSchema = z.object({
+  employeeName: z.string().min(2, { message: "Employee name is required" }),
+  position: z.string().min(2, { message: "Position is required" }),
+  department: z.string().min(2, { message: "Department is required" }),
+  startDate: z.string(),
+  mentor: z.string().min(2, { message: "Mentor name is required" }),
+  description: z.string().optional(),
+  orientation: z.boolean().default(true),
+  itSetup: z.boolean().default(true),
+  paperwork: z.boolean().default(true),
+  training: z.boolean().default(true),
+});
+
+const documentSchema = z.object({
+  documentType: z.string().min(1, { message: "Document type is required" }),
+  employeeId: z.string().min(1, { message: "Employee is required" }),
+  description: z.string().optional(),
 });
 
 const mockProfiles = [
@@ -85,6 +112,15 @@ const mockUpcomingOnboarding = [
   { name: "Jennifer Lee", id: 5, date: "May 25, 2025", position: "Marketing Specialist", dept: "Marketing" }
 ];
 
+const mockDocuments = [
+  { id: 1, name: "john_smith_resume.pdf", employee: "John Smith", type: "Resume/CV", date: "May 12, 2023" },
+  { id: 2, name: "sarah_johnson_resume.pdf", employee: "Sarah Johnson", type: "Resume/CV", date: "Mar 05, 2022" },
+  { id: 3, name: "michael_brown_resume.pdf", employee: "Michael Brown", type: "Resume/CV", date: "Jan 18, 2023" },
+  { id: 4, name: "john_smith_id.pdf", employee: "John Smith", type: "ID Proof", date: "May 12, 2023" },
+  { id: 5, name: "sarah_johnson_performance.pdf", employee: "Sarah Johnson", type: "Performance Reviews", date: "Dec 15, 2022" },
+  { id: 6, name: "michael_brown_offer.pdf", employee: "Michael Brown", type: "Offer Letter", date: "Jan 10, 2023" },
+];
+
 const Employees: React.FC = () => {
   const { speak } = useVoice();
   const [activeTab, setActiveTab] = useState('directory');
@@ -95,6 +131,11 @@ const Employees: React.FC = () => {
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
   const [selectedDocType, setSelectedDocType] = useState<string | null>(null);
   const [isUploadingDocument, setIsUploadingDocument] = useState(false);
+  const [isCreatingOnboardingPlan, setIsCreatingOnboardingPlan] = useState(false);
+  const [viewingOnboardingDetails, setViewingOnboardingDetails] = useState<any>(null);
+  const [preparingOnboarding, setPreparingOnboarding] = useState<any>(null);
+  const [filteredDocuments, setFilteredDocuments] = useState<any[]>([]);
+  const [mentorOptions] = useState(['Alex Miller', 'Jessica Thompson', 'Thomas Anderson', 'Maria Rodriguez']);
 
   const form = useForm<z.infer<typeof employeeProfileSchema>>({
     resolver: zodResolver(employeeProfileSchema),
@@ -122,6 +163,31 @@ const Employees: React.FC = () => {
     },
   });
 
+  const onboardingForm = useForm<z.infer<typeof onboardingPlanSchema>>({
+    resolver: zodResolver(onboardingPlanSchema),
+    defaultValues: {
+      employeeName: "",
+      position: "",
+      department: "",
+      startDate: new Date().toISOString().split('T')[0],
+      mentor: "",
+      description: "",
+      orientation: true,
+      itSetup: true,
+      paperwork: true,
+      training: true,
+    },
+  });
+
+  const documentForm = useForm<z.infer<typeof documentSchema>>({
+    resolver: zodResolver(documentSchema),
+    defaultValues: {
+      documentType: mockDocumentTypes[0],
+      employeeId: "",
+      description: "",
+    },
+  });
+
   useEffect(() => {
     speak("Employee management module loaded. Here you can manage employee profiles, view directories, and handle employee information.");
   }, [speak]);
@@ -139,6 +205,31 @@ const Employees: React.FC = () => {
       });
     }
   }, [selectedEmployee, isEditingEmployee, editForm]);
+
+  useEffect(() => {
+    if (selectedDocType) {
+      const docs = mockDocuments.filter(doc => doc.type === selectedDocType);
+      setFilteredDocuments(docs);
+    }
+  }, [selectedDocType]);
+
+  useEffect(() => {
+    if (preparingOnboarding) {
+      onboardingForm.reset({
+        employeeName: preparingOnboarding.name,
+        position: preparingOnboarding.position,
+        department: preparingOnboarding.dept,
+        startDate: new Date().toISOString().split('T')[0],
+        mentor: mentorOptions[0],
+        description: `Onboarding plan for ${preparingOnboarding.name} joining as ${preparingOnboarding.position}`,
+        orientation: true,
+        itSetup: true,
+        paperwork: true,
+        training: true,
+      });
+      setIsCreatingOnboardingPlan(true);
+    }
+  }, [preparingOnboarding, mentorOptions, onboardingForm]);
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
@@ -231,25 +322,37 @@ const Employees: React.FC = () => {
   };
   
   const handleCreateOnboardingPlan = () => {
+    setIsCreatingOnboardingPlan(true);
     speak("Creating a new onboarding plan. You can define tasks, assign mentors, and set up training schedules for new employees.");
-    toast.success("Creating onboarding plan", {
-      description: "You can now set up a new employee onboarding process."
-    });
   };
 
   const handlePrepareOnboarding = (employee: any) => {
+    setPreparingOnboarding(employee);
     speak(`Preparing onboarding for ${employee.name}. Setting up workstation, accounts, and orientation schedule.`);
-    toast.success("Onboarding preparation started", {
-      description: `Onboarding preparation for ${employee.name} has been initiated.`
+  };
+
+  const handleSubmitOnboardingPlan = (values: z.infer<typeof onboardingPlanSchema>) => {
+    setIsCreatingOnboardingPlan(false);
+    setPreparingOnboarding(null);
+    toast.success("Onboarding plan created", {
+      description: `Onboarding plan for ${values.employeeName} has been created successfully.`
     });
+    speak(`Onboarding plan for ${values.employeeName} has been created successfully. All tasks have been scheduled.`);
+    onboardingForm.reset();
   };
   
-  const handleSubmitDocumentUpload = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmitDocumentUpload = (values: z.infer<typeof documentSchema>) => {
     setIsUploadingDocument(false);
     toast.success("Document uploaded successfully", {
       description: "The document has been added to employee records."
     });
+    speak("Document has been uploaded successfully and added to the employee's records.");
+    documentForm.reset();
+  };
+
+  const handleViewOnboarding = (employee: any) => {
+    setViewingOnboardingDetails(employee);
+    speak(`Viewing onboarding details for ${employee.name}. Here you can track the progress and manage onboarding tasks.`);
   };
 
   const formatDate = (dateString: string) => {
@@ -743,7 +846,13 @@ const Employees: React.FC = () => {
                                   <p className="font-medium">{employee.name}</p>
                                   <p className="text-xs text-muted-foreground">{employee.position} • {employee.dept}</p>
                                 </div>
-                                <Button variant="outline" size="sm">View</Button>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => handleViewOnboarding(employee)}
+                                >
+                                  View
+                                </Button>
                               </div>
                               <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
                                 <div 
@@ -792,6 +901,273 @@ const Employees: React.FC = () => {
               </Button>
             </CardFooter>
           </Card>
+
+          {/* Create Onboarding Plan Dialog */}
+          <Dialog open={isCreatingOnboardingPlan} onOpenChange={setIsCreatingOnboardingPlan}>
+            <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Create Onboarding Plan</DialogTitle>
+                <DialogDescription>
+                  Set up an onboarding plan for a new employee joining your organization.
+                </DialogDescription>
+              </DialogHeader>
+              
+              <Form {...onboardingForm}>
+                <form onSubmit={onboardingForm.handleSubmit(handleSubmitOnboardingPlan)} className="space-y-4 py-4">
+                  <FormField
+                    control={onboardingForm.control}
+                    name="employeeName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Employee Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="John Smith" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={onboardingForm.control}
+                      name="position"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Position</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Software Developer" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={onboardingForm.control}
+                      name="department"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Department</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Engineering" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
+                  <FormField
+                    control={onboardingForm.control}
+                    name="startDate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Start Date</FormLabel>
+                        <FormControl>
+                          <Input type="date" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={onboardingForm.control}
+                    name="mentor"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Assign Mentor</FormLabel>
+                        <Select
+                          value={field.value}
+                          onValueChange={field.onChange}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a mentor" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {mentorOptions.map((mentor, index) => (
+                              <SelectItem key={index} value={mentor}>{mentor}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormDescription>
+                          The mentor will guide the new employee through the onboarding process.
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={onboardingForm.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Notes</FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            placeholder="Add any special instructions or notes for this onboarding process..." 
+                            className="min-h-[100px]"
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <div className="space-y-3">
+                    <h4 className="text-sm font-medium">Onboarding Tasks</h4>
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <input type="checkbox" id="orientation" className="h-4 w-4" defaultChecked />
+                        <label htmlFor="orientation" className="text-sm">Schedule orientation session</label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input type="checkbox" id="itSetup" className="h-4 w-4" defaultChecked />
+                        <label htmlFor="itSetup" className="text-sm">Prepare IT equipment and accounts</label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input type="checkbox" id="paperwork" className="h-4 w-4" defaultChecked />
+                        <label htmlFor="paperwork" className="text-sm">Complete all required paperwork</label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input type="checkbox" id="training" className="h-4 w-4" defaultChecked />
+                        <label htmlFor="training" className="text-sm">Set up initial training sessions</label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input type="checkbox" id="intro" className="h-4 w-4" defaultChecked />
+                        <label htmlFor="intro" className="text-sm">Schedule team introduction</label>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <DialogFooter>
+                    <Button type="button" variant="outline" onClick={() => {
+                      setIsCreatingOnboardingPlan(false);
+                      setPreparingOnboarding(null);
+                    }}>
+                      Cancel
+                    </Button>
+                    <Button type="submit">Create Plan</Button>
+                  </DialogFooter>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
+
+          {/* View Onboarding Details Dialog */}
+          <Dialog open={!!viewingOnboardingDetails} onOpenChange={() => setViewingOnboardingDetails(null)}>
+            <DialogContent className="sm:max-w-[600px]">
+              <DialogHeader>
+                <DialogTitle>Onboarding Details</DialogTitle>
+                {viewingOnboardingDetails && (
+                  <DialogDescription>
+                    Onboarding progress for {viewingOnboardingDetails.name}
+                  </DialogDescription>
+                )}
+              </DialogHeader>
+              
+              {viewingOnboardingDetails && (
+                <div className="py-4 space-y-6">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h3 className="text-lg font-semibold">{viewingOnboardingDetails.name}</h3>
+                      <p className="text-muted-foreground">{viewingOnboardingDetails.position} • {viewingOnboardingDetails.dept}</p>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm font-medium">{viewingOnboardingDetails.progress}% Complete</div>
+                      <div className="h-2 w-24 bg-muted rounded-full mt-1 overflow-hidden">
+                        <div 
+                          className="h-full bg-primary" 
+                          style={{ width: `${viewingOnboardingDetails.progress}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <h4 className="text-sm font-medium border-b pb-2">Onboarding Tasks</h4>
+                    
+                    <div className="grid gap-2">
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center space-x-2">
+                          <div className="h-5 w-5 rounded-full bg-green-500 flex items-center justify-center text-white text-xs">✓</div>
+                          <span>Complete paperwork</span>
+                        </div>
+                        <span className="text-xs text-muted-foreground">Completed</span>
+                      </div>
+                      
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center space-x-2">
+                          <div className="h-5 w-5 rounded-full bg-green-500 flex items-center justify-center text-white text-xs">✓</div>
+                          <span>IT setup</span>
+                        </div>
+                        <span className="text-xs text-muted-foreground">Completed</span>
+                      </div>
+                      
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center space-x-2">
+                          <div className="h-5 w-5 rounded-full bg-green-500 flex items-center justify-center text-white text-xs">✓</div>
+                          <span>Orientation</span>
+                        </div>
+                        <span className="text-xs text-muted-foreground">Completed</span>
+                      </div>
+                      
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center space-x-2">
+                          {viewingOnboardingDetails.progress < 100 ? (
+                            <div className="h-5 w-5 rounded-full border border-primary flex items-center justify-center"></div>
+                          ) : (
+                            <div className="h-5 w-5 rounded-full bg-green-500 flex items-center justify-center text-white text-xs">✓</div>
+                          )}
+                          <span>Team introduction</span>
+                        </div>
+                        <span className="text-xs text-muted-foreground">
+                          {viewingOnboardingDetails.progress < 100 ? "Pending" : "Completed"}
+                        </span>
+                      </div>
+                      
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center space-x-2">
+                          {viewingOnboardingDetails.progress < 100 ? (
+                            <div className="h-5 w-5 rounded-full border border-primary flex items-center justify-center"></div>
+                          ) : (
+                            <div className="h-5 w-5 rounded-full bg-green-500 flex items-center justify-center text-white text-xs">✓</div>
+                          )}
+                          <span>First week review</span>
+                        </div>
+                        <span className="text-xs text-muted-foreground">
+                          {viewingOnboardingDetails.progress < 100 ? "Scheduled" : "Completed"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-medium border-b pb-2">Assigned Mentor</h4>
+                    <div className="flex items-center space-x-3">
+                      <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                        <Users size={16} className="text-primary" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">Alex Miller</p>
+                        <p className="text-xs text-muted-foreground">Senior {viewingOnboardingDetails.dept} Specialist</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setViewingOnboardingDetails(null)}>Close</Button>
+                <Button>Update Progress</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </TabsContent>
         
         <TabsContent value="documents" className="space-y-4">
@@ -854,56 +1230,32 @@ const Employees: React.FC = () => {
               
               <div className="py-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-base">john_smith_resume.pdf</CardTitle>
-                        <Button variant="ghost" size="sm">
-                          <Eye size={16} />
-                        </Button>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="pt-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">John Smith</span>
-                        <span className="text-muted-foreground">Added May 12, 2023</span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-base">sarah_johnson_resume.pdf</CardTitle>
-                        <Button variant="ghost" size="sm">
-                          <Eye size={16} />
-                        </Button>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="pt-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Sarah Johnson</span>
-                        <span className="text-muted-foreground">Added Mar 05, 2022</span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-base">michael_brown_resume.pdf</CardTitle>
-                        <Button variant="ghost" size="sm">
-                          <Eye size={16} />
-                        </Button>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="pt-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Michael Brown</span>
-                        <span className="text-muted-foreground">Added Jan 18, 2023</span>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  {filteredDocuments.length > 0 ? (
+                    filteredDocuments.map(doc => (
+                      <Card key={doc.id}>
+                        <CardHeader className="pb-2">
+                          <div className="flex items-center justify-between">
+                            <CardTitle className="text-base">{doc.name}</CardTitle>
+                            <Button variant="ghost" size="sm">
+                              <Eye size={16} />
+                            </Button>
+                          </div>
+                        </CardHeader>
+                        <CardContent className="pt-2">
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">{doc.employee}</span>
+                            <span className="text-muted-foreground">Added {doc.date}</span>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))
+                  ) : (
+                    <div className="col-span-2 flex flex-col items-center justify-center p-6 text-center">
+                      <FileText className="h-12 w-12 text-muted-foreground mb-2" />
+                      <h4 className="text-lg font-medium mb-2">No documents found</h4>
+                      <p className="text-muted-foreground">No {selectedDocType} documents have been uploaded yet.</p>
+                    </div>
+                  )}
                 </div>
               </div>
               
@@ -927,62 +1279,100 @@ const Employees: React.FC = () => {
                 </DialogDescription>
               </DialogHeader>
               
-              <form onSubmit={handleSubmitDocumentUpload} className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <label htmlFor="documentType" className="text-sm font-medium">Document Type</label>
-                  <select 
-                    id="documentType"
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                  >
-                    {mockDocumentTypes.map((docType, index) => (
-                      <option key={index} value={docType}>{docType}</option>
-                    ))}
-                  </select>
-                </div>
-                
-                <div className="space-y-2">
-                  <label htmlFor="employee" className="text-sm font-medium">Employee</label>
-                  <select 
-                    id="employee"
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                  >
-                    <option value="">Select an employee...</option>
-                    {employees.map((emp) => (
-                      <option key={emp.id} value={emp.id}>
-                        {emp.firstName} {emp.lastName} - {emp.position}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">File</label>
-                  <div className="border-2 border-dashed border-input rounded-md p-6 flex flex-col items-center justify-center">
-                    <Upload className="h-8 w-8 text-muted-foreground mb-2" />
-                    <p className="text-sm text-center text-muted-foreground mb-1">
-                      Drag & drop your file here, or click to browse
-                    </p>
-                    <p className="text-xs text-center text-muted-foreground">
-                      Supports PDF, DOCX, JPG, PNG (Max 10MB)
-                    </p>
-                    <Button type="button" variant="ghost" className="mt-2">Browse Files</Button>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <label htmlFor="description" className="text-sm font-medium">Description (optional)</label>
-                  <textarea 
-                    id="description"
-                    className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                    placeholder="Add a brief description of the document..."
+              <Form {...documentForm}>
+                <form onSubmit={documentForm.handleSubmit(handleSubmitDocumentUpload)} className="space-y-4 py-4">
+                  <FormField
+                    control={documentForm.control}
+                    name="documentType"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Document Type</FormLabel>
+                        <Select
+                          value={field.value}
+                          onValueChange={field.onChange}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select document type" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {mockDocumentTypes.map((docType, index) => (
+                              <SelectItem key={index} value={docType}>{docType}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                </div>
-                
-                <DialogFooter>
-                  <Button type="button" variant="outline" onClick={() => setIsUploadingDocument(false)}>Cancel</Button>
-                  <Button type="submit">Upload Document</Button>
-                </DialogFooter>
-              </form>
+                  
+                  <FormField
+                    control={documentForm.control}
+                    name="employeeId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Employee</FormLabel>
+                        <Select
+                          value={field.value}
+                          onValueChange={field.onChange}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select an employee" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {employees.map((emp) => (
+                              <SelectItem key={emp.id} value={emp.id.toString()}>
+                                {emp.firstName} {emp.lastName} - {emp.position}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <div className="space-y-2">
+                    <FormLabel>File</FormLabel>
+                    <div className="border-2 border-dashed border-input rounded-md p-6 flex flex-col items-center justify-center">
+                      <Upload className="h-8 w-8 text-muted-foreground mb-2" />
+                      <p className="text-sm text-center text-muted-foreground mb-1">
+                        Drag & drop your file here, or click to browse
+                      </p>
+                      <p className="text-xs text-center text-muted-foreground">
+                        Supports PDF, DOCX, JPG, PNG (Max 10MB)
+                      </p>
+                      <Button type="button" variant="ghost" className="mt-2">Browse Files</Button>
+                    </div>
+                  </div>
+                  
+                  <FormField
+                    control={documentForm.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Description (optional)</FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            placeholder="Add a brief description of the document..."
+                            className="min-h-[80px]"
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <DialogFooter>
+                    <Button type="button" variant="outline" onClick={() => setIsUploadingDocument(false)}>Cancel</Button>
+                    <Button type="submit">Upload Document</Button>
+                  </DialogFooter>
+                </form>
+              </Form>
             </DialogContent>
           </Dialog>
         </TabsContent>
