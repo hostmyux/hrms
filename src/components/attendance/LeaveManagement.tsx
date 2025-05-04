@@ -43,12 +43,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { Calendar, Plus, Clock, Eye, Check, X, FileText, User } from 'lucide-react';
+import { Calendar, Plus, Clock, Eye, Check, X, FileText, User, Home, Briefcase } from 'lucide-react';
 import { format, differenceInCalendarDays } from 'date-fns';
 import { useForm } from 'react-hook-form';
 
 // Types
-type LeaveType = 'annual' | 'sick' | 'personal' | 'bereavement' | 'maternity' | 'paternity' | 'unpaid';
+type LeaveType = 'annual' | 'sick' | 'personal' | 'bereavement' | 'maternity' | 'paternity' | 'unpaid' | 'work-from-home';
 type LeaveStatus = 'pending' | 'approved' | 'rejected';
 
 interface LeaveRequest {
@@ -80,6 +80,10 @@ interface LeaveFormData {
   startDate: Date | undefined;
   endDate: Date | undefined;
   reason: string;
+}
+
+interface ApprovalFormData {
+  notes: string;
 }
 
 // Mock data functions
@@ -133,7 +137,38 @@ const fetchLeaveRequests = async (): Promise<LeaveRequest[]> => {
       approvedBy: 'HR Manager',
       approvedDate: new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1),
       dateRequested: new Date(today.getFullYear(), today.getMonth(), today.getDate() - 4)
+    },
+    {
+      id: '4',
+      employeeId: 'EMP004',
+      employeeName: 'Sarah Johnson',
+      department: 'Finance',
+      type: 'work-from-home',
+      startDate: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1),
+      endDate: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1),
+      duration: 1,
+      reason: 'Plumber coming for home repairs',
+      status: 'pending',
+      dateRequested: new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1)
     }
+  ];
+};
+
+const fetchHolidays = async () => {
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 500));
+  
+  const currentYear = new Date().getFullYear();
+  
+  return [
+    { name: "New Year's Day", date: new Date(currentYear, 0, 1) },
+    { name: "Memorial Day", date: new Date(currentYear, 4, 30) },
+    { name: "Independence Day", date: new Date(currentYear, 6, 4) },
+    { name: "Labor Day", date: new Date(currentYear, 8, 4) },
+    { name: "Thanksgiving Day", date: new Date(currentYear, 10, 25) },
+    { name: "Day after Thanksgiving", date: new Date(currentYear, 10, 26) },
+    { name: "Christmas Eve", date: new Date(currentYear, 11, 24) },
+    { name: "Christmas Day", date: new Date(currentYear, 11, 25) }
   ];
 };
 
@@ -159,6 +194,11 @@ export const LeaveManagement: React.FC = () => {
   const [isAddLeaveOpen, setIsAddLeaveOpen] = useState(false);
   const [isViewDetailsOpen, setIsViewDetailsOpen] = useState(false);
   const [selectedLeave, setSelectedLeave] = useState<LeaveRequest | null>(null);
+  const [isApprovalDialogOpen, setIsApprovalDialogOpen] = useState(false);
+  const [isRejectionDialogOpen, setIsRejectionDialogOpen] = useState(false);
+  const [holidays, setHolidays] = useState<{name: string, date: Date}[]>([]);
+  const [isHolidaysDialogOpen, setIsHolidaysDialogOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('leaves');
 
   const form = useForm<LeaveFormData>({
     defaultValues: {
@@ -169,18 +209,26 @@ export const LeaveManagement: React.FC = () => {
     }
   });
 
+  const approvalForm = useForm<ApprovalFormData>({
+    defaultValues: {
+      notes: ''
+    }
+  });
+
   // Load leave data
   useEffect(() => {
     const loadData = async () => {
       setIsLoading(true);
       try {
-        const [requests, balance] = await Promise.all([
+        const [requests, balance, holidaysList] = await Promise.all([
           fetchLeaveRequests(),
-          fetchLeaveBalance()
+          fetchLeaveBalance(),
+          fetchHolidays()
         ]);
         setLeaveRequests(requests);
         setLeaveBalance(balance);
-        speak("Leave management loaded. You can request and manage leave applications here.");
+        setHolidays(holidaysList);
+        speak("Leave management loaded. HR managers and supervisors can approve or reject leave requests, manage work from home requests, and view company holidays.");
       } catch (error) {
         toast({
           title: "Error loading leave data",
@@ -253,6 +301,92 @@ export const LeaveManagement: React.FC = () => {
     setIsViewDetailsOpen(true);
   };
 
+  // Handle approval dialog
+  const handleOpenApprovalDialog = (leave: LeaveRequest) => {
+    setSelectedLeave(leave);
+    setIsApprovalDialogOpen(true);
+    speak(`Preparing to approve leave request for ${leave.employeeName}. You can add optional approval notes before confirming.`);
+  };
+
+  // Handle rejection dialog
+  const handleOpenRejectionDialog = (leave: LeaveRequest) => {
+    setSelectedLeave(leave);
+    setIsRejectionDialogOpen(true);
+    speak(`Preparing to reject leave request for ${leave.employeeName}. Please provide a reason for rejection before confirming.`);
+  };
+
+  // Handle approval submission
+  const handleApproveLeave = (data: ApprovalFormData) => {
+    if (!selectedLeave) return;
+    
+    // Update leave request
+    const updatedRequests = leaveRequests.map(req => {
+      if (req.id === selectedLeave.id) {
+        return {
+          ...req,
+          status: 'approved' as LeaveStatus,
+          approvedBy: 'HR Manager', // Current user
+          approvedDate: new Date(),
+          notes: data.notes || 'Approved'
+        };
+      }
+      return req;
+    });
+    
+    // Update state
+    setLeaveRequests(updatedRequests);
+    
+    // Close dialog
+    setIsApprovalDialogOpen(false);
+    
+    // Show success message
+    toast({
+      title: "Leave request approved",
+      description: `You have approved ${selectedLeave.employeeName}'s leave request.`,
+    });
+    
+    speak(`Leave request for ${selectedLeave.employeeName} has been approved. An email notification will be sent to the employee.`);
+    
+    // Reset form
+    approvalForm.reset();
+  };
+
+  // Handle rejection submission
+  const handleRejectLeave = (data: ApprovalFormData) => {
+    if (!selectedLeave) return;
+    
+    // Update leave request
+    const updatedRequests = leaveRequests.map(req => {
+      if (req.id === selectedLeave.id) {
+        return {
+          ...req,
+          status: 'rejected' as LeaveStatus,
+          approvedBy: 'HR Manager', // Current user
+          approvedDate: new Date(),
+          notes: data.notes || 'Rejected'
+        };
+      }
+      return req;
+    });
+    
+    // Update state
+    setLeaveRequests(updatedRequests);
+    
+    // Close dialog
+    setIsRejectionDialogOpen(false);
+    
+    // Show success message
+    toast({
+      title: "Leave request rejected",
+      description: `You have rejected ${selectedLeave.employeeName}'s leave request.`,
+    });
+    
+    speak(`Leave request for ${selectedLeave.employeeName} has been rejected. An email notification will be sent to the employee with the provided reason.`);
+    
+    // Reset form
+    approvalForm.reset();
+  };
+
   // Get leave type display name
   const getLeaveTypeDisplay = (type: LeaveType) => {
     switch (type) {
@@ -263,6 +397,15 @@ export const LeaveManagement: React.FC = () => {
       case 'maternity': return 'Maternity Leave';
       case 'paternity': return 'Paternity Leave';
       case 'unpaid': return 'Unpaid Leave';
+      case 'work-from-home': return 'Work From Home';
+    }
+  };
+
+  // Get leave type icon
+  const getLeaveTypeIcon = (type: LeaveType) => {
+    switch (type) {
+      case 'work-from-home': return <Home size={16} className="mr-1" />;
+      default: return <Briefcase size={16} className="mr-1" />;
     }
   };
 
@@ -290,6 +433,22 @@ export const LeaveManagement: React.FC = () => {
     }
   };
 
+  // Toggle between leaves and holidays tabs
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    if (tab === 'holidays') {
+      speak("Company holiday calendar. These are the official holidays when the organization will be closed. You can view the complete list of holidays for the year.");
+    } else {
+      speak("Leave requests management. Here you can view, approve or reject employee time-off requests.");
+    }
+  };
+
+  // View all holidays
+  const handleViewHolidays = () => {
+    setIsHolidaysDialogOpen(true);
+    speak("Viewing all company holidays for the current year. This shows the complete list of official holidays and observances.");
+  };
+
   // Render loading state
   if (isLoading) {
     return (
@@ -312,17 +471,20 @@ export const LeaveManagement: React.FC = () => {
             <CardTitle>Leave Management</CardTitle>
           </div>
           <div className="flex gap-2 mt-2 sm:mt-0">
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[140px]">
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Requests</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="approved">Approved</SelectItem>
-                <SelectItem value="rejected">Rejected</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="flex bg-muted rounded-md p-1">
+              <button
+                onClick={() => handleTabChange('leaves')}
+                className={`px-3 py-1 text-sm font-medium rounded-sm ${activeTab === 'leaves' ? 'bg-background shadow' : ''}`}
+              >
+                Leave Requests
+              </button>
+              <button
+                onClick={() => handleTabChange('holidays')}
+                className={`px-3 py-1 text-sm font-medium rounded-sm ${activeTab === 'holidays' ? 'bg-background shadow' : ''}`}
+              >
+                Holidays
+              </button>
+            </div>
             
             <Button onClick={() => setIsAddLeaveOpen(true)}>
               <Plus className="mr-2 h-4 w-4" />
@@ -333,76 +495,136 @@ export const LeaveManagement: React.FC = () => {
       </CardHeader>
       
       <CardContent className="pt-6">
-        {/* Leave Balance Cards */}
-        {leaveBalance && (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-            <div className="bg-muted rounded-lg p-4">
-              <h4 className="text-sm font-medium text-muted-foreground">Annual Leave</h4>
-              <p className="text-2xl font-bold">{leaveBalance.annual} days</p>
+        {activeTab === 'leaves' ? (
+          <>
+            {/* Leave Balance Cards */}
+            {leaveBalance && (
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                <div className="bg-muted rounded-lg p-4">
+                  <h4 className="text-sm font-medium text-muted-foreground">Annual Leave</h4>
+                  <p className="text-2xl font-bold">{leaveBalance.annual} days</p>
+                </div>
+                <div className="bg-muted rounded-lg p-4">
+                  <h4 className="text-sm font-medium text-muted-foreground">Sick Leave</h4>
+                  <p className="text-2xl font-bold">{leaveBalance.sick} days</p>
+                </div>
+                <div className="bg-muted rounded-lg p-4">
+                  <h4 className="text-sm font-medium text-muted-foreground">Personal Leave</h4>
+                  <p className="text-2xl font-bold">{leaveBalance.personal} days</p>
+                </div>
+                <div className="bg-muted rounded-lg p-4">
+                  <h4 className="text-sm font-medium text-muted-foreground">Other Leave</h4>
+                  <p className="text-2xl font-bold">{leaveBalance.other} days</p>
+                </div>
+              </div>
+            )}
+            
+            {/* Leave Request Filters */}
+            <div className="flex justify-end mb-4">
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Requests</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="approved">Approved</SelectItem>
+                  <SelectItem value="rejected">Rejected</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            <div className="bg-muted rounded-lg p-4">
-              <h4 className="text-sm font-medium text-muted-foreground">Sick Leave</h4>
-              <p className="text-2xl font-bold">{leaveBalance.sick} days</p>
-            </div>
-            <div className="bg-muted rounded-lg p-4">
-              <h4 className="text-sm font-medium text-muted-foreground">Personal Leave</h4>
-              <p className="text-2xl font-bold">{leaveBalance.personal} days</p>
-            </div>
-            <div className="bg-muted rounded-lg p-4">
-              <h4 className="text-sm font-medium text-muted-foreground">Other Leave</h4>
-              <p className="text-2xl font-bold">{leaveBalance.other} days</p>
-            </div>
-          </div>
-        )}
-        
-        {/* Leave Requests Table */}
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Employee</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Duration</TableHead>
-                <TableHead>Date Requested</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredLeaveRequests.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8">
-                    <div className="flex flex-col items-center justify-center text-muted-foreground">
-                      <Calendar size={48} strokeWidth={1.5} className="mb-2" />
-                      <p>No leave requests found with the selected filter.</p>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ) : (
-                filteredLeaveRequests.map(leave => (
-                  <TableRow key={leave.id}>
-                    <TableCell className="font-medium">
-                      {leave.employeeName}
-                      <div className="text-xs text-muted-foreground">{leave.department}</div>
-                    </TableCell>
-                    <TableCell>{getLeaveTypeDisplay(leave.type)}</TableCell>
-                    <TableCell className="whitespace-nowrap">
-                      {format(leave.startDate, "MMM d, yyyy")} - {format(leave.endDate, "MMM d, yyyy")}
-                      <div className="text-xs text-muted-foreground">{leave.duration} day{leave.duration > 1 ? 's' : ''}</div>
-                    </TableCell>
-                    <TableCell>{format(leave.dateRequested, "MMM d, yyyy")}</TableCell>
-                    <TableCell>{getStatusBadge(leave.status)}</TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="ghost" size="icon" onClick={() => handleViewLeave(leave)}>
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
+            
+            {/* Leave Requests Table */}
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Employee</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Duration</TableHead>
+                    <TableHead>Date Requested</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
+                </TableHeader>
+                <TableBody>
+                  {filteredLeaveRequests.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-8">
+                        <div className="flex flex-col items-center justify-center text-muted-foreground">
+                          <Calendar size={48} strokeWidth={1.5} className="mb-2" />
+                          <p>No leave requests found with the selected filter.</p>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filteredLeaveRequests.map(leave => (
+                      <TableRow key={leave.id}>
+                        <TableCell className="font-medium">
+                          {leave.employeeName}
+                          <div className="text-xs text-muted-foreground">{leave.department}</div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center">
+                            {getLeaveTypeIcon(leave.type)}
+                            {getLeaveTypeDisplay(leave.type)}
+                          </div>
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap">
+                          {format(leave.startDate, "MMM d, yyyy")} - {format(leave.endDate, "MMM d, yyyy")}
+                          <div className="text-xs text-muted-foreground">{leave.duration} day{leave.duration > 1 ? 's' : ''}</div>
+                        </TableCell>
+                        <TableCell>{format(leave.dateRequested, "MMM d, yyyy")}</TableCell>
+                        <TableCell>{getStatusBadge(leave.status)}</TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-1">
+                            {leave.status === 'pending' && (
+                              <>
+                                <Button variant="ghost" size="icon" onClick={() => handleOpenApprovalDialog(leave)} title="Approve">
+                                  <Check className="h-4 w-4 text-green-600" />
+                                </Button>
+                                <Button variant="ghost" size="icon" onClick={() => handleOpenRejectionDialog(leave)} title="Reject">
+                                  <X className="h-4 w-4 text-red-600" />
+                                </Button>
+                              </>
+                            )}
+                            <Button variant="ghost" size="icon" onClick={() => handleViewLeave(leave)} title="View Details">
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </>
+        ) : (
+          // Holidays tab content
+          <>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-medium">Company Holidays</h3>
+              <Button variant="outline" onClick={handleViewHolidays}>
+                View All Holidays
+              </Button>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {holidays.slice(0, 6).map((holiday, index) => (
+                <div key={index} className="border rounded-lg p-4">
+                  <h4 className="font-medium">{holiday.name}</h4>
+                  <p className="text-muted-foreground">{format(holiday.date, "MMMM d, yyyy")}</p>
+                  <div className={`mt-2 text-xs px-2 py-1 rounded-full inline-flex items-center ${
+                    new Date() > holiday.date ? "bg-gray-100 text-gray-700" : "bg-green-100 text-green-700"
+                  }`}>
+                    {new Date() > holiday.date ? "Observed" : "Upcoming"}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
       </CardContent>
       
       {/* Add Leave Dialog */}
@@ -437,6 +659,7 @@ export const LeaveManagement: React.FC = () => {
                         <SelectItem value="maternity">Maternity Leave</SelectItem>
                         <SelectItem value="paternity">Paternity Leave</SelectItem>
                         <SelectItem value="unpaid">Unpaid Leave</SelectItem>
+                        <SelectItem value="work-from-home">Work From Home</SelectItem>
                       </SelectContent>
                     </Select>
                   </FormItem>
@@ -546,6 +769,199 @@ export const LeaveManagement: React.FC = () => {
         </DialogContent>
       </Dialog>
       
+      {/* Approval Dialog */}
+      <Dialog open={isApprovalDialogOpen} onOpenChange={setIsApprovalDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Approve Leave Request</DialogTitle>
+            <DialogDescription>
+              You are approving the leave request for {selectedLeave?.employeeName}.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <Form {...approvalForm}>
+            <form onSubmit={approvalForm.handleSubmit(handleApproveLeave)} className="space-y-4">
+              {selectedLeave && (
+                <div className="border rounded-md p-4 bg-muted/50 space-y-2">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <p className="text-sm font-medium">Employee</p>
+                      <p className="text-sm">{selectedLeave.employeeName}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">Department</p>
+                      <p className="text-sm">{selectedLeave.department}</p>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Leave Type</p>
+                    <p className="text-sm">{getLeaveTypeDisplay(selectedLeave.type)}</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <p className="text-sm font-medium">Start Date</p>
+                      <p className="text-sm">{format(selectedLeave.startDate, "MMM d, yyyy")}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">End Date</p>
+                      <p className="text-sm">{format(selectedLeave.endDate, "MMM d, yyyy")}</p>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Reason</p>
+                    <p className="text-sm">{selectedLeave.reason}</p>
+                  </div>
+                </div>
+              )}
+              
+              <FormField
+                control={approvalForm.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Approval Notes (Optional)</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="Add any notes for this approval"
+                        className="resize-none"
+                        {...field}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              
+              <DialogFooter>
+                <Button variant="outline" type="button" onClick={() => setIsApprovalDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit" className="bg-green-600 hover:bg-green-700">Approve</Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Rejection Dialog */}
+      <Dialog open={isRejectionDialogOpen} onOpenChange={setIsRejectionDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Reject Leave Request</DialogTitle>
+            <DialogDescription>
+              You are rejecting the leave request for {selectedLeave?.employeeName}. Please provide a reason.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <Form {...approvalForm}>
+            <form onSubmit={approvalForm.handleSubmit(handleRejectLeave)} className="space-y-4">
+              {selectedLeave && (
+                <div className="border rounded-md p-4 bg-muted/50 space-y-2">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <p className="text-sm font-medium">Employee</p>
+                      <p className="text-sm">{selectedLeave.employeeName}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">Department</p>
+                      <p className="text-sm">{selectedLeave.department}</p>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Leave Type</p>
+                    <p className="text-sm">{getLeaveTypeDisplay(selectedLeave.type)}</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <p className="text-sm font-medium">Start Date</p>
+                      <p className="text-sm">{format(selectedLeave.startDate, "MMM d, yyyy")}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">End Date</p>
+                      <p className="text-sm">{format(selectedLeave.endDate, "MMM d, yyyy")}</p>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Reason</p>
+                    <p className="text-sm">{selectedLeave.reason}</p>
+                  </div>
+                </div>
+              )}
+              
+              <FormField
+                control={approvalForm.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Reason for Rejection*</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="Explain why this leave request is being rejected"
+                        className="resize-none"
+                        required
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      This information will be shared with the employee.
+                    </FormDescription>
+                  </FormItem>
+                )}
+              />
+              
+              <DialogFooter>
+                <Button variant="outline" type="button" onClick={() => setIsRejectionDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit" variant="destructive">Reject</Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+      
+      {/* View All Holidays Dialog */}
+      <Dialog open={isHolidaysDialogOpen} onOpenChange={setIsHolidaysDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Company Holidays</DialogTitle>
+            <DialogDescription>
+              Official company holidays for {new Date().getFullYear()}.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Holiday</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {holidays.map((holiday, index) => (
+                  <TableRow key={index}>
+                    <TableCell className="font-medium">{holiday.name}</TableCell>
+                    <TableCell>{format(holiday.date, "MMMM d, yyyy")}</TableCell>
+                    <TableCell>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        new Date() > holiday.date ? "bg-gray-100 text-gray-700" : "bg-green-100 text-green-700"
+                      }`}>
+                        {new Date() > holiday.date ? "Observed" : "Upcoming"}
+                      </span>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+          
+          <DialogFooter>
+            <Button onClick={() => setIsHolidaysDialogOpen(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
       {/* View Leave Details Dialog */}
       <Dialog open={isViewDetailsOpen} onOpenChange={setIsViewDetailsOpen}>
         <DialogContent className="sm:max-w-[500px]">
@@ -572,7 +988,10 @@ export const LeaveManagement: React.FC = () => {
               
               <div>
                 <h4 className="text-sm font-semibold">Leave Type</h4>
-                <p>{getLeaveTypeDisplay(selectedLeave.type)}</p>
+                <div className="flex items-center">
+                  {getLeaveTypeIcon(selectedLeave.type)}
+                  {getLeaveTypeDisplay(selectedLeave.type)}
+                </div>
               </div>
               
               <div className="grid grid-cols-2 gap-4">
@@ -599,11 +1018,11 @@ export const LeaveManagement: React.FC = () => {
               {selectedLeave.approvedBy && (
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <h4 className="text-sm font-semibold">Approved By</h4>
+                    <h4 className="text-sm font-semibold">Approved/Rejected By</h4>
                     <p>{selectedLeave.approvedBy}</p>
                   </div>
                   <div>
-                    <h4 className="text-sm font-semibold">Approval Date</h4>
+                    <h4 className="text-sm font-semibold">Decision Date</h4>
                     <p>{selectedLeave.approvedDate ? format(selectedLeave.approvedDate, "MMMM d, yyyy") : 'N/A'}</p>
                   </div>
                 </div>
