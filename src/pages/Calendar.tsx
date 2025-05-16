@@ -226,7 +226,7 @@ const Calendar: React.FC = () => {
               <SelectValue placeholder="Filter type" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All types</SelectItem>
+              <SelectItem value="all">All types</SelectItem>
               <SelectItem value="meeting">Meetings</SelectItem>
               <SelectItem value="task">Tasks</SelectItem>
               <SelectItem value="reminder">Reminders</SelectItem>
