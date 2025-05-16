@@ -21,22 +21,6 @@ export const PayrollProcessing: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h3 className="text-lg font-medium">Upcoming Payroll Cycles</h3>
-          <p className="text-muted-foreground text-sm">
-            Manage and process scheduled payroll runs
-          </p>
-        </div>
-        <Button 
-          onClick={handleRunPayroll}
-          className="flex items-center gap-2"
-        >
-          <CalendarDays size={16} />
-          Run Payroll
-        </Button>
-      </div>
-      
       <Card>
         <CardHeader className="pb-3">
           <CardTitle>Payroll Schedule</CardTitle>

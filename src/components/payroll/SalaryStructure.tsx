@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
-import { Edit, Plus, Save, Trash2 } from 'lucide-react';
+import { Edit, Save, Trash2 } from 'lucide-react';
 import { useVoice } from '../../contexts/VoiceContext';
 import { toast } from 'sonner';
 
@@ -113,22 +113,6 @@ export const SalaryStructure: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h3 className="text-lg font-medium">Salary Components</h3>
-          <p className="text-muted-foreground text-sm">
-            Configure salary structure and components
-          </p>
-        </div>
-        <Button 
-          onClick={handleAddNew}
-          className="flex items-center gap-2"
-        >
-          <Plus size={16} />
-          Add Component
-        </Button>
-      </div>
-      
       <Card>
         <CardHeader className="pb-3">
           <CardTitle>Salary Structure</CardTitle>
