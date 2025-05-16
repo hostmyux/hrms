@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useVoice } from '../contexts/VoiceContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -29,7 +28,7 @@ import {
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Calendar, Link, Settings as SettingsIcon, Integration } from 'lucide-react';
+import { Calendar, Link, Settings as SettingsIcon, Cog, Info } from 'lucide-react';
 
 const profileFormSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -509,7 +508,7 @@ const Settings: React.FC = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
-                <Integration className="h-5 w-5 mr-2" />
+                <Link className="h-5 w-5 mr-2" />
                 Third-Party Integrations
               </CardTitle>
               <CardDescription>
@@ -606,7 +605,7 @@ const Settings: React.FC = () => {
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-md border">
                   <div className="flex items-start md:items-center gap-3">
                     <div className="bg-orange-100 p-2 rounded-md">
-                      <Integration className="h-6 w-6 text-orange-600" />
+                      <Cog className="h-6 w-6 text-orange-600" />
                     </div>
                     <div>
                       <h4 className="font-medium">Zapier</h4>
