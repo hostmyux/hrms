@@ -32,11 +32,11 @@ const Dashboard: React.FC = () => {
   
   // Additional demo data
   const demoEmployees = [
-    { id: 'e1', name: 'Jane Cooper', title: 'Regional Manager', department: 'Marketing', status: 'active', image: '/assets/users/user-1.jpg', email: 'jane.cooper@example.com', phone: '(555) 123-4567', position: 'Regional Manager' },
-    { id: 'e2', name: 'Cody Fisher', title: 'Product Designer', department: 'Design', status: 'active', image: '/assets/users/user-2.jpg', email: 'cody.fisher@example.com', phone: '(555) 234-5678', position: 'Product Designer' },
-    { id: 'e3', name: 'Esther Howard', title: 'Senior Developer', department: 'Engineering', status: 'on-leave', image: '/assets/users/user-3.jpg', email: 'esther.howard@example.com', phone: '(555) 345-6789', position: 'Senior Developer' },
-    { id: 'e4', name: 'Jenny Wilson', title: 'Marketing Coordinator', department: 'Marketing', status: 'active', image: '/assets/users/user-4.jpg', email: 'jenny.wilson@example.com', phone: '(555) 456-7890', position: 'Marketing Coordinator' },
-    { id: 'e5', name: 'Kristin Watson', title: 'HR Manager', department: 'Human Resources', status: 'active', image: '/assets/users/user-5.jpg', email: 'kristin.watson@example.com', phone: '(555) 567-8901', position: 'HR Manager' }
+    { id: 'e1', name: 'Jane Cooper', email: 'jane.cooper@example.com', phone: '(555) 123-4567', department: 'Marketing', position: 'Regional Manager', status: 'active' },
+    { id: 'e2', name: 'Cody Fisher', email: 'cody.fisher@example.com', phone: '(555) 234-5678', department: 'Design', position: 'Product Designer', status: 'active' },
+    { id: 'e3', name: 'Esther Howard', email: 'esther.howard@example.com', phone: '(555) 345-6789', department: 'Engineering', position: 'Senior Developer', status: 'on-leave' },
+    { id: 'e4', name: 'Jenny Wilson', email: 'jenny.wilson@example.com', phone: '(555) 456-7890', department: 'Marketing', position: 'Marketing Coordinator', status: 'active' },
+    { id: 'e5', name: 'Kristin Watson', email: 'kristin.watson@example.com', phone: '(555) 567-8901', department: 'Human Resources', position: 'HR Manager', status: 'active' }
   ];
   
   const demoActivities = [
@@ -79,9 +79,8 @@ const Dashboard: React.FC = () => {
       module: "Dashboard"
     });
     
-    toast("Navigating to " + destination.charAt(0).toUpperCase() + destination.slice(1), {
-      description: message,
-      duration: 3000,
+    toast({
+      description: `Navigating to ${destination.charAt(0).toUpperCase() + destination.slice(1)}`,
     });
   };
 
@@ -96,9 +95,8 @@ const Dashboard: React.FC = () => {
       module: "Employees"
     });
     
-    toast("Add Employee", {
+    toast({
       description: "Opening the employee creation form.",
-      duration: 3000,
     });
   };
 
@@ -142,7 +140,7 @@ const Dashboard: React.FC = () => {
                 description: "Exported dashboard data",
                 module: "Dashboard"
               });
-              toast("Success", {
+              toast({
                 description: "Dashboard data exported successfully",
               });
             }}>
@@ -189,7 +187,7 @@ const Dashboard: React.FC = () => {
                   description: `Viewed event details: ${event.title}`,
                   module: "Calendar"
                 });
-                toast("Event Details", {
+                toast({
                   description: `Viewing details for ${event.title}`,
                 });
               }}>

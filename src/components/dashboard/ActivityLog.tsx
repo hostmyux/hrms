@@ -93,6 +93,28 @@ export const ActivityLog: React.FC<ActivityLogProps> = ({
     const intervalId = setInterval(() => {
       // This simulates polling for new activities
       setLastUpdated(new Date());
+      
+      // Simulate occasional new activities (random chance to add a new activity)
+      if (Math.random() > 0.7) {
+        const mockActivity: ActivityItem = {
+          id: `auto-${Date.now()}`,
+          type: Math.random() > 0.5 ? 'document_upload' : 'attendance',
+          title: 'System Update',
+          description: 'Automated system activity detected',
+          date: new Date().toLocaleString(),
+          user: {
+            name: 'System',
+            role: 'Automated'
+          }
+        };
+        
+        setActivities(prev => [mockActivity, ...prev.slice(0, -1)]);
+        
+        // Show toast notification for new activity
+        toast({
+          description: "New activity detected",
+        });
+      }
     }, 60000); // Poll every minute
     
     return () => clearInterval(intervalId);
@@ -103,12 +125,26 @@ export const ActivityLog: React.FC<ActivityLogProps> = ({
     
     // Simulate an API call with a timeout
     setTimeout(() => {
+      // Simulate getting a new activity
+      const newActivity: ActivityItem = {
+        id: `refresh-${Date.now()}`,
+        type: 'leave_request',
+        title: 'Fresh Activity',
+        description: 'New activity after manual refresh',
+        date: new Date().toLocaleString(),
+        user: {
+          name: 'System',
+          role: 'Refresh'
+        }
+      };
+      
+      setActivities(prev => [newActivity, ...prev.slice(0, -1)]);
+      
       // Update last updated time
       setLastUpdated(new Date());
       setIsLoading(false);
-      toast("Activities refreshed", {
-        description: "Latest activities have been loaded",
-        duration: 3000
+      toast({
+        description: "Activities refreshed - New activity loaded",
       });
     }, 800);
   };

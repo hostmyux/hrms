@@ -64,10 +64,16 @@ export const QuickAccessCards: React.FC<QuickAccessCardsProps> = ({ onCardClick 
 
   // Load saved preferences on component mount
   useEffect(() => {
-    const savedCards = localStorageService.getItem<QuickAccessCard[]>('quick_access_cards', []);
+    const savedCards = localStorageService.getItem<QuickAccessCard[]>('quick_access_cards');
     
     if (savedCards && savedCards.length > 0) {
-      setCards(savedCards);
+      setCards(prevCards => {
+        // Merge saved preferences with default cards
+        return prevCards.map(defaultCard => {
+          const savedCard = savedCards.find(sc => sc.id === defaultCard.id);
+          return savedCard ? { ...defaultCard, isFavorite: savedCard.isFavorite } : defaultCard;
+        });
+      });
     }
   }, []);
 
@@ -97,7 +103,6 @@ export const QuickAccessCards: React.FC<QuickAccessCardsProps> = ({ onCardClick 
     
     toast(`${card?.isFavorite ? 'Removed from' : 'Added to'} favorites`, {
       description: `${card?.title} ${card?.isFavorite ? 'removed from' : 'added to'} your favorites`,
-      duration: 3000,
     });
   };
 

@@ -47,6 +47,32 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({ employees, title =
     navigate(`/employees/${employee.id}`);
   };
 
+  const handleEdit = (e: React.MouseEvent, employee: Employee) => {
+    e.stopPropagation();
+    speak(`Editing ${employee.name}'s profile`);
+    addAction({
+      type: "edit",
+      description: `Edited ${employee.name}'s profile`,
+      module: "Employees"
+    });
+    navigate(`/employees/${employee.id}/edit`);
+  };
+
+  const handleDelete = (e: React.MouseEvent, employee: Employee) => {
+    e.stopPropagation();
+    speak(`Delete ${employee.name} from employee records`);
+    addAction({
+      type: "delete",
+      description: `Initiated deletion of ${employee.name}`,
+      module: "Employees"
+    });
+    // In a real app, this would show a confirmation dialog
+    toast({
+      title: "Delete Employee",
+      description: `Are you sure you want to delete ${employee.name}?`,
+    });
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active':
@@ -128,11 +154,7 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({ employees, title =
                       size="sm" 
                       variant="ghost" 
                       className="h-8 w-8 p-0"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        speak(`Edit ${employee.name}'s profile`);
-                        navigate(`/employees/${employee.id}/edit`);
-                      }}
+                      onClick={(e) => handleEdit(e, employee)}
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
@@ -140,10 +162,7 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({ employees, title =
                       size="sm" 
                       variant="ghost" 
                       className="h-8 w-8 p-0 text-red-500 hover:text-red-600 hover:bg-red-50"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        speak(`Delete ${employee.name} from employee records`);
-                      }}
+                      onClick={(e) => handleDelete(e, employee)}
                     >
                       <Trash className="h-4 w-4" />
                     </Button>
