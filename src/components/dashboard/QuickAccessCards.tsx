@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Calendar, BarChart, FileText, UserPlus, Star } from 'lucide-react';
@@ -101,13 +100,10 @@ export const QuickAccessCards: React.FC<QuickAccessCardsProps> = ({ onCardClick 
       module: "Dashboard"
     });
     
-    // Fix: The sonner toast function requires both the title and options object
-    toast(
-      `${card?.isFavorite ? 'Removed from' : 'Added to'} favorites`, // Title (first argument)
-      { 
-        description: `${card?.title} ${card?.isFavorite ? 'removed from' : 'added to'} your favorites` 
-      } // Options object (second argument)
-    );
+    // Fix: The sonner toast function expects title and description as separate arguments
+    toast(`${card?.isFavorite ? 'Removed from' : 'Added to'} favorites`, {
+      description: `${card?.title} ${card?.isFavorite ? 'removed from' : 'added to'} your favorites`
+    });
   };
 
   // Sort cards to show favorites first
