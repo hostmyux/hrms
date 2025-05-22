@@ -1,10 +1,10 @@
-
 import React from 'react';
 import { useVoice } from '../../contexts/VoiceContext';
 import { Button } from '../ui/button';
 import { User, Mail, Phone, Building, Edit, Trash } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../../contexts/UserContext';
+import { toast } from 'sonner';
 
 interface Employee {
   id: string;
@@ -67,10 +67,7 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({ employees, title =
       module: "Employees"
     });
     // In a real app, this would show a confirmation dialog
-    toast({
-      title: "Delete Employee",
-      description: `Are you sure you want to delete ${employee.name}?`,
-    });
+    toast(`Are you sure you want to delete ${employee.name}?`);
   };
 
   const getStatusColor = (status: string) => {

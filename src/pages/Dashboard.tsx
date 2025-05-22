@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useVoice } from '../contexts/VoiceContext';
 import { useUser } from '../contexts/UserContext';
@@ -79,9 +78,7 @@ const Dashboard: React.FC = () => {
       module: "Dashboard"
     });
     
-    toast({
-      description: `Navigating to ${destination.charAt(0).toUpperCase() + destination.slice(1)}`,
-    });
+    toast(`Navigating to ${destination.charAt(0).toUpperCase() + destination.slice(1)}`);
   };
 
   const handleAddEmployeeClick = () => {
@@ -95,9 +92,7 @@ const Dashboard: React.FC = () => {
       module: "Employees"
     });
     
-    toast({
-      description: "Opening the employee creation form.",
-    });
+    toast("Opening the employee creation form.");
   };
 
   const handleViewAllEmployees = () => {
@@ -140,9 +135,7 @@ const Dashboard: React.FC = () => {
                 description: "Exported dashboard data",
                 module: "Dashboard"
               });
-              toast({
-                description: "Dashboard data exported successfully",
-              });
+              toast("Dashboard data exported successfully");
             }}>
               Export Data
             </Button>
@@ -187,9 +180,7 @@ const Dashboard: React.FC = () => {
                   description: `Viewed event details: ${event.title}`,
                   module: "Calendar"
                 });
-                toast({
-                  description: `Viewing details for ${event.title}`,
-                });
+                toast(`Viewing details for ${event.title}`);
               }}>
               <div className="bg-primary/10 p-2 rounded-md">
                 <Calendar className="h-5 w-5 text-primary" />

@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useVoice } from '../../contexts/VoiceContext';
 import { UserPlus, FileText, Clock, Calendar, RefreshCw } from 'lucide-react';
@@ -111,9 +110,7 @@ export const ActivityLog: React.FC<ActivityLogProps> = ({
         setActivities(prev => [mockActivity, ...prev.slice(0, -1)]);
         
         // Show toast notification for new activity
-        toast({
-          description: "New activity detected",
-        });
+        toast("New activity detected");
       }
     }, 60000); // Poll every minute
     
@@ -143,9 +140,7 @@ export const ActivityLog: React.FC<ActivityLogProps> = ({
       // Update last updated time
       setLastUpdated(new Date());
       setIsLoading(false);
-      toast({
-        description: "Activities refreshed - New activity loaded",
-      });
+      toast("Activities refreshed - New activity loaded");
     }, 800);
   };
 
