@@ -78,7 +78,9 @@ const Dashboard: React.FC = () => {
       module: "Dashboard"
     });
     
-    toast(`Navigating to ${destination.charAt(0).toUpperCase() + destination.slice(1)}`);
+    toast(`Navigating to ${destination.charAt(0).toUpperCase() + destination.slice(1)}`, {
+      description: `Opening the ${destination} module`
+    });
   };
 
   const handleAddEmployeeClick = () => {
@@ -92,7 +94,9 @@ const Dashboard: React.FC = () => {
       module: "Employees"
     });
     
-    toast("Opening the employee creation form.");
+    toast("Opening employee form", {
+      description: "Prepare to add a new employee to the system"
+    });
   };
 
   const handleViewAllEmployees = () => {
@@ -135,7 +139,9 @@ const Dashboard: React.FC = () => {
                 description: "Exported dashboard data",
                 module: "Dashboard"
               });
-              toast("Dashboard data exported successfully");
+              toast("Export successful", {
+                description: "Dashboard data exported"
+              });
             }}>
               Export Data
             </Button>
@@ -180,7 +186,9 @@ const Dashboard: React.FC = () => {
                   description: `Viewed event details: ${event.title}`,
                   module: "Calendar"
                 });
-                toast(`Viewing details for ${event.title}`);
+                toast(`Viewing ${event.title}`, {
+                  description: `Opening details for ${event.type.toLowerCase()}`
+                });
               }}>
               <div className="bg-primary/10 p-2 rounded-md">
                 <Calendar className="h-5 w-5 text-primary" />

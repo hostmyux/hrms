@@ -101,12 +101,10 @@ export const QuickAccessCards: React.FC<QuickAccessCardsProps> = ({ onCardClick 
       module: "Dashboard"
     });
     
-    toast(
-      `${card?.isFavorite ? 'Removed from' : 'Added to'} favorites`,
-      {
-        description: `${card?.title} ${card?.isFavorite ? 'removed from' : 'added to'} your favorites`,
-      }
-    );
+    // Fixed toast call to match expected signature with two arguments
+    toast(`${card?.isFavorite ? 'Removed from' : 'Added to'} favorites`, {
+      description: `${card?.title} ${card?.isFavorite ? 'removed from' : 'added to'} your favorites`,
+    });
   };
 
   // Sort cards to show favorites first

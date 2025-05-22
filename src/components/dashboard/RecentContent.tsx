@@ -50,6 +50,7 @@ export const RecentContent: React.FC<RecentContentProps> = ({
         </div>
         <ActivityLog 
           activities={activities}
+          limit={10}
           voiceDescription="Recent HR activities across your organization. Each entry represents an important event that may require your attention or awareness."  
         />
       </div>

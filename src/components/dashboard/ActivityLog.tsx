@@ -21,16 +21,20 @@ interface ActivityLogProps {
   activities: ActivityItem[];
   title?: string;
   voiceDescription?: string;
+  limit?: number;
 }
 
 export const ActivityLog: React.FC<ActivityLogProps> = ({ 
   activities: initialActivities, 
   title = "Recent Activities",
-  voiceDescription 
+  voiceDescription,
+  limit = 10  // Default limit to 10
 }) => {
   const { speak } = useVoice();
   const { actions } = useUser();
-  const [activities, setActivities] = useState<ActivityItem[]>(initialActivities);
+  const [activities, setActivities] = useState<ActivityItem[]>(
+    initialActivities.slice(0, limit)
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
 
@@ -60,7 +64,7 @@ export const ActivityLog: React.FC<ActivityLogProps> = ({
         }
         
         return {
-          id: action.id,
+          id: `action-${action.id}`, // Use a unique prefix to avoid key conflicts
           type,
           title: action.module,
           description: action.description,
@@ -78,14 +82,14 @@ export const ActivityLog: React.FC<ActivityLogProps> = ({
         setActivities(prev => {
           const existingIds = new Set(prev.map(a => a.id));
           const filteredNew = newActivities.filter(a => !existingIds.has(a.id));
-          // Return the most recent activities first
-          return [...filteredNew, ...prev].slice(0, initialActivities.length);
+          // Return the most recent activities first, respecting the limit
+          return [...filteredNew, ...prev].slice(0, limit);
         });
       }
     };
     
     transformRecentActions();
-  }, [actions, initialActivities.length]);
+  }, [actions, limit]);
 
   // Set up polling for real-time updates
   useEffect(() => {
@@ -96,7 +100,7 @@ export const ActivityLog: React.FC<ActivityLogProps> = ({
       // Simulate occasional new activities (random chance to add a new activity)
       if (Math.random() > 0.7) {
         const mockActivity: ActivityItem = {
-          id: `auto-${Date.now()}`,
+          id: `auto-${Date.now()}`, // Ensure unique ID
           type: Math.random() > 0.5 ? 'document_upload' : 'attendance',
           title: 'System Update',
           description: 'Automated system activity detected',
@@ -107,15 +111,17 @@ export const ActivityLog: React.FC<ActivityLogProps> = ({
           }
         };
         
-        setActivities(prev => [mockActivity, ...prev.slice(0, -1)]);
+        setActivities(prev => [mockActivity, ...prev.slice(0, limit - 1)]);
         
         // Show toast notification for new activity
-        toast("New activity detected");
+        toast("New activity detected", {
+          description: "System has detected a new activity in the background"
+        });
       }
     }, 60000); // Poll every minute
     
     return () => clearInterval(intervalId);
-  }, []);
+  }, [limit]);
 
   const refreshActivities = () => {
     setIsLoading(true);
@@ -124,7 +130,7 @@ export const ActivityLog: React.FC<ActivityLogProps> = ({
     setTimeout(() => {
       // Simulate getting a new activity
       const newActivity: ActivityItem = {
-        id: `refresh-${Date.now()}`,
+        id: `refresh-${Date.now()}`, // Use timestamp for unique ID
         type: 'leave_request',
         title: 'Fresh Activity',
         description: 'New activity after manual refresh',
@@ -135,12 +141,14 @@ export const ActivityLog: React.FC<ActivityLogProps> = ({
         }
       };
       
-      setActivities(prev => [newActivity, ...prev.slice(0, -1)]);
+      setActivities(prev => [newActivity, ...prev.slice(0, limit - 1)]);
       
       // Update last updated time
       setLastUpdated(new Date());
       setIsLoading(false);
-      toast("Activities refreshed - New activity loaded");
+      toast("Activities refreshed", {
+        description: "New activity loaded"
+      });
     }, 800);
   };
 

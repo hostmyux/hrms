@@ -15,10 +15,10 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
   const [isVoiceEnabled, setIsVoiceEnabled] = useState(() => voiceAssistant.isVoiceEnabled());
 
   useEffect(() => {
-    // Speak a welcome message when the app first loads
+    // Speak a welcome message when the app first loads with improved voice training message
     const timer = setTimeout(() => {
       if (isVoiceEnabled) {
-        voiceAssistant.speak("Welcome to HRMS Nexus. Your voice-guided HR management system.");
+        voiceAssistant.speak("Welcome to HRMS Nexus. Your voice-guided HR management system. I'm your AI assistant, here to provide information about your dashboard and help navigate through the system.");
       }
     }, 1000);
 
@@ -30,7 +30,7 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
     setIsVoiceEnabled(newState);
     
     if (newState) {
-      voiceAssistant.speak("Voice guidance enabled");
+      voiceAssistant.speak("Voice guidance enabled. I'll provide verbal information as you navigate through the HR system.");
     }
   };
 
