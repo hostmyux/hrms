@@ -32,11 +32,11 @@ const Dashboard: React.FC = () => {
   
   // Additional demo data
   const demoEmployees = [
-    { id: 'e1', name: 'Jane Cooper', title: 'Regional Manager', department: 'Marketing', status: 'Active', image: '/assets/users/user-1.jpg' },
-    { id: 'e2', name: 'Cody Fisher', title: 'Product Designer', department: 'Design', status: 'Active', image: '/assets/users/user-2.jpg' },
-    { id: 'e3', name: 'Esther Howard', title: 'Senior Developer', department: 'Engineering', status: 'On Leave', image: '/assets/users/user-3.jpg' },
-    { id: 'e4', name: 'Jenny Wilson', title: 'Marketing Coordinator', department: 'Marketing', status: 'Active', image: '/assets/users/user-4.jpg' },
-    { id: 'e5', name: 'Kristin Watson', title: 'HR Manager', department: 'Human Resources', status: 'Active', image: '/assets/users/user-5.jpg' }
+    { id: 'e1', name: 'Jane Cooper', title: 'Regional Manager', department: 'Marketing', status: 'active', image: '/assets/users/user-1.jpg', email: 'jane.cooper@example.com', phone: '(555) 123-4567', position: 'Regional Manager' },
+    { id: 'e2', name: 'Cody Fisher', title: 'Product Designer', department: 'Design', status: 'active', image: '/assets/users/user-2.jpg', email: 'cody.fisher@example.com', phone: '(555) 234-5678', position: 'Product Designer' },
+    { id: 'e3', name: 'Esther Howard', title: 'Senior Developer', department: 'Engineering', status: 'on-leave', image: '/assets/users/user-3.jpg', email: 'esther.howard@example.com', phone: '(555) 345-6789', position: 'Senior Developer' },
+    { id: 'e4', name: 'Jenny Wilson', title: 'Marketing Coordinator', department: 'Marketing', status: 'active', image: '/assets/users/user-4.jpg', email: 'jenny.wilson@example.com', phone: '(555) 456-7890', position: 'Marketing Coordinator' },
+    { id: 'e5', name: 'Kristin Watson', title: 'HR Manager', department: 'Human Resources', status: 'active', image: '/assets/users/user-5.jpg', email: 'kristin.watson@example.com', phone: '(555) 567-8901', position: 'HR Manager' }
   ];
   
   const demoActivities = [

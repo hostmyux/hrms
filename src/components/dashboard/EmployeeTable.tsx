@@ -3,6 +3,8 @@ import React from 'react';
 import { useVoice } from '../../contexts/VoiceContext';
 import { Button } from '../ui/button';
 import { User, Mail, Phone, Building, Edit, Trash } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useUser } from '../../contexts/UserContext';
 
 interface Employee {
   id: string;
@@ -22,6 +24,8 @@ interface EmployeeTableProps {
 
 export const EmployeeTable: React.FC<EmployeeTableProps> = ({ employees, title = "Recent Employees", voiceDescription }) => {
   const { speak } = useVoice();
+  const navigate = useNavigate();
+  const { addAction } = useUser();
 
   React.useEffect(() => {
     if (voiceDescription) {
@@ -30,7 +34,17 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({ employees, title =
   }, [voiceDescription, speak]);
 
   const handleRowClick = (employee: Employee) => {
-    speak(`Employee ${employee.name}, ${employee.position} in ${employee.department}. Email: ${employee.email}`);
+    speak(`Navigating to ${employee.name}'s profile. ${employee.position} in ${employee.department}. Email: ${employee.email}`);
+    
+    // Log the action
+    addAction({
+      type: "navigation",
+      description: `Viewed ${employee.name}'s profile`,
+      module: "Employees"
+    });
+    
+    // Navigate to employee profile
+    navigate(`/employees/${employee.id}`);
   };
 
   const getStatusColor = (status: string) => {
@@ -76,7 +90,7 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({ employees, title =
               >
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
-                    <div className="w-10 h-10 flex-shrink-0 rounded-full bg-hrms-primary/10 flex items-center justify-center text-hrms-primary">
+                    <div className="w-10 h-10 flex-shrink-0 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                       <User size={16} />
                     </div>
                     <div className="ml-4">
@@ -117,6 +131,7 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({ employees, title =
                       onClick={(e) => {
                         e.stopPropagation();
                         speak(`Edit ${employee.name}'s profile`);
+                        navigate(`/employees/${employee.id}/edit`);
                       }}
                     >
                       <Edit className="h-4 w-4" />
