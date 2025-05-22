@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useVoice } from '../../contexts/VoiceContext';
 import { UserPlus, FileText, Clock, Calendar, RefreshCw } from 'lucide-react';
@@ -33,7 +34,7 @@ export const ActivityLog: React.FC<ActivityLogProps> = ({
   const { speak } = useVoice();
   const { actions } = useUser();
   const [activities, setActivities] = useState<ActivityItem[]>(
-    initialActivities.slice(0, limit)
+    initialActivities.slice(0, limit) // Always apply limit here to initial activities
   );
   const [isLoading, setIsLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
@@ -49,7 +50,7 @@ export const ActivityLog: React.FC<ActivityLogProps> = ({
           const diff = now.getTime() - actionDate.getTime();
           return diff < 24 * 60 * 60 * 1000; // 24 hours in milliseconds
         })
-        .slice(0, 3); // Get the 3 most recent actions
+        .slice(0, limit); // Apply limit to recent actions
       
       // Transform actions to activity format
       const newActivities = recentActions.map(action => {
@@ -111,7 +112,8 @@ export const ActivityLog: React.FC<ActivityLogProps> = ({
           }
         };
         
-        setActivities(prev => [mockActivity, ...prev.slice(0, limit - 1)]);
+        // Ensure we respect the limit when adding new activities
+        setActivities(prev => [mockActivity, ...prev].slice(0, limit));
         
         // Show toast notification for new activity
         toast("New activity detected", {
@@ -141,7 +143,8 @@ export const ActivityLog: React.FC<ActivityLogProps> = ({
         }
       };
       
-      setActivities(prev => [newActivity, ...prev.slice(0, limit - 1)]);
+      // Ensure limit is respected when adding new activities
+      setActivities(prev => [newActivity, ...prev].slice(0, limit));
       
       // Update last updated time
       setLastUpdated(new Date());
@@ -232,7 +235,7 @@ export const ActivityLog: React.FC<ActivityLogProps> = ({
       </div>
       <div className="divide-y divide-border">
         {activities.length > 0 ? (
-          activities.map((activity) => (
+          activities.slice(0, limit).map((activity) => (
             <div 
               key={activity.id} 
               className="p-4 hover:bg-muted/30 cursor-pointer transition-colors"
@@ -264,3 +267,4 @@ export const ActivityLog: React.FC<ActivityLogProps> = ({
     </div>
   );
 };
+
