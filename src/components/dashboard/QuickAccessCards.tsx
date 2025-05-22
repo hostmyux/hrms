@@ -101,10 +101,13 @@ export const QuickAccessCards: React.FC<QuickAccessCardsProps> = ({ onCardClick 
       module: "Dashboard"
     });
     
-    // Fixed toast call to match expected signature with two arguments
-    toast(`${card?.isFavorite ? 'Removed from' : 'Added to'} favorites`, {
-      description: `${card?.title} ${card?.isFavorite ? 'removed from' : 'added to'} your favorites`,
-    });
+    // Fixed: The toast function from sonner expects a title as the first argument
+    toast(
+      `${card?.isFavorite ? 'Removed from' : 'Added to'} favorites`, 
+      {
+        description: `${card?.title} ${card?.isFavorite ? 'removed from' : 'added to'} your favorites`,
+      }
+    );
   };
 
   // Sort cards to show favorites first
