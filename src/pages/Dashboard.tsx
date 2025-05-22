@@ -10,7 +10,7 @@ import { RecentContent } from '../components/dashboard/RecentContent';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { toast } from '@/components/ui/sonner';
+import { toast } from 'sonner';
 import { localStorageService } from '../services/localStorageService';
 import { useResponsive } from '../hooks/useResponsive';
 import { Calendar, Clock } from 'lucide-react';
@@ -79,8 +79,7 @@ const Dashboard: React.FC = () => {
       module: "Dashboard"
     });
     
-    toast({
-      title: `Navigating to ${destination.charAt(0).toUpperCase() + destination.slice(1)}`,
+    toast("Navigating to " + destination.charAt(0).toUpperCase() + destination.slice(1), {
       description: message,
       duration: 3000,
     });
@@ -97,8 +96,7 @@ const Dashboard: React.FC = () => {
       module: "Employees"
     });
     
-    toast({
-      title: "Add Employee",
+    toast("Add Employee", {
       description: "Opening the employee creation form.",
       duration: 3000,
     });
@@ -144,10 +142,8 @@ const Dashboard: React.FC = () => {
                 description: "Exported dashboard data",
                 module: "Dashboard"
               });
-              toast({
-                title: "Success",
+              toast("Success", {
                 description: "Dashboard data exported successfully",
-                variant: "success"
               });
             }}>
               Export Data
@@ -193,8 +189,7 @@ const Dashboard: React.FC = () => {
                   description: `Viewed event details: ${event.title}`,
                   module: "Calendar"
                 });
-                toast({
-                  title: "Event Details",
+                toast("Event Details", {
                   description: `Viewing details for ${event.title}`,
                 });
               }}>
