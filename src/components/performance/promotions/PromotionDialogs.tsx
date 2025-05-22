@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   Dialog, DialogContent, DialogHeader, DialogTitle, 
@@ -16,26 +15,32 @@ import {
   Accordion, AccordionContent, 
   AccordionItem, AccordionTrigger 
 } from '@/components/ui/accordion';
-import { PromotionRequest, HighPotentialEmployee, PromotionFormData } from './types';
+import { PromotionRequest, HighPotentialEmployee, PromotionFormData, PromotionCandidate } from './types';
 import { UseFormReturn } from 'react-hook-form';
 
 interface PromotionDialogsProps {
-  isCreatePromotionOpen: boolean;
-  setIsCreatePromotionOpen: (value: boolean) => void;
-  isViewPromotionOpen: boolean;
-  setIsViewPromotionOpen: (value: boolean) => void;
-  isViewDevelopmentPlanOpen: boolean;
-  setIsViewDevelopmentPlanOpen: (value: boolean) => void;
-  isApproveDialogOpen: boolean;
-  setIsApproveDialogOpen: (value: boolean) => void;
-  selectedPromotion: PromotionRequest | null;
-  selectedEmployee: HighPotentialEmployee | null;
-  promotionForm: UseFormReturn<PromotionFormData>;
-  onSubmitPromotion: (data: PromotionFormData) => void;
-  handleConfirmApproval: () => void;
-  handleApprovePromotion: (promotion: PromotionRequest) => void;
-  getStatusColor: (status: string) => string;
-  getReadinessColor: (readiness: string) => string;
+  isCreatePromotionOpen?: boolean;
+  setIsCreatePromotionOpen?: (value: boolean) => void;
+  isViewPromotionOpen?: boolean;
+  setIsViewPromotionOpen?: (value: boolean) => void;
+  isViewDevelopmentPlanOpen?: boolean;
+  setIsViewDevelopmentPlanOpen?: (value: boolean) => void;
+  isApproveDialogOpen?: boolean;
+  setIsApproveDialogOpen?: (value: boolean) => void;
+  selectedPromotion?: PromotionRequest | null;
+  selectedEmployee?: HighPotentialEmployee | null;
+  promotionForm?: UseFormReturn<PromotionFormData>;
+  onSubmitPromotion?: (data: PromotionFormData) => void;
+  handleConfirmApproval?: () => void;
+  handleApprovePromotion?: (promotion: PromotionRequest) => void;
+  getStatusColor?: (status: string) => string;
+  getReadinessColor?: (readiness: string) => string;
+  
+  dialogType?: 'view' | 'approve' | 'reject' | null;
+  candidate?: PromotionCandidate | null;
+  onClose?: () => void;
+  onApprove?: (reason: string) => void;
+  onReject?: (reason: string) => void;
 }
 
 export const PromotionDialogs: React.FC<PromotionDialogsProps> = ({
@@ -54,12 +59,212 @@ export const PromotionDialogs: React.FC<PromotionDialogsProps> = ({
   handleConfirmApproval,
   handleApprovePromotion,
   getStatusColor,
-  getReadinessColor
+  getReadinessColor,
+  dialogType,
+  candidate,
+  onClose,
+  onApprove,
+  onReject
 }) => {
+  if (dialogType !== undefined && candidate !== undefined) {
+    return (
+      <>
+        {/* View Candidate Details Dialog */}
+        <Dialog open={dialogType === 'view'} onOpenChange={() => onClose && onClose()}>
+          <DialogContent className="sm:max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle>Promotion Request Details</DialogTitle>
+              <DialogDescription>
+                Complete information about this promotion request
+              </DialogDescription>
+            </DialogHeader>
+            
+            {candidate && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <h4 className="text-sm font-semibold">Employee</h4>
+                    <p>{candidate.name}</p>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-semibold">Employee ID</h4>
+                    <p>{candidate.employeeId}</p>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <h4 className="text-sm font-semibold">Current Position</h4>
+                    <p>{candidate.currentPosition}</p>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-semibold">Department</h4>
+                    <p>{candidate.currentDepartment}</p>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <h4 className="text-sm font-semibold">Proposed Position</h4>
+                    <p>{candidate.proposedPosition}</p>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-semibold">Manager</h4>
+                    <p>{candidate.manager}</p>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <h4 className="text-sm font-semibold">Current Salary</h4>
+                    <p>${candidate.currentSalary.toLocaleString()}</p>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-semibold">Proposed Salary</h4>
+                    <p>${candidate.proposedSalary.toLocaleString()}</p>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <h4 className="text-sm font-semibold">Years in Role</h4>
+                    <p>{candidate.yearsInRole}</p>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-semibold">Performance Score</h4>
+                    <p>{candidate.performanceScore} / 5.0</p>
+                  </div>
+                </div>
+                
+                <div>
+                  <h4 className="text-sm font-semibold">Justification</h4>
+                  <p className="text-sm whitespace-pre-line">{candidate.justification}</p>
+                </div>
+                
+                {candidate.notes && candidate.notes.length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-semibold mb-2">Notes</h4>
+                    <div className="space-y-2">
+                      {candidate.notes.map((note, idx) => (
+                        <div key={idx} className="bg-muted/50 p-3 rounded-md">
+                          <div className="flex justify-between items-center mb-1">
+                            <span className="text-xs font-medium">{note.author}</span>
+                            <span className="text-xs text-muted-foreground">{note.date}</span>
+                          </div>
+                          <p className="text-sm">{note.content}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+            
+            <DialogFooter>
+              <Button variant="outline" onClick={() => onClose && onClose()}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+        
+        {/* Approve Dialog */}
+        <Dialog open={dialogType === 'approve'} onOpenChange={() => onClose && onClose()}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Approve Promotion</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to approve this promotion request?
+              </DialogDescription>
+            </DialogHeader>
+            
+            {candidate && (
+              <div className="bg-muted/50 p-4 rounded-lg space-y-3">
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Employee</p>
+                    <p className="font-medium">{candidate.name}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Current Position</p>
+                    <p className="font-medium">{candidate.currentPosition}</p>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Proposed Position</p>
+                  <p className="font-medium">{candidate.proposedPosition}</p>
+                </div>
+              </div>
+            )}
+            
+            <Textarea 
+              placeholder="Add comments (optional)" 
+              className="min-h-[100px]" 
+              id="approvalReason"
+            />
+            
+            <DialogFooter>
+              <Button variant="outline" onClick={() => onClose && onClose()}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={() => {
+                  const reasonEl = document.getElementById('approvalReason') as HTMLTextAreaElement;
+                  onApprove && onApprove(reasonEl.value || 'Promotion approved');
+                }}
+              >
+                Approve
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+        
+        {/* Reject Dialog */}
+        <Dialog open={dialogType === 'reject'} onOpenChange={() => onClose && onClose()}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Reject Promotion</DialogTitle>
+              <DialogDescription>
+                Please provide a reason for rejecting this promotion request
+              </DialogDescription>
+            </DialogHeader>
+            
+            {candidate && (
+              <div className="bg-muted/50 p-4 rounded-lg mb-4">
+                <p className="font-medium">{candidate.name} - {candidate.currentPosition} to {candidate.proposedPosition}</p>
+              </div>
+            )}
+            
+            <Textarea 
+              placeholder="Reason for rejection (required)" 
+              className="min-h-[100px]" 
+              id="rejectionReason"
+            />
+            
+            <DialogFooter>
+              <Button variant="outline" onClick={() => onClose && onClose()}>
+                Cancel
+              </Button>
+              <Button 
+                variant="destructive"
+                onClick={() => {
+                  const reasonEl = document.getElementById('rejectionReason') as HTMLTextAreaElement;
+                  if (reasonEl.value.trim()) {
+                    onReject && onReject(reasonEl.value);
+                  }
+                }}
+              >
+                Reject
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </>
+    );
+  }
+
   return (
     <>
       {/* Create Promotion Request Dialog */}
-      <Dialog open={isCreatePromotionOpen} onOpenChange={setIsCreatePromotionOpen}>
+      <Dialog open={!!isCreatePromotionOpen} onOpenChange={setIsCreatePromotionOpen || (() => {})}>
         <DialogContent className="sm:max-w-[550px]">
           <DialogHeader>
             <DialogTitle>Request Promotion</DialogTitle>
@@ -183,7 +388,7 @@ export const PromotionDialogs: React.FC<PromotionDialogsProps> = ({
       </Dialog>
 
       {/* View Promotion Details Dialog */}
-      <Dialog open={isViewPromotionOpen} onOpenChange={setIsViewPromotionOpen}>
+      <Dialog open={!!isViewPromotionOpen} onOpenChange={setIsViewPromotionOpen || (() => {})}>
         <DialogContent className="sm:max-w-[550px]">
           <DialogHeader>
             <DialogTitle>Promotion Request Details</DialogTitle>
@@ -262,7 +467,7 @@ export const PromotionDialogs: React.FC<PromotionDialogsProps> = ({
       </Dialog>
 
       {/* View Development Plan Dialog */}
-      <Dialog open={isViewDevelopmentPlanOpen} onOpenChange={setIsViewDevelopmentPlanOpen}>
+      <Dialog open={!!isViewDevelopmentPlanOpen} onOpenChange={setIsViewDevelopmentPlanOpen || (() => {})}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle>Career Development Plan</DialogTitle>
@@ -355,7 +560,7 @@ export const PromotionDialogs: React.FC<PromotionDialogsProps> = ({
       </Dialog>
 
       {/* Approve Promotion Dialog */}
-      <Dialog open={isApproveDialogOpen} onOpenChange={setIsApproveDialogOpen}>
+      <Dialog open={!!isApproveDialogOpen} onOpenChange={setIsApproveDialogOpen || (() => {})}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle>Approve Promotion</DialogTitle>

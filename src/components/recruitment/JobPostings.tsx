@@ -28,6 +28,7 @@ interface JobPosting {
   views: number;
 }
 
+// Update the form values type to include 'closed' as a valid status
 interface JobPostingFormValues {
   title: string;
   department: string;
@@ -37,7 +38,7 @@ interface JobPostingFormValues {
   salary: string;
   description: string;
   requirements: string;
-  status: 'draft' | 'published';
+  status: 'draft' | 'published' | 'closed';
 }
 
 export const JobPostings: React.FC = () => {
@@ -479,6 +480,7 @@ export const JobPostings: React.FC = () => {
                       <SelectContent>
                         <SelectItem value="draft">Save as Draft</SelectItem>
                         <SelectItem value="published">Publish Immediately</SelectItem>
+                        <SelectItem value="closed">Close Job</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
