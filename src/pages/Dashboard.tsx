@@ -10,7 +10,7 @@ import { RecentContent } from '../components/dashboard/RecentContent';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/components/ui/sonner';
 import { localStorageService } from '../services/localStorageService';
 import { useResponsive } from '../hooks/useResponsive';
 import { Calendar, Clock } from 'lucide-react';
@@ -144,7 +144,11 @@ const Dashboard: React.FC = () => {
                 description: "Exported dashboard data",
                 module: "Dashboard"
               });
-              toast.success("Dashboard data exported successfully");
+              toast({
+                title: "Success",
+                description: "Dashboard data exported successfully",
+                variant: "success"
+              });
             }}>
               Export Data
             </Button>
@@ -189,7 +193,10 @@ const Dashboard: React.FC = () => {
                   description: `Viewed event details: ${event.title}`,
                   module: "Calendar"
                 });
-                toast.info(`Viewing details for ${event.title}`);
+                toast({
+                  title: "Event Details",
+                  description: `Viewing details for ${event.title}`,
+                });
               }}>
               <div className="bg-primary/10 p-2 rounded-md">
                 <Calendar className="h-5 w-5 text-primary" />
