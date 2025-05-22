@@ -100,10 +100,13 @@ export const QuickAccessCards: React.FC<QuickAccessCardsProps> = ({ onCardClick 
       module: "Dashboard"
     });
     
-    // Fix: The sonner toast function expects title and description as separate arguments
-    toast(`${card?.isFavorite ? 'Removed from' : 'Added to'} favorites`, {
-      description: `${card?.title} ${card?.isFavorite ? 'removed from' : 'added to'} your favorites`
-    });
+    // Fix: The sonner toast function requires a title (first argument) and options object (second argument)
+    toast(
+      `${card?.isFavorite ? 'Removed from' : 'Added to'} favorites`, // Title
+      { 
+        description: `${card?.title} ${card?.isFavorite ? 'removed from' : 'added to'} your favorites` 
+      }
+    );
   };
 
   // Sort cards to show favorites first
