@@ -1,12 +1,17 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Bell, Search, User, X } from 'lucide-react';
+import { Bell, Search, User, X, History } from 'lucide-react';
 import { useVoice } from '../../contexts/VoiceContext';
+import { useUser } from '../../contexts/UserContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { useResponsive } from '../../hooks/useResponsive';
+import { Button } from '@/components/ui/button';
 
 export const Topbar: React.FC = () => {
   const { speak } = useVoice();
+  const { addAction } = useUser();
+  const { isMobile } = useResponsive();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const notificationsRef = useRef<HTMLDivElement>(null);
 
@@ -27,14 +32,23 @@ export const Topbar: React.FC = () => {
     setNotificationsOpen(!notificationsOpen);
     if (!notificationsOpen) {
       speak("Notifications panel. Here you can view all your HR related notifications.");
+      
+      // Record the action
+      addAction({
+        type: "view",
+        description: "Opened notifications panel",
+        module: "Notifications"
+      });
     }
   };
 
   return (
-    <header className="flex items-center h-16 px-6 border-b border-border bg-card">
-      <div className="flex-1">
-        <SearchBar />
-      </div>
+    <header className={`flex items-center h-16 px-3 sm:px-6 border-b border-border bg-card ${isMobile ? 'justify-end' : ''}`}>
+      {!isMobile && (
+        <div className="flex-1">
+          <SearchBar />
+        </div>
+      )}
       <div className="flex items-center gap-4">
         <div className="relative" ref={notificationsRef}>
           <button 
@@ -50,13 +64,34 @@ export const Topbar: React.FC = () => {
             <div className="absolute right-0 mt-2 w-80 bg-card border border-border rounded-md shadow-lg z-50 animate-fade-in">
               <div className="flex justify-between items-center p-4 border-b border-border">
                 <h3 className="font-medium">Notifications</h3>
-                <Link to="/notifications" className="text-sm text-primary hover:underline">
+                <Link 
+                  to="/notifications" 
+                  className="text-sm text-primary hover:underline"
+                  onClick={() => {
+                    setNotificationsOpen(false);
+                    addAction({
+                      type: "navigation",
+                      description: "Viewed all notifications",
+                      module: "Notifications"
+                    });
+                  }}
+                >
                   View All
                 </Link>
               </div>
               <div className="max-h-72 overflow-y-auto">
                 {[1, 2, 3].map((item) => (
-                  <div key={item} className="p-4 border-b border-border hover:bg-muted/30 cursor-pointer">
+                  <div 
+                    key={item} 
+                    className="p-4 border-b border-border hover:bg-muted/30 cursor-pointer"
+                    onClick={() => {
+                      addAction({
+                        type: "view",
+                        description: `Viewed notification: Leave Request Approved`,
+                        module: "Notifications"
+                      });
+                    }}
+                  >
                     <p className="font-medium text-sm">Leave Request Approved</p>
                     <p className="text-xs text-muted-foreground mt-1">John's vacation has been approved</p>
                     <p className="text-xs text-muted-foreground mt-2">2 hours ago</p>
@@ -66,7 +101,22 @@ export const Topbar: React.FC = () => {
             </div>
           )}
         </div>
-        <div className="h-8 w-px bg-border"></div>
+        
+        <Link 
+          to="/user-activity"
+          className="p-2 rounded-full hover:bg-accent"
+          onClick={() => {
+            addAction({
+              type: "navigation",
+              description: "Accessed user activity history",
+              module: "User Activity"
+            });
+          }}
+        >
+          <History size={20} />
+        </Link>
+        
+        <div className="h-8 w-px bg-border hidden md:block"></div>
         <UserMenu />
       </div>
     </header>
@@ -184,6 +234,7 @@ const SearchBar: React.FC = () => {
 const UserMenu: React.FC = () => {
   const [isOpen, setIsOpen] = React.useState(false);
   const { speak } = useVoice();
+  const { addAction } = useUser();
   const menuRef = React.useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
@@ -215,15 +266,30 @@ const UserMenu: React.FC = () => {
         navigate('/settings/profile');
         speak("View or edit your profile");
         toast.info("Navigating to your profile");
+        addAction({
+          type: "navigation",
+          description: "Viewed user profile",
+          module: "Settings"
+        });
         break;
       case 'settings':
         navigate('/settings');
         speak("Adjust your account settings");
         toast.info("Navigating to settings");
+        addAction({
+          type: "navigation",
+          description: "Accessed settings",
+          module: "Settings"
+        });
         break;
       case 'signout':
         speak("Signing out of HRMS Nexus");
         toast.info("Signing out...");
+        addAction({
+          type: "auth",
+          description: "Signed out",
+          module: "Authentication"
+        });
         // In a real app, would handle actual logout here
         setTimeout(() => {
           toast.success("Successfully signed out");

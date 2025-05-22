@@ -1,9 +1,8 @@
 
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { cn } from '../../../lib/utils';
 import { useVoice } from '../../../contexts/VoiceContext';
-import { toast } from 'sonner';
+import { useUser } from '../../../contexts/UserContext';
 
 interface SidebarItemProps {
   icon: React.ReactNode;
@@ -14,42 +13,45 @@ interface SidebarItemProps {
 }
 
 export const SidebarItem: React.FC<SidebarItemProps> = ({ 
-  icon, label, href, isActive = false, onClick 
+  icon, 
+  label, 
+  href, 
+  isActive = false,
+  onClick
 }) => {
   const { speak } = useVoice();
-  const location = useLocation();
+  const { addAction } = useUser();
   
-  // Check if current path matches this item's href
-  const isCurrentPath = location.pathname === href;
-  
-  // Use either passed isActive prop or determine from current path
-  const active = isActive || isCurrentPath;
-  
-  const handleClick = (e: React.MouseEvent) => {
-    if (href === '#') {
-      e.preventDefault();
-      toast.info(`${label} module will be available soon`);
-    } else {
-      speak(`Navigating to ${label} module`);
-      toast.info(`Navigating to ${label}`);
-    }
+  const handleClick = () => {
+    speak(`Navigating to ${label}`);
     
-    if (onClick) onClick();
+    // Log navigation if no custom onClick provided
+    if (!onClick) {
+      addAction({
+        type: "navigation",
+        description: `Navigated to ${label}`,
+        module: label
+      });
+    } else {
+      onClick();
+    }
   };
-
+  
   return (
     <Link
-      to={href === '#' ? location.pathname : href}
-      className={cn(
-        "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent",
-        active ? "bg-accent text-accent-foreground font-medium" : "text-foreground/70"
-      )}
+      to={href}
       onClick={handleClick}
-      aria-current={active ? "page" : undefined}
-      data-testid={`sidebar-item-${label.toLowerCase().replace(/\s+/g, '-')}`}
+      className={cn(
+        "flex items-center py-2 px-3 mb-1 rounded-md font-medium text-sm transition-colors relative group",
+        isActive ? "bg-primary text-primary-foreground hover:bg-primary/90" : "hover:bg-accent"
+      )}
     >
-      <span className="flex items-center justify-center w-5 h-5">{icon}</span>
-      <span>{label}</span>
+      <span className="mr-3">{icon}</span>
+      <span className="truncate">{label}</span>
+      
+      {isActive && (
+        <span className="absolute inset-y-0 left-0 w-1 bg-primary-foreground/80 rounded-full my-1"></span>
+      )}
     </Link>
   );
 };

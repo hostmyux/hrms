@@ -4,7 +4,9 @@ import { useLocation } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
 import { useVoice } from '../../contexts/VoiceContext';
+import { useUser } from '../../contexts/UserContext';
 import { VoiceControls } from '../shared/VoiceControls';
+import { useResponsive } from '../../hooks/useResponsive';
 import { toast } from '@/components/ui/use-toast';
 
 interface MainLayoutProps {
@@ -13,6 +15,8 @@ interface MainLayoutProps {
 
 export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const { speak } = useVoice();
+  const { addAction } = useUser();
+  const { isMobile } = useResponsive();
   const location = useLocation();
 
   // Get the current path without any query parameters
@@ -77,6 +81,10 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         name: 'System settings',
         description: 'Configure the HRMS platform to align with your organization\'s needs. Customize workflows, set up user roles, define approval chains, and manage system integrations. Regular review of settings ensures optimal system performance.'
       },
+      '/user-activity': {
+        name: 'User Activity History',
+        description: 'Track all your actions and interactions with the HRMS system. View a chronological log of your activities, filter by module or action type, and gain insights into your usage patterns. This helps maintain accountability and provides a reference for past actions.'
+      }
     };
 
     const moduleInfo = pathToModuleMap[currentPath] || { 
@@ -93,14 +101,21 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       description: moduleInfo.description,
       duration: 5000,
     });
-  }, [speak, currentPath]);
+    
+    // Record page navigation in user actions
+    addAction({
+      type: "navigation",
+      description: `Visited ${moduleInfo.name}`,
+      module: moduleInfo.name
+    });
+  }, [speak, currentPath, addAction]);
 
   return (
     <div className="flex min-h-screen bg-background">
       <Sidebar />
       <div className="flex flex-col flex-1">
         <Topbar />
-        <main className="flex-1 p-6 overflow-auto animate-fade-in">
+        <main className={`flex-1 p-3 sm:p-4 md:p-6 overflow-auto animate-fade-in ${isMobile ? 'pt-16' : ''}`}>
           {children}
         </main>
       </div>
