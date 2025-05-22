@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -16,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { PromotionDialogs } from './PromotionDialogs';
 import { promotionCycles as initialPromotionCycles } from './demoData';
-import { PromotionCycle, PromotionCandidate, PromotionStatus } from './types';
+import { PromotionCycle, PromotionCandidate, PromotionStatus2 } from './types';
 
 export const PromotionList = () => {
   const [promotionCycles, setPromotionCycles] = useState<PromotionCycle[]>(initialPromotionCycles);
@@ -24,7 +23,7 @@ export const PromotionList = () => {
   const [selectedCandidate, setSelectedCandidate] = useState<PromotionCandidate | null>(null);
   const [dialogType, setDialogType] = useState<'view' | 'approve' | 'reject' | null>(null);
   const [filterDepartment, setFilterDepartment] = useState<string>('all');
-  const [filterStatus, setFilterStatus] = useState<PromotionStatus | 'all'>('all');
+  const [filterStatus, setFilterStatus] = useState<PromotionStatus2 | 'all'>('all');
 
   const filteredCandidates = selectedCycle?.candidates.filter(candidate => {
     const departmentMatch = filterDepartment === 'all' || candidate.currentDepartment === filterDepartment;
@@ -60,7 +59,7 @@ export const PromotionList = () => {
             if (candidate.id === selectedCandidate.id) {
               return {
                 ...candidate,
-                status: newStatus as PromotionStatus,
+                status: newStatus as PromotionStatus2,
                 notes: [...candidate.notes, { 
                   date: new Date().toISOString(), 
                   content: reason, 
@@ -84,7 +83,7 @@ export const PromotionList = () => {
     setDialogType(null);
   };
 
-  const getStatusBadge = (status: PromotionStatus) => {
+  const getStatusBadge = (status: PromotionStatus2) => {
     switch (status) {
       case 'pending':
         return <Badge variant="outline" className="bg-yellow-50 text-yellow-800">Pending</Badge>;
@@ -152,7 +151,7 @@ export const PromotionList = () => {
           
           <Select 
             value={filterStatus} 
-            onValueChange={(value) => setFilterStatus(value as PromotionStatus | 'all')}
+            onValueChange={(value) => setFilterStatus(value as PromotionStatus2 | 'all')}
           >
             <SelectTrigger className="w-[160px]">
               <SelectValue placeholder="Filter by status" />

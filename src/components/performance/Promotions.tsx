@@ -324,12 +324,7 @@ export const Promotions: React.FC = () => {
       </div>
       
       <TabsContent value="requests" className="space-y-4 mt-4">
-        <PromotionList 
-          promotionRequests={promotionRequests}
-          onViewPromotion={handleViewPromotion}
-          onApprovePromotion={handleApprovePromotion}
-          getStatusColor={getStatusColor}
-        />
+        <PromotionList />
       </TabsContent>
       
       <TabsContent value="highpotential" className="space-y-4 mt-4">

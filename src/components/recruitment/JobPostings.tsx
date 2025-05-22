@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useVoice } from '../../contexts/VoiceContext';
@@ -172,7 +171,13 @@ export const JobPostings: React.FC = () => {
         job.id === selectedJob.id 
           ? { 
               ...job, 
-              ...data, 
+              title: data.title,
+              department: data.department,
+              location: data.location,
+              type: data.type,
+              experience: data.experience,
+              salary: data.salary,
+              description: data.description,
               requirements: data.requirements.split('\n').filter(req => req.trim() !== ''),
               status: data.status,
               postedDate: data.status === 'published' ? new Date().toISOString().substring(0, 10) : job.postedDate
@@ -187,7 +192,13 @@ export const JobPostings: React.FC = () => {
       // Create new job
       const newJob: JobPosting = {
         id: (jobs.length + 1).toString(),
-        ...data,
+        title: data.title,
+        department: data.department,
+        location: data.location,
+        type: data.type,
+        experience: data.experience,
+        salary: data.salary,
+        description: data.description,
         requirements: data.requirements.split('\n').filter(req => req.trim() !== ''),
         status: data.status,
         postedDate: data.status === 'published' ? new Date().toISOString().substring(0, 10) : undefined,

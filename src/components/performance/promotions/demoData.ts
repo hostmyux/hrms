@@ -1,5 +1,4 @@
-
-import { PromotionCycle, PromotionCandidate, PromotionStatus } from './types';
+import { PromotionCycle, PromotionCandidate, PromotionStatus2 } from './types';
 
 export const promotionCycles: PromotionCycle[] = [
   {
