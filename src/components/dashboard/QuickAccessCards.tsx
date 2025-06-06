@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Calendar, BarChart, FileText, UserPlus, Star } from 'lucide-react';
@@ -113,7 +112,7 @@ export const QuickAccessCards: React.FC<QuickAccessCardsProps> = ({ onCardClick 
     
     // Fixed: Use correct toast function call with proper arguments
     const action = card?.isFavorite ? 'Removed from' : 'Added to';
-    toast(`${action} favorites`, {
+    toast(`${card?.title} ${action} favorites`, {
       description: `${card?.title} has been ${card?.isFavorite ? 'removed from' : 'added to'} your favorites`
     });
   };

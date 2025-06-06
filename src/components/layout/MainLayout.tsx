@@ -114,7 +114,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   return (
     <div className="min-h-screen w-full flex bg-background">
       <Sidebar />
-      <div className="flex-1 flex flex-col min-w-0 ml-0 lg:ml-0">
+      <div className="flex-1 flex flex-col min-w-0">
         <Topbar />
         <main className="flex-1 p-3 sm:p-4 md:p-6 overflow-auto">
           {children}
