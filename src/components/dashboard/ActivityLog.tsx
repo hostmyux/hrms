@@ -29,12 +29,12 @@ export const ActivityLog: React.FC<ActivityLogProps> = ({
   activities: initialActivities, 
   title = "Recent Activities",
   voiceDescription,
-  limit = 10  // Default limit to 10
+  limit = 10
 }) => {
   const { speak } = useVoice();
   const { actions } = useUser();
   const [activities, setActivities] = useState<ActivityItem[]>(
-    initialActivities.slice(0, limit) // Always apply limit here to initial activities
+    initialActivities.slice(0, limit)
   );
   const [isLoading, setIsLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
@@ -42,18 +42,16 @@ export const ActivityLog: React.FC<ActivityLogProps> = ({
   // Effect to sync with user actions from context
   useEffect(() => {
     const transformRecentActions = () => {
-      // Only get actions from the last 24 hours
       const recentActions = actions
         .filter(action => {
           const actionDate = new Date(action.timestamp);
           const now = new Date();
           const diff = now.getTime() - actionDate.getTime();
-          return diff < 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+          return diff < 24 * 60 * 60 * 1000; // 24 hours
         })
-        .slice(0, limit); // Apply limit to recent actions
+        .slice(0, Math.min(5, limit)); // Limit context actions to 5 or less
       
-      // Transform actions to activity format
-      const newActivities = recentActions.map(action => {
+      const newActivities = recentActions.map((action, index) => {
         let type: 'new_employee' | 'leave_request' | 'document_upload' | 'attendance' = 'document_upload';
         
         if (action.module === 'Employees' && action.type === 'create') {
@@ -65,7 +63,7 @@ export const ActivityLog: React.FC<ActivityLogProps> = ({
         }
         
         return {
-          id: `action-${action.id}`, // Use a unique prefix to avoid key conflicts
+          id: `context-action-${action.id}-${index}`,
           type,
           title: action.module,
           description: action.description,
@@ -77,14 +75,12 @@ export const ActivityLog: React.FC<ActivityLogProps> = ({
         };
       });
       
-      // Only update if there are new actions
       if (newActivities.length > 0) {
-        // Merge with existing activities but avoid duplicates
         setActivities(prev => {
           const existingIds = new Set(prev.map(a => a.id));
           const filteredNew = newActivities.filter(a => !existingIds.has(a.id));
-          // Return the most recent activities first, respecting the limit
-          return [...filteredNew, ...prev].slice(0, limit);
+          const combined = [...filteredNew, ...prev];
+          return combined.slice(0, limit); // Ensure we never exceed the limit
         });
       }
     };
@@ -92,16 +88,15 @@ export const ActivityLog: React.FC<ActivityLogProps> = ({
     transformRecentActions();
   }, [actions, limit]);
 
-  // Set up polling for real-time updates
+  // Set up periodic refresh for demo purposes
   useEffect(() => {
     const intervalId = setInterval(() => {
-      // This simulates polling for new activities
       setLastUpdated(new Date());
       
-      // Simulate occasional new activities (random chance to add a new activity)
-      if (Math.random() > 0.7) {
+      // Simulate occasional new activities
+      if (Math.random() > 0.8) {
         const mockActivity: ActivityItem = {
-          id: `auto-${Date.now()}`, // Ensure unique ID
+          id: `auto-${Date.now()}-${Math.random()}`,
           type: Math.random() > 0.5 ? 'document_upload' : 'attendance',
           title: 'System Update',
           description: 'Automated system activity detected',
@@ -112,15 +107,13 @@ export const ActivityLog: React.FC<ActivityLogProps> = ({
           }
         };
         
-        // Ensure we respect the limit when adding new activities
         setActivities(prev => [mockActivity, ...prev].slice(0, limit));
         
-        // Show toast notification for new activity
-        toast("New activity detected", {
-          description: "System has detected a new activity in the background"
+        toast('New activity detected', {
+          description: 'System activity has been logged'
         });
       }
-    }, 60000); // Poll every minute
+    }, 120000); // Check every 2 minutes
     
     return () => clearInterval(intervalId);
   }, [limit]);
@@ -128,11 +121,9 @@ export const ActivityLog: React.FC<ActivityLogProps> = ({
   const refreshActivities = () => {
     setIsLoading(true);
     
-    // Simulate an API call with a timeout
     setTimeout(() => {
-      // Simulate getting a new activity
       const newActivity: ActivityItem = {
-        id: `refresh-${Date.now()}`, // Use timestamp for unique ID
+        id: `refresh-${Date.now()}`,
         type: 'leave_request',
         title: 'Fresh Activity',
         description: 'New activity after manual refresh',
@@ -143,23 +134,15 @@ export const ActivityLog: React.FC<ActivityLogProps> = ({
         }
       };
       
-      // Ensure limit is respected when adding new activities
       setActivities(prev => [newActivity, ...prev].slice(0, limit));
-      
-      // Update last updated time
       setLastUpdated(new Date());
       setIsLoading(false);
-      toast("Activities refreshed", {
-        description: "New activity loaded"
+      
+      toast('Activities refreshed', {
+        description: 'Latest activities loaded successfully'
       });
     }, 800);
   };
-
-  React.useEffect(() => {
-    if (voiceDescription) {
-      // Register this component with voice assistant when mounted
-    }
-  }, [voiceDescription]);
 
   const getActivityIcon = (type: string) => {
     switch (type) {
@@ -213,13 +196,16 @@ export const ActivityLog: React.FC<ActivityLogProps> = ({
     return detailedDescription;
   };
 
+  // Ensure we display exactly the limit or fewer activities
+  const displayedActivities = activities.slice(0, limit);
+
   return (
     <div className="bg-card rounded-lg border border-border overflow-hidden">
       <div className="p-6 border-b border-border flex justify-between items-center">
         <div>
           <h3 className="text-lg font-medium">{title}</h3>
           <p className="text-sm text-muted-foreground mt-1">
-            Recent HR activities • Last updated: {lastUpdated.toLocaleTimeString()}
+            Recent HR activities (showing {displayedActivities.length} of {limit} max) • Last updated: {lastUpdated.toLocaleTimeString()}
           </p>
         </div>
         <Button 
@@ -234,8 +220,8 @@ export const ActivityLog: React.FC<ActivityLogProps> = ({
         </Button>
       </div>
       <div className="divide-y divide-border">
-        {activities.length > 0 ? (
-          activities.slice(0, limit).map((activity) => (
+        {displayedActivities.length > 0 ? (
+          displayedActivities.map((activity) => (
             <div 
               key={activity.id} 
               className="p-4 hover:bg-muted/30 cursor-pointer transition-colors"
@@ -267,4 +253,3 @@ export const ActivityLog: React.FC<ActivityLogProps> = ({
     </div>
   );
 };
-

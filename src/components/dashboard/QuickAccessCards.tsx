@@ -101,10 +101,10 @@ export const QuickAccessCards: React.FC<QuickAccessCardsProps> = ({ onCardClick 
       module: "Dashboard"
     });
     
-    // Fixed: Use correct toast syntax with proper arguments
+    // Fixed: Use correct toast function call
     const action = card?.isFavorite ? 'Removed from' : 'Added to';
     toast(`${action} favorites`, {
-      description: `${card?.title} ${card?.isFavorite ? 'removed from' : 'added to'} your favorites`
+      description: `${card?.title} has been ${card?.isFavorite ? 'removed from' : 'added to'} your favorites`
     });
   };
 

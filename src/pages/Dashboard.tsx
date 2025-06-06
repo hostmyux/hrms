@@ -29,7 +29,7 @@ const Dashboard: React.FC = () => {
     lastVisit: localStorageService.getItem<string>('last_dashboard_visit', ''),
   });
   
-  // Additional demo data
+  // Additional demo data - employees
   const demoEmployees = [
     { id: 'e1', name: 'Jane Cooper', email: 'jane.cooper@example.com', phone: '(555) 123-4567', department: 'Marketing', position: 'Regional Manager', status: 'active' },
     { id: 'e2', name: 'Cody Fisher', email: 'cody.fisher@example.com', phone: '(555) 234-5678', department: 'Design', position: 'Product Designer', status: 'active' },
@@ -38,13 +38,19 @@ const Dashboard: React.FC = () => {
     { id: 'e5', name: 'Kristin Watson', email: 'kristin.watson@example.com', phone: '(555) 567-8901', department: 'Human Resources', position: 'HR Manager', status: 'active' }
   ];
   
+  // Demo activities - limited to exactly 10 items
   const demoActivities = [
     { id: 'a1', type: 'new_employee', title: 'New Employee', description: 'Michael Brown joined as UI Designer', date: 'Today at 10:30 AM', user: { name: 'HR Manager', role: 'Administrator' } },
     { id: 'a2', type: 'leave_request', title: 'Leave Request', description: 'Sarah Johnson requested annual leave', date: 'Today at 9:15 AM', user: { name: 'Sarah Johnson', role: 'Employee' } },
     { id: 'a3', type: 'document_upload', title: 'Document Uploaded', description: 'Q2 Employee Handbook updated', date: 'Yesterday at 4:45 PM', user: { name: 'Admin', role: 'System' } },
     { id: 'a4', type: 'attendance', title: 'Late Arrival', description: 'Team meeting attendance report', date: 'Yesterday at 11:30 AM', user: { name: 'System', role: 'Automated' } },
     { id: 'a5', type: 'leave_request', title: 'Leave Approved', description: 'Robert Smith\'s sick leave approved', date: '2 days ago', user: { name: 'Department Head', role: 'Manager' } },
-  ];
+    { id: 'a6', type: 'new_employee', title: 'New Hire', description: 'Emma Davis started as Marketing Analyst', date: '2 days ago', user: { name: 'HR Team', role: 'Administrator' } },
+    { id: 'a7', type: 'document_upload', title: 'Policy Update', description: 'Remote work policy revised', date: '3 days ago', user: { name: 'Legal Team', role: 'System' } },
+    { id: 'a8', type: 'attendance', title: 'Overtime Report', description: 'Weekly overtime summary generated', date: '3 days ago', user: { name: 'Payroll System', role: 'Automated' } },
+    { id: 'a9', type: 'leave_request', title: 'Leave Denied', description: 'John Doe\'s vacation request denied due to staffing', date: '4 days ago', user: { name: 'Manager', role: 'Supervisor' } },
+    { id: 'a10', type: 'document_upload', title: 'Training Material', description: 'New employee onboarding guide uploaded', date: '5 days ago', user: { name: 'Training Team', role: 'Administrator' } }
+  ].slice(0, 10); // Ensure exactly 10 activities
 
   // Store last visit time
   useEffect(() => {
