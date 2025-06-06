@@ -79,7 +79,17 @@ export const QuickAccessCards: React.FC<QuickAccessCardsProps> = ({ onCardClick 
 
   // Save preferences whenever they change
   useEffect(() => {
-    localStorageService.setItem('quick_access_cards', cards);
+    try {
+      localStorageService.setItem('quick_access_cards', cards.map(card => ({
+        id: card.id,
+        isFavorite: card.isFavorite
+      })));
+    } catch (error) {
+      console.error('Error saving card preferences:', error);
+      toast('Error saving preferences', {
+        description: 'Unable to save your favorite card preferences'
+      });
+    }
   }, [cards]);
 
   const toggleFavorite = (id: string, event: React.MouseEvent) => {

@@ -7,7 +7,7 @@ import { useVoice } from '../../contexts/VoiceContext';
 import { useUser } from '../../contexts/UserContext';
 import { VoiceControls } from '../shared/VoiceControls';
 import { useResponsive } from '../../hooks/useResponsive';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -92,14 +92,20 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       description: 'Navigate using the sidebar menu to access different HR modules. Each module is designed to streamline specific aspects of human resources management. If you need guidance, the voice assistant can explain each feature in detail.' 
     };
     
-    // Speak the module name and brief description
-    speak(`${moduleInfo.name} loaded. ${moduleInfo.description}`);
+    // Only speak if voice is enabled and avoid excessive notifications
+    if (speak) {
+      const utterance = `${moduleInfo.name} loaded. ${moduleInfo.description}`;
+      try {
+        speak(utterance);
+      } catch (error) {
+        console.error('Voice synthesis error:', error);
+      }
+    }
     
-    // Show toast notification for module change
-    toast({
-      title: moduleInfo.name,
+    // Show single toast notification for module change
+    toast(moduleInfo.name, {
       description: moduleInfo.description,
-      duration: 5000,
+      duration: 3000,
     });
     
     // Record page navigation in user actions
@@ -111,11 +117,11 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   }, [speak, currentPath, addAction]);
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="min-h-screen w-full flex bg-background">
       <Sidebar />
-      <div className="flex flex-col flex-1">
+      <div className="flex-1 flex flex-col min-w-0">
         <Topbar />
-        <main className={`flex-1 p-3 sm:p-4 md:p-6 overflow-auto animate-fade-in ${isMobile ? 'pt-16' : ''}`}>
+        <main className="flex-1 p-3 sm:p-4 md:p-6 overflow-auto">
           {children}
         </main>
       </div>
