@@ -92,8 +92,8 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       description: 'Navigate using the sidebar menu to access different HR modules.' 
     };
     
-    // Only speak if voice is enabled
-    if (speak) {
+    // Only speak if voice is enabled and speak function is available
+    if (speak && typeof speak === 'function') {
       try {
         speak(`${moduleInfo.name} loaded. ${moduleInfo.description}`);
       } catch (error) {
@@ -102,17 +102,19 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     }
     
     // Record page navigation in user actions
-    addAction({
-      type: "navigation",
-      description: `Visited ${moduleInfo.name}`,
-      module: moduleInfo.name
-    });
+    if (addAction && typeof addAction === 'function') {
+      addAction({
+        type: "navigation",
+        description: `Visited ${moduleInfo.name}`,
+        module: moduleInfo.name
+      });
+    }
   }, [speak, currentPath, addAction]);
 
   return (
     <div className="min-h-screen w-full flex bg-background">
       <Sidebar />
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 ml-0 lg:ml-0">
         <Topbar />
         <main className="flex-1 p-3 sm:p-4 md:p-6 overflow-auto">
           {children}
