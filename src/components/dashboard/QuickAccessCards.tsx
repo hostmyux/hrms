@@ -101,8 +101,9 @@ export const QuickAccessCards: React.FC<QuickAccessCardsProps> = ({ onCardClick 
       module: "Dashboard"
     });
     
-    // Fixed: The toast function requires two arguments - title and options object
-    toast(`${card?.isFavorite ? 'Removed from' : 'Added to'} favorites`, {
+    // Fixed: Use correct toast syntax with proper arguments
+    const action = card?.isFavorite ? 'Removed from' : 'Added to';
+    toast(`${action} favorites`, {
       description: `${card?.title} ${card?.isFavorite ? 'removed from' : 'added to'} your favorites`
     });
   };
