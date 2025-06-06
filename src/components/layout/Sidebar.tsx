@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { cn } from '../../lib/utils';
@@ -76,7 +75,7 @@ export const Sidebar = () => {
       {/* Mobile overlay */}
       {isMobile && isMobileOpen && (
         <div 
-          className="fixed inset-0 bg-black/50 z-40"
+          className="fixed inset-0 bg-black/50 z-50"
           onClick={() => setIsMobileOpen(false)}
         />
       )}
@@ -94,9 +93,9 @@ export const Sidebar = () => {
       {/* Sidebar */}
       <div 
         className={cn(
-          "flex flex-col h-screen bg-card border-r border-border transition-all duration-300 fixed lg:relative z-40",
+          "flex flex-col h-full bg-card border-r border-border transition-all duration-300 relative",
           isCollapsed ? "w-[70px]" : "w-64",
-          isMobile && !isMobileOpen ? "-translate-x-full" : "translate-x-0"
+          isMobile ? (isMobileOpen ? "fixed inset-y-0 left-0 z-40 w-64" : "hidden") : "flex"
         )}
       >
         <div className="flex items-center px-4 py-5 border-b border-border">

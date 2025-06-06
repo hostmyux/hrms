@@ -110,11 +110,9 @@ export const QuickAccessCards: React.FC<QuickAccessCardsProps> = ({ onCardClick 
       module: "Dashboard"
     });
     
-    // Fixed: Use correct toast function call with proper arguments
+    // Fixed: Use correct toast function call
     const action = card?.isFavorite ? 'Removed from' : 'Added to';
-    toast(`${card?.title} ${action} favorites`, {
-      description: `${card?.title} has been ${card?.isFavorite ? 'removed from' : 'added to'} your favorites`
-    });
+    toast(`${card?.title} ${action} favorites`);
   };
 
   // Sort cards to show favorites first
