@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Calendar, BarChart, FileText, UserPlus, Star } from 'lucide-react';
@@ -110,9 +111,11 @@ export const QuickAccessCards: React.FC<QuickAccessCardsProps> = ({ onCardClick 
       module: "Dashboard"
     });
     
-    // Fixed: Use correct toast function call
+    // Fixed: Use correct toast function call with title and description
     const action = card?.isFavorite ? 'Removed from' : 'Added to';
-    toast(`${card?.title} ${action} favorites`);
+    toast(`${card?.title} ${action} favorites`, {
+      description: `Successfully updated your favorites`
+    });
   };
 
   // Sort cards to show favorites first
