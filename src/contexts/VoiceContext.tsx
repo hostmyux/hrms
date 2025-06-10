@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { voiceAssistant } from '../services/voiceAssistant';
 import { voiceTrainingService } from '../services/voiceTrainingService';
@@ -19,12 +18,11 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    // Initialize voice assistant
     try {
       const enabled = voiceAssistant.isVoiceEnabled();
       setIsVoiceEnabled(enabled);
       setIsInitialized(true);
-      console.log('Voice assistant initialized:', enabled);
+      console.log('Voice assistant initialized successfully:', enabled);
     } catch (error) {
       console.error('Error initializing voice assistant:', error);
       setIsVoiceEnabled(false);
@@ -33,19 +31,16 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    // Only run welcome message after initialization and if voice is enabled
     if (!isInitialized || !isVoiceEnabled) return;
 
-    // Check if speech synthesis is available
     if (!window.speechSynthesis) {
       console.warn('Speech synthesis not supported in this browser');
       return;
     }
 
-    // Speak a comprehensive welcome message when the app first loads
     const timer = setTimeout(() => {
       try {
-        voiceAssistant.speak("Welcome to HRMS Nexus, your comprehensive voice-guided HR management system. I'm your AI voice trainer, ready to guide you through all HR operations. Voice assistance is now active and will provide detailed explanations as you navigate. You can toggle voice guidance using the microphone button in the top navigation, adjust volume, or stop speaking at any time. Let's begin exploring your HR dashboard.");
+        voiceAssistant.speak("Welcome to HRMS Nexus, your comprehensive voice-guided HR management system. I'm your AI voice trainer, ready to provide detailed guidance through all HR operations. Voice assistance is now active and will provide comprehensive explanations as you navigate. The entire application is fully responsive and adapts to your device. You can toggle voice guidance, adjust volume, or activate training mode using the controls in the top navigation. Let's begin exploring your responsive HR dashboard with detailed voice guidance for every feature.");
       } catch (error) {
         console.error('Error speaking welcome message:', error);
       }
@@ -60,9 +55,9 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
       setIsVoiceEnabled(newState);
       
       if (newState) {
-        voiceAssistant.speak("Voice guidance enabled. I will now provide comprehensive assistance as you navigate through the HR system. All buttons, forms, and actions will include detailed voice instructions.");
+        voiceAssistant.speak("Voice guidance enabled. I will now provide comprehensive assistance as you navigate through the responsive HR system. All buttons, forms, cards, and actions will include detailed voice instructions with context-aware guidance for your current screen size and device.");
       } else {
-        voiceAssistant.speak("Voice guidance disabled. You can re-enable it anytime using the microphone button.");
+        voiceAssistant.speak("Voice guidance disabled. You can re-enable it anytime using the microphone button in the navigation bar.");
       }
     } catch (error) {
       console.error('Error toggling voice:', error);
@@ -92,7 +87,8 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
     if (!isVoiceEnabled) return;
     
     const guidance = voiceTrainingService.provideContextualHelp(module);
-    speak(guidance);
+    const responsiveInfo = voiceTrainingService.provideResponsiveGuidance();
+    speak(`${guidance} ${responsiveInfo}`);
   };
 
   const provideActionGuidance = (module: string, action: string) => {

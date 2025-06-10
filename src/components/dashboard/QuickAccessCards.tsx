@@ -30,7 +30,7 @@ export const QuickAccessCards: React.FC<QuickAccessCardsProps> = ({ onCardClick 
       id: 'leave-management',
       title: 'Leave Management',
       description: 'Approve and manage leave requests',
-      icon: <Calendar className="h-8 w-8 text-primary mb-2" />,
+      icon: <Calendar className="h-6 w-6 sm:h-8 sm:w-8 text-primary mb-2" />,
       destination: 'attendance',
       message: 'Navigating to leave management screen where you can review and manage employee leave requests.',
       isFavorite: false
@@ -39,7 +39,7 @@ export const QuickAccessCards: React.FC<QuickAccessCardsProps> = ({ onCardClick 
       id: 'performance-goals',
       title: 'Performance Goals',
       description: 'Create and manage goals',
-      icon: <BarChart className="h-8 w-8 text-primary mb-2" />,
+      icon: <BarChart className="h-6 w-6 sm:h-8 sm:w-8 text-primary mb-2" />,
       destination: 'performance',
       message: 'Navigating to performance goals section where you can set and track employee objectives.',
       isFavorite: false
@@ -48,7 +48,7 @@ export const QuickAccessCards: React.FC<QuickAccessCardsProps> = ({ onCardClick 
       id: 'payroll',
       title: 'Payroll',
       description: 'Process employee payments',
-      icon: <FileText className="h-8 w-8 text-primary mb-2" />,
+      icon: <FileText className="h-6 w-6 sm:h-8 sm:w-8 text-primary mb-2" />,
       destination: 'payroll',
       message: 'Navigating to payroll management where you can run payroll processes and review compensation reports.',
       isFavorite: false
@@ -57,7 +57,7 @@ export const QuickAccessCards: React.FC<QuickAccessCardsProps> = ({ onCardClick 
       id: 'recruitment',
       title: 'Recruitment',
       description: 'Manage hiring pipeline',
-      icon: <UserPlus className="h-8 w-8 text-primary mb-2" />,
+      icon: <UserPlus className="h-6 w-6 sm:h-8 sm:w-8 text-primary mb-2" />,
       destination: 'recruitment',
       message: 'Navigating to recruitment section where you can manage job listings and review candidates.',
       isFavorite: false
@@ -70,7 +70,6 @@ export const QuickAccessCards: React.FC<QuickAccessCardsProps> = ({ onCardClick 
     
     if (savedCards && savedCards.length > 0) {
       setCards(prevCards => {
-        // Merge saved preferences with default cards
         return prevCards.map(defaultCard => {
           const savedCard = savedCards.find(sc => sc.id === defaultCard.id);
           return savedCard ? { ...defaultCard, isFavorite: savedCard.isFavorite } : defaultCard;
@@ -78,11 +77,9 @@ export const QuickAccessCards: React.FC<QuickAccessCardsProps> = ({ onCardClick 
       });
     }
 
-    // Enhanced voice training for quick access cards
     speak("Quick access cards loaded. You have four main modules available: Leave Management for handling employee time off requests, Performance Goals for setting and tracking objectives, Payroll for processing payments, and Recruitment for managing the hiring pipeline. Click the star icon on any card to add it to your favorites for priority display. Hover over cards to hear detailed descriptions of each module's capabilities.");
   }, [speak]);
 
-  // Save preferences whenever they change
   useEffect(() => {
     try {
       localStorageService.setItem('quick_access_cards', cards.map(card => ({
@@ -91,7 +88,7 @@ export const QuickAccessCards: React.FC<QuickAccessCardsProps> = ({ onCardClick 
       })));
     } catch (error) {
       console.error('Error saving card preferences:', error);
-      toast('Error saving preferences - Unable to save your favorite card preferences');
+      toast("Error saving preferences - Unable to save your favorite card preferences");
     }
   }, [cards]);
 
@@ -104,21 +101,17 @@ export const QuickAccessCards: React.FC<QuickAccessCardsProps> = ({ onCardClick 
       )
     );
     
-    // Get the card that was toggled
     const card = cards.find(c => c.id === id);
     
-    // Log the action
     addAction({
       type: "preference",
       description: `${card?.isFavorite ? 'Removed' : 'Added'} ${card?.title} ${card?.isFavorite ? 'from' : 'to'} favorites`,
       module: "Dashboard"
     });
     
-    // Enhanced voice feedback with context
     const action = card?.isFavorite ? 'removed from' : 'added to';
     speak(`${card?.title} has been ${action} your favorites. ${card?.isFavorite ? 'This card will no longer be prioritized in your dashboard display.' : 'This card will now appear first in your quick access section for faster navigation.'}`);
     
-    // Toast notification - using correct sonner syntax (single string argument)
     const favoriteAction = card?.isFavorite ? 'removed from' : 'added to';
     toast(`${card?.title} ${favoriteAction} favorites`);
   };
@@ -139,7 +132,6 @@ export const QuickAccessCards: React.FC<QuickAccessCardsProps> = ({ onCardClick 
     speak(`${card.title}: ${card.description}. ${additionalInfo[card.id as keyof typeof additionalInfo]} Click to navigate to this module and explore its full functionality.`);
   };
 
-  // Sort cards to show favorites first
   const sortedCards = [...cards].sort((a, b) => {
     if (a.isFavorite && !b.isFavorite) return -1;
     if (!a.isFavorite && b.isFavorite) return 1;
@@ -147,7 +139,7 @@ export const QuickAccessCards: React.FC<QuickAccessCardsProps> = ({ onCardClick 
   });
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
       {sortedCards.map((card) => (
         <Card 
           key={card.id}
@@ -155,19 +147,19 @@ export const QuickAccessCards: React.FC<QuickAccessCardsProps> = ({ onCardClick 
           onClick={() => handleCardClick(card)}
           onMouseEnter={() => handleCardHover(card)}
         >
-          <CardContent className="p-4 flex flex-col items-center justify-center text-center relative">
+          <CardContent className="p-3 sm:p-4 flex flex-col items-center justify-center text-center relative">
             <Button
               variant="ghost" 
               size="icon"
-              className={`absolute top-2 right-2 h-8 w-8 ${card.isFavorite ? 'text-yellow-500' : 'text-muted-foreground'}`}
+              className={`absolute top-1 right-1 sm:top-2 sm:right-2 h-6 w-6 sm:h-8 sm:w-8 ${card.isFavorite ? 'text-yellow-500' : 'text-muted-foreground'}`}
               onClick={(e) => toggleFavorite(card.id, e)}
               onMouseEnter={() => speak(`Click to ${card.isFavorite ? 'remove this card from' : 'add this card to'} your favorites. Favorite cards appear first for quicker access to your most-used modules.`)}
             >
-              <Star className="h-4 w-4" fill={card.isFavorite ? "currentColor" : "none"} />
+              <Star className="h-3 w-3 sm:h-4 sm:w-4" fill={card.isFavorite ? "currentColor" : "none"} />
             </Button>
             {card.icon}
-            <h3 className="font-medium">{card.title}</h3>
-            <p className="text-sm text-muted-foreground">{card.description}</p>
+            <h3 className="font-medium text-sm sm:text-base">{card.title}</h3>
+            <p className="text-xs sm:text-sm text-muted-foreground">{card.description}</p>
           </CardContent>
         </Card>
       ))}
