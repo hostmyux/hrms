@@ -18,16 +18,29 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    try {
-      const enabled = voiceAssistant.isVoiceEnabled();
-      setIsVoiceEnabled(enabled);
-      setIsInitialized(true);
-      console.log('Voice assistant initialized successfully:', enabled);
-    } catch (error) {
-      console.error('Error initializing voice assistant:', error);
-      setIsVoiceEnabled(false);
-      setIsInitialized(true);
-    }
+    const initializeVoice = async () => {
+      try {
+        // Wait for voices to load
+        await new Promise((resolve) => {
+          if (window.speechSynthesis?.getVoices().length > 0) {
+            resolve(true);
+          } else {
+            window.speechSynthesis.addEventListener('voiceschanged', resolve, { once: true });
+          }
+        });
+
+        const enabled = voiceAssistant.isVoiceEnabled();
+        setIsVoiceEnabled(enabled);
+        setIsInitialized(true);
+        console.log('Voice assistant initialized successfully:', enabled);
+      } catch (error) {
+        console.error('Error initializing voice assistant:', error);
+        setIsVoiceEnabled(false);
+        setIsInitialized(true);
+      }
+    };
+
+    initializeVoice();
   }, []);
 
   useEffect(() => {
@@ -44,7 +57,7 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
       } catch (error) {
         console.error('Error speaking welcome message:', error);
       }
-    }, 2000);
+    }, 1000);
 
     return () => clearTimeout(timer);
   }, [isVoiceEnabled, isInitialized]);

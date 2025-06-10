@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Calendar, BarChart, FileText, UserPlus, Star } from 'lucide-react';
@@ -88,7 +87,7 @@ export const QuickAccessCards: React.FC<QuickAccessCardsProps> = ({ onCardClick 
       })));
     } catch (error) {
       console.error('Error saving card preferences:', error);
-      toast("Error saving preferences - Unable to save your favorite card preferences");
+      toast.error("Unable to save your favorite card preferences");
     }
   }, [cards]);
 
@@ -113,7 +112,7 @@ export const QuickAccessCards: React.FC<QuickAccessCardsProps> = ({ onCardClick 
     speak(`${card?.title} has been ${action} your favorites. ${card?.isFavorite ? 'This card will no longer be prioritized in your dashboard display.' : 'This card will now appear first in your quick access section for faster navigation.'}`);
     
     const favoriteAction = card?.isFavorite ? 'removed from' : 'added to';
-    toast(`${card?.title} ${favoriteAction} favorites`);
+    toast.success(`${card?.title} ${favoriteAction} favorites`);
   };
 
   const handleCardClick = (card: QuickAccessCard) => {
