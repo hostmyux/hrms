@@ -1,8 +1,10 @@
+
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Calendar, BarChart, FileText, UserPlus, Star } from 'lucide-react';
 import { localStorageService } from '../../services/localStorageService';
 import { useUser } from '../../contexts/UserContext';
+import { useVoice } from '../../contexts/VoiceContext';
 import { toast } from 'sonner';
 import { Button } from '../ui/button';
 
@@ -22,6 +24,7 @@ interface QuickAccessCardsProps {
 
 export const QuickAccessCards: React.FC<QuickAccessCardsProps> = ({ onCardClick }) => {
   const { addAction } = useUser();
+  const { speak } = useVoice();
   const [cards, setCards] = useState<QuickAccessCard[]>([
     {
       id: 'leave-management',
@@ -74,7 +77,10 @@ export const QuickAccessCards: React.FC<QuickAccessCardsProps> = ({ onCardClick 
         });
       });
     }
-  }, []);
+
+    // Voice training for quick access cards
+    speak("Quick access cards loaded. These cards provide shortcuts to frequently used HR modules. You can favorite cards by clicking the star icon.");
+  }, [speak]);
 
   // Save preferences whenever they change
   useEffect(() => {
@@ -110,11 +116,21 @@ export const QuickAccessCards: React.FC<QuickAccessCardsProps> = ({ onCardClick 
       module: "Dashboard"
     });
     
-    // Fixed: Use correct sonner toast function call
-    const action = card?.isFavorite ? 'Removed from' : 'Added to';
-    toast(`${card?.title} ${action} favorites`, {
-      description: `Successfully updated your favorites`
-    });
+    // Voice feedback
+    const action = card?.isFavorite ? 'removed from' : 'added to';
+    speak(`${card?.title} ${action} favorites`);
+    
+    // Toast notification
+    toast(`${card?.title} ${card?.isFavorite ? 'removed from' : 'added to'} favorites`);
+  };
+
+  const handleCardClick = (card: QuickAccessCard) => {
+    speak(`Clicking on ${card.title}. ${card.message}`);
+    onCardClick(card.destination, card.message);
+  };
+
+  const handleCardHover = (card: QuickAccessCard) => {
+    speak(`${card.title}: ${card.description}. Click to navigate to this module.`);
   };
 
   // Sort cards to show favorites first
@@ -130,7 +146,8 @@ export const QuickAccessCards: React.FC<QuickAccessCardsProps> = ({ onCardClick 
         <Card 
           key={card.id}
           className={`cursor-pointer hover:bg-muted/50 transition-colors ${card.isFavorite ? 'border-primary' : ''}`} 
-          onClick={() => onCardClick(card.destination, card.message)}
+          onClick={() => handleCardClick(card)}
+          onMouseEnter={() => handleCardHover(card)}
         >
           <CardContent className="p-4 flex flex-col items-center justify-center text-center relative">
             <Button
@@ -138,6 +155,7 @@ export const QuickAccessCards: React.FC<QuickAccessCardsProps> = ({ onCardClick 
               size="icon"
               className={`absolute top-2 right-2 h-8 w-8 ${card.isFavorite ? 'text-yellow-500' : 'text-muted-foreground'}`}
               onClick={(e) => toggleFavorite(card.id, e)}
+              onMouseEnter={() => speak('Click to toggle favorite status')}
             >
               <Star className="h-4 w-4" fill={card.isFavorite ? "currentColor" : "none"} />
             </Button>
