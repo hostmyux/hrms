@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Calendar, BarChart, FileText, UserPlus, Star } from 'lucide-react';
@@ -77,8 +78,8 @@ export const QuickAccessCards: React.FC<QuickAccessCardsProps> = ({ onCardClick 
       });
     }
 
-    // Voice training for quick access cards
-    speak("Quick access cards loaded. These cards provide shortcuts to frequently used HR modules. You can favorite cards by clicking the star icon.");
+    // Enhanced voice training for quick access cards
+    speak("Quick access cards loaded. You have four main modules available: Leave Management for handling employee time off requests, Performance Goals for setting and tracking objectives, Payroll for processing payments, and Recruitment for managing the hiring pipeline. Click the star icon on any card to add it to your favorites for priority display. Hover over cards to hear detailed descriptions of each module's capabilities.");
   }, [speak]);
 
   // Save preferences whenever they change
@@ -90,9 +91,7 @@ export const QuickAccessCards: React.FC<QuickAccessCardsProps> = ({ onCardClick 
       })));
     } catch (error) {
       console.error('Error saving card preferences:', error);
-      toast('Error saving preferences', {
-        description: 'Unable to save your favorite card preferences'
-      });
+      toast('Error saving preferences - Unable to save your favorite card preferences');
     }
   }, [cards]);
 
@@ -115,9 +114,9 @@ export const QuickAccessCards: React.FC<QuickAccessCardsProps> = ({ onCardClick 
       module: "Dashboard"
     });
     
-    // Voice feedback
+    // Enhanced voice feedback with context
     const action = card?.isFavorite ? 'removed from' : 'added to';
-    speak(`${card?.title} ${action} favorites`);
+    speak(`${card?.title} has been ${action} your favorites. ${card?.isFavorite ? 'This card will no longer be prioritized in your dashboard display.' : 'This card will now appear first in your quick access section for faster navigation.'}`);
     
     // Toast notification - using correct sonner syntax (single string argument)
     const favoriteAction = card?.isFavorite ? 'removed from' : 'added to';
@@ -125,12 +124,19 @@ export const QuickAccessCards: React.FC<QuickAccessCardsProps> = ({ onCardClick 
   };
 
   const handleCardClick = (card: QuickAccessCard) => {
-    speak(`Clicking on ${card.title}. ${card.message}`);
+    speak(`Accessing ${card.title} module. ${card.message} This module contains comprehensive tools for ${card.description.toLowerCase()}. You'll find navigation options, data tables, and action buttons to manage all related tasks efficiently.`);
     onCardClick(card.destination, card.message);
   };
 
   const handleCardHover = (card: QuickAccessCard) => {
-    speak(`${card.title}: ${card.description}. Click to navigate to this module.`);
+    const additionalInfo = {
+      'leave-management': 'This module includes leave request approval workflows, attendance tracking, holiday management, and work-from-home coordination.',
+      'performance-goals': 'Features include goal setting frameworks, progress tracking, performance reviews, employee feedback systems, and promotion management.',
+      'payroll': 'Comprehensive payroll processing including salary calculations, tax deductions, benefits administration, and payslip generation.',
+      'recruitment': 'Full recruitment lifecycle management with job posting creation, applicant tracking, interview scheduling, and offer management.'
+    };
+    
+    speak(`${card.title}: ${card.description}. ${additionalInfo[card.id as keyof typeof additionalInfo]} Click to navigate to this module and explore its full functionality.`);
   };
 
   // Sort cards to show favorites first
@@ -145,7 +151,7 @@ export const QuickAccessCards: React.FC<QuickAccessCardsProps> = ({ onCardClick 
       {sortedCards.map((card) => (
         <Card 
           key={card.id}
-          className={`cursor-pointer hover:bg-muted/50 transition-colors ${card.isFavorite ? 'border-primary' : ''}`} 
+          className={`cursor-pointer hover:bg-muted/50 transition-colors ${card.isFavorite ? 'border-primary ring-1 ring-primary/20' : ''}`} 
           onClick={() => handleCardClick(card)}
           onMouseEnter={() => handleCardHover(card)}
         >
@@ -155,7 +161,7 @@ export const QuickAccessCards: React.FC<QuickAccessCardsProps> = ({ onCardClick 
               size="icon"
               className={`absolute top-2 right-2 h-8 w-8 ${card.isFavorite ? 'text-yellow-500' : 'text-muted-foreground'}`}
               onClick={(e) => toggleFavorite(card.id, e)}
-              onMouseEnter={() => speak('Click to toggle favorite status')}
+              onMouseEnter={() => speak(`Click to ${card.isFavorite ? 'remove this card from' : 'add this card to'} your favorites. Favorite cards appear first for quicker access to your most-used modules.`)}
             >
               <Star className="h-4 w-4" fill={card.isFavorite ? "currentColor" : "none"} />
             </Button>

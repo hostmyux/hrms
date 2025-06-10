@@ -1,12 +1,15 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { voiceAssistant } from '../services/voiceAssistant';
+import { voiceTrainingService } from '../services/voiceTrainingService';
 
 interface VoiceContextType {
   isVoiceEnabled: boolean;
   toggleVoice: () => void;
   speak: (text: string) => void;
   stopSpeaking: () => void;
+  provideModuleGuidance: (module: string) => void;
+  provideActionGuidance: (module: string, action: string) => void;
 }
 
 const VoiceContext = createContext<VoiceContextType | undefined>(undefined);
@@ -39,10 +42,10 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    // Speak a welcome message when the app first loads
+    // Speak a comprehensive welcome message when the app first loads
     const timer = setTimeout(() => {
       try {
-        voiceAssistant.speak("Welcome to HRMS Nexus. Your voice-guided HR management system is ready.");
+        voiceAssistant.speak("Welcome to HRMS Nexus, your comprehensive voice-guided HR management system. I'm your AI voice trainer, ready to guide you through all HR operations. Voice assistance is now active and will provide detailed explanations as you navigate. You can toggle voice guidance using the microphone button in the top navigation, adjust volume, or stop speaking at any time. Let's begin exploring your HR dashboard.");
       } catch (error) {
         console.error('Error speaking welcome message:', error);
       }
@@ -57,7 +60,9 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
       setIsVoiceEnabled(newState);
       
       if (newState) {
-        voiceAssistant.speak("Voice guidance enabled.");
+        voiceAssistant.speak("Voice guidance enabled. I will now provide comprehensive assistance as you navigate through the HR system. All buttons, forms, and actions will include detailed voice instructions.");
+      } else {
+        voiceAssistant.speak("Voice guidance disabled. You can re-enable it anytime using the microphone button.");
       }
     } catch (error) {
       console.error('Error toggling voice:', error);
@@ -83,11 +88,27 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const provideModuleGuidance = (module: string) => {
+    if (!isVoiceEnabled) return;
+    
+    const guidance = voiceTrainingService.provideContextualHelp(module);
+    speak(guidance);
+  };
+
+  const provideActionGuidance = (module: string, action: string) => {
+    if (!isVoiceEnabled) return;
+    
+    const guidance = voiceTrainingService.provideContextualHelp(module, action);
+    speak(guidance);
+  };
+
   const value = {
     isVoiceEnabled,
     toggleVoice,
     speak,
-    stopSpeaking
+    stopSpeaking,
+    provideModuleGuidance,
+    provideActionGuidance
   };
 
   return <VoiceContext.Provider value={value}>{children}</VoiceContext.Provider>;

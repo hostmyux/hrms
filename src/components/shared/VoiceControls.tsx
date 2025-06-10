@@ -2,7 +2,7 @@
 import React from 'react';
 import { useVoice } from '../../contexts/VoiceContext';
 import { Button } from '@/components/ui/button';
-import { Mic, MicOff, Volume2, VolumeX, StopCircle, HelpCircle } from 'lucide-react';
+import { Mic, MicOff, Volume2, VolumeX, StopCircle, HelpCircle, BookOpen } from 'lucide-react';
 import {
   Tooltip,
   TooltipContent,
@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/tooltip';
 import { Slider } from '@/components/ui/slider';
 import { voiceAssistant } from '../../services/voiceAssistant';
+import { voiceTrainingService } from '../../services/voiceTrainingService';
 import {
   Dialog,
   DialogContent,
@@ -18,11 +19,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { useLocation } from 'react-router-dom';
 
 export const VoiceControls: React.FC = () => {
-  const { isVoiceEnabled, toggleVoice, stopSpeaking } = useVoice();
+  const { isVoiceEnabled, toggleVoice, stopSpeaking, speak } = useVoice();
   const [volume, setVolume] = React.useState(0.8);
   const [showVolumeSlider, setShowVolumeSlider] = React.useState(false);
+  const location = useLocation();
 
   const handleVolumeChange = (newVolume: number[]) => {
     const value = newVolume[0];
@@ -30,9 +33,39 @@ export const VoiceControls: React.FC = () => {
     voiceAssistant.setOptions({ volume: value });
   };
   
+  const getCurrentModule = () => {
+    const path = location.pathname;
+    const moduleMap: Record<string, string> = {
+      '/': 'dashboard',
+      '/organization': 'organization',
+      '/employees': 'employees',
+      '/recruitment': 'recruitment',
+      '/attendance': 'attendance',
+      '/payroll': 'payroll',
+      '/performance': 'performance',
+      '/learning': 'learning',
+      '/reports': 'reports',
+      '/helpdesk': 'helpdesk'
+    };
+    return moduleMap[path] || 'general';
+  };
+
   const getContextualHelp = () => {
-    // This function would generate contextual help based on the current route
-    // For now, we'll just provide general assistance information
+    const currentModule = getCurrentModule();
+    const training = voiceTrainingService.getModuleTraining(currentModule);
+    
+    if (training) {
+      return {
+        title: `${training.module} - Voice Assistant Guide`,
+        content: [
+          training.welcomeMessage,
+          training.navigationGuide,
+          ...training.actionInstructions,
+          ...training.tips
+        ]
+      };
+    }
+
     return {
       title: "Voice Assistant Guide",
       content: [
@@ -44,6 +77,17 @@ export const VoiceControls: React.FC = () => {
         "The assistant will proactively offer suggestions and best practices for HR processes.",
       ]
     };
+  };
+
+  const handleTrainingMode = () => {
+    const currentModule = getCurrentModule();
+    const guidance = voiceTrainingService.provideDetailedGuidance(currentModule);
+    
+    if (guidance) {
+      speak(`Entering training mode for ${currentModule}. ${guidance}`);
+    } else {
+      speak("Training mode activated. I'll provide comprehensive guidance as you navigate through the system. Each module has specific voice training tailored to its functionality.");
+    }
   };
 
   const helpInfo = getContextualHelp();
@@ -87,11 +131,23 @@ export const VoiceControls: React.FC = () => {
                 onClick={stopSpeaking} 
                 className="ml-1"
               >
-                <span className="sr-only">Stop speaking</span>
                 <StopCircle className="h-4 w-4 text-destructive" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>Stop speaking</TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant="outline" 
+                size="icon" 
+                onClick={handleTrainingMode}
+              >
+                <BookOpen className="h-4 w-4 text-blue-600" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Activate training mode</TooltipContent>
           </Tooltip>
 
           {showVolumeSlider && (
@@ -117,7 +173,7 @@ export const VoiceControls: React.FC = () => {
           <DialogHeader>
             <DialogTitle>{helpInfo.title}</DialogTitle>
             <DialogDescription>
-              Learn how to use the AI voice trainer effectively
+              Learn how to use the AI voice trainer effectively for this module
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 mt-4">
@@ -130,7 +186,7 @@ export const VoiceControls: React.FC = () => {
               ))}
             </ul>
             <p className="text-sm text-muted-foreground pt-2 border-t">
-              The AI Voice Trainer adapts to each module to provide contextual guidance. Try navigating between different HR modules to experience personalized assistance.
+              The AI Voice Trainer adapts to each module to provide contextual guidance. Use the training mode button for comprehensive module-specific instruction.
             </p>
           </div>
         </DialogContent>
