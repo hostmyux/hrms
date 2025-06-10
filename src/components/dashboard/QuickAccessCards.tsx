@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Calendar, BarChart, FileText, UserPlus, Star } from 'lucide-react';
@@ -119,7 +120,7 @@ export const QuickAccessCards: React.FC<QuickAccessCardsProps> = ({ onCardClick 
     const action = card?.isFavorite ? 'removed from' : 'added to';
     speak(`${card?.title} ${action} favorites`);
     
-    // Toast notification - fixed to use correct sonner syntax
+    // Toast notification - using correct sonner syntax
     const favoriteAction = card?.isFavorite ? 'removed from' : 'added to';
     toast(`${card?.title} ${favoriteAction} favorites`);
   };

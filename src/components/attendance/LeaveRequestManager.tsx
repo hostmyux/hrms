@@ -99,7 +99,7 @@ export const LeaveRequestManager: React.FC = () => {
     setLeaveRequests(prev => 
       prev.map(req => 
         req.id === requestId 
-          ? { ...req, status: 'approved', approvedBy: 'Current User', comments: approvalComments }
+          ? { ...req, status: 'approved' as const, approvedBy: 'Current User', comments: approvalComments }
           : req
       )
     );
@@ -120,7 +120,7 @@ export const LeaveRequestManager: React.FC = () => {
     setLeaveRequests(prev => 
       prev.map(req => 
         req.id === requestId 
-          ? { ...req, status: 'rejected', approvedBy: 'Current User', comments: approvalComments }
+          ? { ...req, status: 'rejected' as const, approvedBy: 'Current User', comments: approvalComments }
           : req
       )
     );
