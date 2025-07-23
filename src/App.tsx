@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { VoiceProvider } from "./contexts/VoiceContext";
 import { UserProvider } from "./contexts/UserContext";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { MainLayout } from "./components/layout/MainLayout";
 import Dashboard from "./pages/Dashboard";
 import Organization from "./pages/Organization";
@@ -23,141 +24,204 @@ import Notifications from "./pages/Notifications";
 import Calendar from "./pages/Calendar";
 import Documents from "./pages/Documents";
 import UserActionHistory from "./pages/UserActionHistory";
+import Login from "./pages/Login";
+import EmployeeDashboard from "./pages/EmployeeDashboard";
 
 const queryClient = new QueryClient();
+
+// Protected Route Component
+const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isAuthenticated } = useAuth();
+  
+  if (!isAuthenticated) {
+    return <Login />;
+  }
+  
+  return <>{children}</>;
+};
+
+// Dashboard Route Component
+const DashboardRoute: React.FC = () => {
+  const { user } = useAuth();
+  
+  if (user?.role === 'employee') {
+    return (
+      <MainLayout>
+        <EmployeeDashboard />
+      </MainLayout>
+    );
+  }
+  
+  return (
+    <MainLayout>
+      <Dashboard />
+    </MainLayout>
+  );
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <VoiceProvider>
         <UserProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
+          <AuthProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+              <Route path="/login" element={<Login />} />
               <Route 
                 path="/" 
                 element={
-                  <MainLayout>
-                    <Dashboard />
-                  </MainLayout>
+                  <ProtectedRoute>
+                    <DashboardRoute />
+                  </ProtectedRoute>
                 } 
               />
               <Route 
                 path="/organization" 
                 element={
-                  <MainLayout>
-                    <Organization />
-                  </MainLayout>
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <Organization />
+                    </MainLayout>
+                  </ProtectedRoute>
                 } 
               />
               <Route 
                 path="/employees" 
                 element={
-                  <MainLayout>
-                    <Employees />
-                  </MainLayout>
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <Employees />
+                    </MainLayout>
+                  </ProtectedRoute>
                 } 
               />
               <Route 
                 path="/recruitment" 
                 element={
-                  <MainLayout>
-                    <Recruitment />
-                  </MainLayout>
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <Recruitment />
+                    </MainLayout>
+                  </ProtectedRoute>
                 } 
               />
               <Route 
                 path="/attendance" 
                 element={
-                  <MainLayout>
-                    <Attendance />
-                  </MainLayout>
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <Attendance />
+                    </MainLayout>
+                  </ProtectedRoute>
                 } 
               />
               <Route 
                 path="/payroll" 
                 element={
-                  <MainLayout>
-                    <Payroll />
-                  </MainLayout>
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <Payroll />
+                    </MainLayout>
+                  </ProtectedRoute>
                 } 
               />
               <Route 
                 path="/performance" 
                 element={
-                  <MainLayout>
-                    <Performance />
-                  </MainLayout>
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <Performance />
+                    </MainLayout>
+                  </ProtectedRoute>
                 } 
               />
               <Route 
                 path="/learning" 
                 element={
-                  <MainLayout>
-                    <Learning />
-                  </MainLayout>
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <Learning />
+                    </MainLayout>
+                  </ProtectedRoute>
                 } 
               />
               <Route 
                 path="/reports" 
                 element={
-                  <MainLayout>
-                    <Reports />
-                  </MainLayout>
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <Reports />
+                    </MainLayout>
+                  </ProtectedRoute>
                 } 
               />
               <Route 
                 path="/helpdesk" 
                 element={
-                  <MainLayout>
-                    <Helpdesk />
-                  </MainLayout>
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <Helpdesk />
+                    </MainLayout>
+                  </ProtectedRoute>
                 } 
               />
               <Route 
                 path="/settings" 
                 element={
-                  <MainLayout>
-                    <Settings />
-                  </MainLayout>
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <Settings />
+                    </MainLayout>
+                  </ProtectedRoute>
                 } 
               />
               <Route 
                 path="/notifications" 
                 element={
-                  <MainLayout>
-                    <Notifications />
-                  </MainLayout>
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <Notifications />
+                    </MainLayout>
+                  </ProtectedRoute>
                 } 
               />
               <Route 
                 path="/calendar" 
                 element={
-                  <MainLayout>
-                    <Calendar />
-                  </MainLayout>
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <Calendar />
+                    </MainLayout>
+                  </ProtectedRoute>
                 } 
               />
               <Route 
                 path="/documents" 
                 element={
-                  <MainLayout>
-                    <Documents />
-                  </MainLayout>
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <Documents />
+                    </MainLayout>
+                  </ProtectedRoute>
                 } 
               />
               <Route 
                 path="/user-activity" 
                 element={
-                  <MainLayout>
-                    <UserActionHistory />
-                  </MainLayout>
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <UserActionHistory />
+                    </MainLayout>
+                  </ProtectedRoute>
                 } 
               />
               <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
+              </Routes>
+            </BrowserRouter>
+          </AuthProvider>
         </UserProvider>
       </VoiceProvider>
     </TooltipProvider>

@@ -1,12 +1,13 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Bell, Search, User, X, History } from 'lucide-react';
+import { Bell, Search, User, X, History, FileText, Briefcase } from 'lucide-react';
 import { useVoice } from '../../contexts/VoiceContext';
 import { useUser } from '../../contexts/UserContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useResponsive } from '../../hooks/useResponsive';
 import { Button } from '@/components/ui/button';
+import RoleSwitcher from './RoleSwitcher';
 
 export const Topbar: React.FC = () => {
   const { speak } = useVoice();
@@ -117,7 +118,7 @@ export const Topbar: React.FC = () => {
         </Link>
         
         <div className="h-8 w-px bg-border hidden md:block"></div>
-        <UserMenu />
+        <RoleSwitcher />
       </div>
     </header>
   );
@@ -338,5 +339,3 @@ const UserMenu: React.FC = () => {
   );
 };
 
-// Missing import for FileText and Briefcase
-import { FileText, Briefcase } from 'lucide-react';
