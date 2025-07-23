@@ -65,7 +65,7 @@ export const QuickAccessCards: React.FC<QuickAccessCardsProps> = ({ onCardClick 
 
   // Load saved preferences on component mount
   useEffect(() => {
-    const savedCards = localStorageService.getItem<QuickAccessCard[]>('quick_access_cards');
+    const savedCards = localStorageService.getItem<QuickAccessCard[]>('quick_access_cards', []);
     
     if (savedCards && savedCards.length > 0) {
       setCards(prevCards => {
