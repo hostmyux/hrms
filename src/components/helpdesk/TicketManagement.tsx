@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from '../../utils/toastHelpers';
 import { useVoice } from '../../contexts/VoiceContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -175,7 +175,7 @@ const fetchTickets = async (): Promise<Ticket[]> => {
 };
 
 export const TicketManagement: React.FC = () => {
-  const { toast } = useToast();
+  // Using toast from sonner import
   const { speak } = useVoice();
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [filteredTickets, setFilteredTickets] = useState<Ticket[]>([]);

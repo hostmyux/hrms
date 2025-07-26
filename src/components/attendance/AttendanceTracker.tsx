@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from '../../utils/toastHelpers';
 import { useVoice } from '../../contexts/VoiceContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -127,7 +127,7 @@ const fetchAttendance = async (month: Date, employeeId?: string): Promise<Employ
 };
 
 export const AttendanceTracker: React.FC = () => {
-  const { toast } = useToast();
+  // Using toast from sonner import
   const { speak } = useVoice();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedMonth, setSelectedMonth] = useState(new Date());

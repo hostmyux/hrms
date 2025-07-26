@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from '../../utils/toastHelpers';
 import { useVoice } from '../../contexts/VoiceContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -185,7 +185,7 @@ const fetchLeaveBalance = async (): Promise<LeaveBalance> => {
 };
 
 export const LeaveManagement: React.FC = () => {
-  const { toast } = useToast();
+  // Using toast from sonner import
   const { speak } = useVoice();
   const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>([]);
   const [leaveBalance, setLeaveBalance] = useState<LeaveBalance | null>(null);

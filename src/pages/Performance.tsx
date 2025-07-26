@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 import { useVoice } from '../contexts/VoiceContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { VoiceControls } from '../components/shared/VoiceControls';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
 import { GoalSetting } from '../components/performance/GoalSetting';
 import { Reviews } from '../components/performance/Reviews';
 import { Feedback } from '../components/performance/Feedback';
@@ -28,11 +28,7 @@ const Performance: React.FC = () => {
     };
     
     speak(tabMessages[value as keyof typeof tabMessages] || "");
-    toast({
-      title: `${value.charAt(0).toUpperCase() + value.slice(1)}`,
-      description: tabMessages[value as keyof typeof tabMessages] || "",
-      duration: 3000,
-    });
+    toast(`${value.charAt(0).toUpperCase() + value.slice(1)}: ${tabMessages[value as keyof typeof tabMessages] || ""}`);
   };
 
   return (

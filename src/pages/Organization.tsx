@@ -8,7 +8,7 @@ import { DesignationManagement } from '../components/organization/DesignationMan
 import { LocationManagement } from '../components/organization/LocationManagement';
 import { OrganizationChart } from '../components/organization/OrganizationChart';
 import { VoiceControls } from '../components/shared/VoiceControls';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
 
 const Organization: React.FC = () => {
   const { speak } = useVoice();
@@ -30,10 +30,8 @@ const Organization: React.FC = () => {
     };
     
     speak(tabMessages[value as keyof typeof tabMessages] || "");
-    toast({
-      title: "Tab changed",
-      description: `You are now viewing the ${value} tab`,
-      duration: 2000,
+    toast(`Tab changed: You are now viewing the ${value} tab`, {
+      description: tabMessages[value as keyof typeof tabMessages] || "",
     });
   };
 

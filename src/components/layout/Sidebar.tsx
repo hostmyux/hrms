@@ -3,7 +3,9 @@ import { useLocation } from 'react-router-dom';
 import { cn } from '../../lib/utils';
 import { useVoice } from '../../contexts/VoiceContext';
 import { useUser } from '../../contexts/UserContext';
+import { useAuth } from '../../contexts/AuthContext';
 import { useResponsive } from '../../hooks/useResponsive';
+import { canAccessRoute } from '../../utils/rolePermissions';
 import { 
   Users, Building, Briefcase, Clock, PieChart, BarChart, 
   Shield, Bell, Calendar, Folder, MessageSquare, 
@@ -20,6 +22,7 @@ export const Sidebar = () => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const { speak } = useVoice();
   const { addAction, preferences, updatePreferences } = useUser();
+  const { user } = useAuth();
   const { isMobile } = useResponsive();
 
   // Set collapsed state based on user preferences
@@ -130,104 +133,141 @@ export const Sidebar = () => {
             />
           </SidebarSection>
 
-          <SidebarSection title="Organization" isCollapsed={isCollapsed}>
-            <SidebarItem 
-              icon={<Building size={18} />} 
-              label="Organization" 
-              href="/organization" 
-              isActive={location.pathname.startsWith('/organization')}
-              onClick={() => handleNavigation("/organization", "Organization")}
-            />
-            <SidebarItem 
-              icon={<Users size={18} />} 
-              label="Employees" 
-              href="/employees" 
-              isActive={location.pathname.startsWith('/employees')}
-              onClick={() => handleNavigation("/employees", "Employees")}
-            />
-          </SidebarSection>
+          {user && canAccessRoute(user.role, '/organization') && (
+            <SidebarSection title="Organization" isCollapsed={isCollapsed}>
+              <SidebarItem 
+                icon={<Building size={18} />} 
+                label="Organization" 
+                href="/organization" 
+                isActive={location.pathname.startsWith('/organization')}
+                onClick={() => handleNavigation("/organization", "Organization")}
+              />
+              {canAccessRoute(user.role, '/employees') && (
+                <SidebarItem 
+                  icon={<Users size={18} />} 
+                  label="Employees" 
+                  href="/employees" 
+                  isActive={location.pathname.startsWith('/employees')}
+                  onClick={() => handleNavigation("/employees", "Employees")}
+                />
+              )}
+            </SidebarSection>
+          )}
 
-          <SidebarSection title="HR Processes" isCollapsed={isCollapsed}>
-            <SidebarItem 
-              icon={<UserPlus size={18} />} 
-              label="Recruitment" 
-              href="/recruitment" 
-              isActive={location.pathname.startsWith('/recruitment')}
-              onClick={() => handleNavigation("/recruitment", "Recruitment")}
-            />
-            <SidebarItem 
-              icon={<Clock size={18} />} 
-              label="Attendance" 
-              href="/attendance" 
-              isActive={location.pathname.startsWith('/attendance')}
-              onClick={() => handleNavigation("/attendance", "Attendance")}
-            />
-            <SidebarItem 
-              icon={<BarChart size={18} />} 
-              label="Performance" 
-              href="/performance" 
-              isActive={location.pathname.startsWith('/performance')}
-              onClick={() => handleNavigation("/performance", "Performance")}
-            />
-            <SidebarItem 
-              icon={<Briefcase size={18} />} 
-              label="Payroll" 
-              href="/payroll" 
-              isActive={location.pathname.startsWith('/payroll')}
-              onClick={() => handleNavigation("/payroll", "Payroll")}
-            />
-            <SidebarItem 
-              icon={<Book size={18} />} 
-              label="Learning" 
-              href="/learning" 
-              isActive={location.pathname.startsWith('/learning')}
-              onClick={() => handleNavigation("/learning", "Learning")}
-            />
-          </SidebarSection>
+          {user && (canAccessRoute(user.role, '/recruitment') || canAccessRoute(user.role, '/attendance') || canAccessRoute(user.role, '/performance') || canAccessRoute(user.role, '/payroll') || canAccessRoute(user.role, '/learning')) && (
+            <SidebarSection title="HR Processes" isCollapsed={isCollapsed}>
+              {canAccessRoute(user.role, '/recruitment') && (
+                <SidebarItem 
+                  icon={<UserPlus size={18} />} 
+                  label="Recruitment" 
+                  href="/recruitment" 
+                  isActive={location.pathname.startsWith('/recruitment')}
+                  onClick={() => handleNavigation("/recruitment", "Recruitment")}
+                />
+              )}
+              {canAccessRoute(user.role, '/attendance') && (
+                <SidebarItem 
+                  icon={<Clock size={18} />} 
+                  label="Attendance" 
+                  href="/attendance" 
+                  isActive={location.pathname.startsWith('/attendance')}
+                  onClick={() => handleNavigation("/attendance", "Attendance")}
+                />
+              )}
+              {canAccessRoute(user.role, '/performance') && (
+                <SidebarItem 
+                  icon={<BarChart size={18} />} 
+                  label="Performance" 
+                  href="/performance" 
+                  isActive={location.pathname.startsWith('/performance')}
+                  onClick={() => handleNavigation("/performance", "Performance")}
+                />
+              )}
+              {canAccessRoute(user.role, '/payroll') && (
+                <SidebarItem 
+                  icon={<Briefcase size={18} />} 
+                  label="Payroll" 
+                  href="/payroll" 
+                  isActive={location.pathname.startsWith('/payroll')}
+                  onClick={() => handleNavigation("/payroll", "Payroll")}
+                />
+              )}
+              {canAccessRoute(user.role, '/learning') && (
+                <SidebarItem 
+                  icon={<Book size={18} />} 
+                  label="Learning" 
+                  href="/learning" 
+                  isActive={location.pathname.startsWith('/learning')}
+                  onClick={() => handleNavigation("/learning", "Learning")}
+                />
+              )}
+            </SidebarSection>
+          )}
 
           <SidebarSection title="Tools" isCollapsed={isCollapsed}>
-            <SidebarItem 
-              icon={<MessageSquare size={18} />} 
-              label="HR Helpdesk" 
-              href="/helpdesk" 
-              isActive={location.pathname.startsWith('/helpdesk')}
-              onClick={() => handleNavigation("/helpdesk", "Helpdesk")}
-            />
-            <SidebarItem 
-              icon={<Bell size={18} />} 
-              label="Notifications" 
-              href="/notifications" 
-              isActive={location.pathname.startsWith('/notifications')}
-              onClick={() => handleNavigation("/notifications", "Notifications")}
-            />
-            <SidebarItem 
-              icon={<Calendar size={18} />} 
-              label="Calendar" 
-              href="/calendar" 
-              isActive={location.pathname.startsWith('/calendar')}
-              onClick={() => handleNavigation("/calendar", "Calendar")}
-            />
-            <SidebarItem 
-              icon={<Folder size={18} />} 
-              label="Documents" 
-              href="/documents" 
-              isActive={location.pathname.startsWith('/documents')}
-              onClick={() => handleNavigation("/documents", "Documents")}
-            />
-            <SidebarItem 
-              icon={<History size={18} />} 
-              label="User Activity" 
-              href="/user-activity" 
-              isActive={location.pathname.startsWith('/user-activity')}
-              onClick={() => handleNavigation("/user-activity", "User Activity")}
-            />
-            <SidebarItem 
-              icon={<Settings size={18} />} 
-              label="Settings" 
-              href="/settings" 
-              isActive={location.pathname.startsWith('/settings')}
-              onClick={() => handleNavigation("/settings", "Settings")}
-            />
+            {canAccessRoute(user.role, '/helpdesk') && (
+              <SidebarItem 
+                icon={<MessageSquare size={18} />} 
+                label="HR Helpdesk" 
+                href="/helpdesk" 
+                isActive={location.pathname.startsWith('/helpdesk')}
+                onClick={() => handleNavigation("/helpdesk", "Helpdesk")}
+              />
+            )}
+            {canAccessRoute(user.role, '/notifications') && (
+              <SidebarItem 
+                icon={<Bell size={18} />} 
+                label="Notifications" 
+                href="/notifications" 
+                isActive={location.pathname.startsWith('/notifications')}
+                onClick={() => handleNavigation("/notifications", "Notifications")}
+              />
+            )}
+            {canAccessRoute(user.role, '/calendar') && (
+              <SidebarItem 
+                icon={<Calendar size={18} />} 
+                label="Calendar" 
+                href="/calendar" 
+                isActive={location.pathname.startsWith('/calendar')}
+                onClick={() => handleNavigation("/calendar", "Calendar")}
+              />
+            )}
+            {canAccessRoute(user.role, '/documents') && (
+              <SidebarItem 
+                icon={<Folder size={18} />} 
+                label="Documents" 
+                href="/documents" 
+                isActive={location.pathname.startsWith('/documents')}
+                onClick={() => handleNavigation("/documents", "Documents")}
+              />
+            )}
+            {canAccessRoute(user.role, '/reports') && (
+              <SidebarItem 
+                icon={<BarChart size={18} />} 
+                label="Reports" 
+                href="/reports" 
+                isActive={location.pathname.startsWith('/reports')}
+                onClick={() => handleNavigation("/reports", "Reports")}
+              />
+            )}
+            {canAccessRoute(user.role, '/user-activity') && (
+              <SidebarItem 
+                icon={<History size={18} />} 
+                label="User Activity" 
+                href="/user-activity" 
+                isActive={location.pathname.startsWith('/user-activity')}
+                onClick={() => handleNavigation("/user-activity", "User Activity")}
+              />
+            )}
+            {canAccessRoute(user.role, '/settings') && (
+              <SidebarItem 
+                icon={<Settings size={18} />} 
+                label="Settings" 
+                href="/settings" 
+                isActive={location.pathname.startsWith('/settings')}
+                onClick={() => handleNavigation("/settings", "Settings")}
+              />
+            )}
           </SidebarSection>
         </div>
 

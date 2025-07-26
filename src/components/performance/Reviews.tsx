@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { CheckCircle, Clock, Edit, FileText, Plus, AlertCircle } from 'lucide-react';
 import { useVoice } from '../../contexts/VoiceContext';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from '../../utils/toastHelpers';
 import {
   Dialog,
   DialogContent,
@@ -70,7 +70,7 @@ interface ReviewFormData {
 
 export const Reviews: React.FC = () => {
   const { speak } = useVoice();
-  const { toast } = useToast();
+  // Using toast from sonner import
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);

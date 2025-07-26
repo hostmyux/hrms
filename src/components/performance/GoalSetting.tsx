@@ -6,7 +6,7 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 import { Edit, Plus, Target, Trash, AlertCircle } from 'lucide-react';
 import { useVoice } from '../../contexts/VoiceContext';
 import { Progress } from '@/components/ui/progress';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from '../../utils/toastHelpers';
 import {
   Dialog,
   DialogContent,
@@ -73,7 +73,7 @@ interface GoalFormData {
 
 export const GoalSetting: React.FC = () => {
   const { speak } = useVoice();
-  const { toast } = useToast();
+  // Using toast from sonner import
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);

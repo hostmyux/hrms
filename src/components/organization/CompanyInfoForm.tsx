@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "../../utils/toastHelpers";
 import { useVoice } from '../../contexts/VoiceContext';
 import { getCompanyInfo, updateCompanyInfo, type Company } from '../../services/organizationService';
 import { Card, CardContent } from '@/components/ui/card';
@@ -12,7 +12,7 @@ import { Separator } from '@/components/ui/separator';
 import { Building, Save, MapPin } from 'lucide-react';
 
 export const CompanyInfoForm: React.FC = () => {
-  const { toast } = useToast();
+  // Using toast from sonner import
   const { speak } = useVoice();
   const [isLoading, setIsLoading] = useState(true);
   const [companyData, setCompanyData] = useState<Company | null>(null);

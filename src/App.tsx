@@ -8,6 +8,7 @@ import { VoiceProvider } from "./contexts/VoiceContext";
 import { UserProvider } from "./contexts/UserContext";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { MainLayout } from "./components/layout/MainLayout";
+import { RoleBasedRoute } from "./components/layout/RoleBasedRoute";
 import Dashboard from "./pages/Dashboard";
 import Organization from "./pages/Organization";
 import Employees from "./pages/Employees";
@@ -83,7 +84,9 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <MainLayout>
-                      <Organization />
+                      <RoleBasedRoute route="/organization">
+                        <Organization />
+                      </RoleBasedRoute>
                     </MainLayout>
                   </ProtectedRoute>
                 } 
@@ -93,7 +96,9 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <MainLayout>
-                      <Employees />
+                      <RoleBasedRoute route="/employees">
+                        <Employees />
+                      </RoleBasedRoute>
                     </MainLayout>
                   </ProtectedRoute>
                 } 
@@ -103,7 +108,9 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <MainLayout>
-                      <Recruitment />
+                      <RoleBasedRoute route="/recruitment">
+                        <Recruitment />
+                      </RoleBasedRoute>
                     </MainLayout>
                   </ProtectedRoute>
                 } 
@@ -113,7 +120,9 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <MainLayout>
-                      <Attendance />
+                      <RoleBasedRoute route="/attendance">
+                        <Attendance />
+                      </RoleBasedRoute>
                     </MainLayout>
                   </ProtectedRoute>
                 } 
@@ -123,7 +132,9 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <MainLayout>
-                      <Payroll />
+                      <RoleBasedRoute route="/payroll">
+                        <Payroll />
+                      </RoleBasedRoute>
                     </MainLayout>
                   </ProtectedRoute>
                 } 
@@ -133,7 +144,9 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <MainLayout>
-                      <Performance />
+                      <RoleBasedRoute route="/performance">
+                        <Performance />
+                      </RoleBasedRoute>
                     </MainLayout>
                   </ProtectedRoute>
                 } 
@@ -143,7 +156,9 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <MainLayout>
-                      <Learning />
+                      <RoleBasedRoute route="/learning">
+                        <Learning />
+                      </RoleBasedRoute>
                     </MainLayout>
                   </ProtectedRoute>
                 } 
@@ -153,7 +168,9 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <MainLayout>
-                      <Reports />
+                      <RoleBasedRoute route="/reports">
+                        <Reports />
+                      </RoleBasedRoute>
                     </MainLayout>
                   </ProtectedRoute>
                 } 
@@ -163,7 +180,9 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <MainLayout>
-                      <Helpdesk />
+                      <RoleBasedRoute route="/helpdesk">
+                        <Helpdesk />
+                      </RoleBasedRoute>
                     </MainLayout>
                   </ProtectedRoute>
                 } 
@@ -173,7 +192,9 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <MainLayout>
-                      <Settings />
+                      <RoleBasedRoute route="/settings">
+                        <Settings />
+                      </RoleBasedRoute>
                     </MainLayout>
                   </ProtectedRoute>
                 } 
@@ -183,7 +204,9 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <MainLayout>
-                      <Notifications />
+                      <RoleBasedRoute route="/notifications">
+                        <Notifications />
+                      </RoleBasedRoute>
                     </MainLayout>
                   </ProtectedRoute>
                 } 
@@ -193,7 +216,9 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <MainLayout>
-                      <Calendar />
+                      <RoleBasedRoute route="/calendar">
+                        <Calendar />
+                      </RoleBasedRoute>
                     </MainLayout>
                   </ProtectedRoute>
                 } 
@@ -203,7 +228,9 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <MainLayout>
-                      <Documents />
+                      <RoleBasedRoute route="/documents">
+                        <Documents />
+                      </RoleBasedRoute>
                     </MainLayout>
                   </ProtectedRoute>
                 } 
@@ -213,7 +240,9 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <MainLayout>
-                      <UserActionHistory />
+                      <RoleBasedRoute route="/user-activity">
+                        <UserActionHistory />
+                      </RoleBasedRoute>
                     </MainLayout>
                   </ProtectedRoute>
                 } 

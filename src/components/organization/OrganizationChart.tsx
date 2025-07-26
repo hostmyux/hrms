@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from '../../utils/toastHelpers';
 import { useVoice } from '../../contexts/VoiceContext';
 import { getOrganizationChart, type OrgChartNode } from '../../services/organizationService';
 import { Card, CardContent } from '@/components/ui/card';
@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Network, ZoomIn, ZoomOut, RotateCw, Download } from 'lucide-react';
 
 export const OrganizationChart: React.FC = () => {
-  const { toast } = useToast();
+  // Using toast from sonner import
   const { speak } = useVoice();
   const [orgChart, setOrgChart] = useState<OrgChartNode | null>(null);
   const [isLoading, setIsLoading] = useState(true);

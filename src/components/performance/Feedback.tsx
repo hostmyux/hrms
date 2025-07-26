@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MessageSquare, Plus, ThumbsUp, User, Send } from 'lucide-react';
 import { useVoice } from '../../contexts/VoiceContext';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from '../../utils/toastHelpers';
 import {
   Dialog,
   DialogContent,
@@ -61,7 +61,7 @@ interface ResponseFormData {
 
 export const Feedback: React.FC = () => {
   const { speak } = useVoice();
-  const { toast } = useToast();
+  // Using toast from sonner import
   const [activeFeedbackTab, setActiveFeedbackTab] = useState('received');
   const [isAddFeedbackOpen, setIsAddFeedbackOpen] = useState(false);
   const [isRespondOpen, setIsRespondOpen] = useState(false);

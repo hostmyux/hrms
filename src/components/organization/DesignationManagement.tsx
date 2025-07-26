@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from '../../utils/toastHelpers';
 import { useVoice } from '../../contexts/VoiceContext';
 import { 
   getDesignations, 
@@ -59,7 +59,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 export const DesignationManagement: React.FC = () => {
-  const { toast } = useToast();
+  // Using toast from sonner import
   const { speak } = useVoice();
   const [designations, setDesignations] = useState<Designation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
