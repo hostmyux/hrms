@@ -1,702 +1,462 @@
 import React, { useEffect, useState } from 'react';
 import { useVoice } from '../contexts/VoiceContext';
+import { useAuth } from '../contexts/AuthContext';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { VoiceControls } from '../components/shared/VoiceControls';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Separator } from '@/components/ui/separator';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { localStorageService } from '../services/localStorageService';
 import { toast } from 'sonner';
+import { 
+  User, 
+  Shield, 
+  Bell, 
+  Volume2, 
+  Download,
+  Save,
+  AlertTriangle,
+  Trash2
+} from 'lucide-react';
 
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Calendar, Link, Settings as SettingsIcon, Cog, Info } from 'lucide-react';
-
-const profileFormSchema = z.object({
-  name: z.string().min(2, { message: "Name must be at least 2 characters." }),
-  email: z.string().email({ message: "Please enter a valid email address." }),
-  role: z.string({
-    required_error: "Please select a role.",
-  }),
-  bio: z.string().max(160).optional(),
-});
+interface UserSettings {
+  profile: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    department: string;
+    position: string;
+  };
+  notifications: {
+    emailNotifications: boolean;
+    pushNotifications: boolean;
+    leaveApprovals: boolean;
+    attendanceReminders: boolean;
+    systemUpdates: boolean;
+  };
+  privacy: {
+    profileVisibility: 'public' | 'team' | 'private';
+    contactVisibility: boolean;
+    activityTracking: boolean;
+  };
+  accessibility: {
+    voiceGuidance: boolean;
+    highContrast: boolean;
+    largeText: boolean;
+    reducedMotion: boolean;
+  };
+}
 
 const Settings: React.FC = () => {
   const { speak } = useVoice();
-  const [activeTab, setActiveTab] = useState('profile');
-  const [isVoiceEnabled, setIsVoiceEnabled] = useState(true);
-  const [emailNotifications, setEmailNotifications] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
-  
-  // Integration state
-  const [googleCalendarIntegration, setGoogleCalendarIntegration] = useState(false);
-  const [slackIntegration, setSlackIntegration] = useState(false);
-  const [teamsIntegration, setTeamsIntegration] = useState(false);
-  const [zapierIntegration, setZapierIntegration] = useState(false);
-  const [webhookUrl, setWebhookUrl] = useState('');
-
-  // Profile form
-  const form = useForm<z.infer<typeof profileFormSchema>>({
-    resolver: zodResolver(profileFormSchema),
-    defaultValues: {
-      name: "John Doe",
-      email: "john.doe@example.com",
-      role: "admin",
-      bio: "HR System Administrator with 5+ years of experience",
+  const { user, logout } = useAuth();
+  const [settings, setSettings] = useState<UserSettings>({
+    profile: {
+      firstName: user?.name?.split(' ')[0] || '',
+      lastName: user?.name?.split(' ').slice(1).join(' ') || '',
+      email: user?.email || '',
+      phone: '',
+      department: user?.department || '',
+      position: '',
+    },
+    notifications: {
+      emailNotifications: true,
+      pushNotifications: true,
+      leaveApprovals: true,
+      attendanceReminders: true,
+      systemUpdates: false,
+    },
+    privacy: {
+      profileVisibility: 'team',
+      contactVisibility: true,
+      activityTracking: true,
+    },
+    accessibility: {
+      voiceGuidance: true,
+      highContrast: false,
+      largeText: false,
+      reducedMotion: false,
     },
   });
 
   useEffect(() => {
-    speak("Settings module loaded. Here you can customize your account, notifications, system preferences, and third-party integrations.");
+    const savedSettings = localStorageService.getItem<UserSettings>('user_settings', settings);
+    setSettings(savedSettings);
+    speak("Settings page loaded. Configure your profile, notifications, privacy, and accessibility preferences.");
   }, [speak]);
 
-  const handleTabChange = (value: string) => {
-    setActiveTab(value);
-    
-    const tabMessages = {
-      'profile': "Profile settings. Update your personal information and account details.",
-      'notifications': "Notification settings. Configure how and when you receive alerts and updates.",
-      'appearance': "Appearance settings. Customize the look and feel of your interface.",
-      'security': "Security settings. Manage your password and security preferences.",
-      'integrations': "Integration settings. Connect the HR system with third-party services and applications.",
+  const handleSaveSettings = () => {
+    localStorageService.setItem('user_settings', settings);
+    toast.success("Settings saved successfully");
+    speak("Your settings have been saved successfully");
+  };
+
+  const handleExportData = () => {
+    const userData = {
+      profile: settings.profile,
+      settings: settings,
+      exportDate: new Date().toISOString(),
     };
     
-    speak(tabMessages[value as keyof typeof tabMessages] || "");
-  };
-
-  const handleToggleVoice = () => {
-    setIsVoiceEnabled(!isVoiceEnabled);
+    const dataStr = JSON.stringify(userData, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `user-data-export-${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
     
-    if (!isVoiceEnabled) {
-      speak("Voice assistant enabled");
-      toast.success("Voice assistant enabled");
-    } else {
-      speak("Voice assistant disabled");
-      toast.success("Voice assistant disabled");
+    toast.success("Data exported successfully");
+    speak("Your user data has been exported successfully");
+  };
+
+  const handleDeleteAccount = () => {
+    if (confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
+      localStorageService.clear();
+      logout();
+      toast.success("Account deleted successfully");
+      speak("Your account has been deleted successfully");
     }
   };
 
-  const handleToggleEmailNotifications = () => {
-    setEmailNotifications(!emailNotifications);
-    toast.success(`Email notifications ${!emailNotifications ? 'enabled' : 'disabled'}`);
-  };
-
-  const handleToggleDarkMode = () => {
-    setDarkMode(!darkMode);
-    toast.success(`Dark mode ${!darkMode ? 'enabled' : 'disabled'}`);
-  };
-
-  function onSubmitProfile(values: z.infer<typeof profileFormSchema>) {
-    console.log(values);
-    speak("Profile information has been updated successfully");
-    toast.success("Profile updated successfully");
-  }
-
-  const handleChangePassword = () => {
-    speak("Password changed successfully. Make sure to use a strong password that includes uppercase letters, lowercase letters, numbers, and special characters for maximum security.");
-    toast.success("Password changed successfully");
-  };
-
-  const handleToggleIntegration = (integration: string, currentState: boolean) => {
-    switch (integration) {
-      case 'google-calendar':
-        setGoogleCalendarIntegration(!currentState);
-        toast.success(`Google Calendar integration ${!currentState ? 'enabled' : 'disabled'}`);
-        speak(`Google Calendar integration ${!currentState ? 'enabled' : 'disabled'}`);
-        break;
-      case 'slack':
-        setSlackIntegration(!currentState);
-        toast.success(`Slack integration ${!currentState ? 'enabled' : 'disabled'}`);
-        speak(`Slack integration ${!currentState ? 'enabled' : 'disabled'}`);
-        break;
-      case 'teams':
-        setTeamsIntegration(!currentState);
-        toast.success(`Microsoft Teams integration ${!currentState ? 'enabled' : 'disabled'}`);
-        speak(`Microsoft Teams integration ${!currentState ? 'enabled' : 'disabled'}`);
-        break;
-      case 'zapier':
-        setZapierIntegration(!currentState);
-        toast.success(`Zapier integration ${!currentState ? 'enabled' : 'disabled'}`);
-        speak(`Zapier integration ${!currentState ? 'enabled' : 'disabled'}`);
-        break;
-      default:
-        break;
-    }
-  };
-
-  const handleSaveWebhook = () => {
-    if (!webhookUrl.trim()) {
-      toast.error("Please enter a valid webhook URL");
-      speak("Please enter a valid webhook URL");
-      return;
-    }
-    
-    toast.success("Webhook URL saved successfully");
-    speak("Webhook URL saved successfully");
+  const updateSettings = (section: keyof UserSettings, key: string, value: any) => {
+    setSettings(prev => ({
+      ...prev,
+      [section]: {
+        ...prev[section],
+        [key]: value,
+      },
+    }));
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
-          <p className="text-muted-foreground">
-            Manage your account settings and preferences.
-          </p>
-        </div>
-        <VoiceControls />
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
+        <p className="text-muted-foreground">
+          Manage your account settings and preferences.
+        </p>
       </div>
-      
-      <Tabs defaultValue="profile" value={activeTab} onValueChange={handleTabChange} className="space-y-4">
-        <TabsList className="flex flex-wrap">
-          <TabsTrigger value="profile">Profile</TabsTrigger>
-          <TabsTrigger value="notifications">Notifications</TabsTrigger>
-          <TabsTrigger value="appearance">Appearance</TabsTrigger>
-          <TabsTrigger value="security">Security</TabsTrigger>
-          <TabsTrigger value="integrations">Integrations</TabsTrigger>
+
+      <Tabs defaultValue="profile" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="profile" className="flex items-center gap-2">
+            <User className="h-4 w-4" />
+            Profile
+          </TabsTrigger>
+          <TabsTrigger value="notifications" className="flex items-center gap-2">
+            <Bell className="h-4 w-4" />
+            Notifications
+          </TabsTrigger>
+          <TabsTrigger value="privacy" className="flex items-center gap-2">
+            <Shield className="h-4 w-4" />
+            Privacy
+          </TabsTrigger>
+          <TabsTrigger value="accessibility" className="flex items-center gap-2">
+            <Volume2 className="h-4 w-4" />
+            Accessibility
+          </TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="profile" className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle>Profile Information</CardTitle>
               <CardDescription>
-                Update your profile details and preferences
+                Update your personal information and contact details.
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmitProfile)} className="space-y-8">
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Your name" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="firstName">First Name</Label>
+                  <Input
+                    id="firstName"
+                    value={settings.profile.firstName}
+                    onChange={(e) => updateSettings('profile', 'firstName', e.target.value)}
                   />
-                  
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Your email" type="email" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="lastName">Last Name</Label>
+                  <Input
+                    id="lastName"
+                    value={settings.profile.lastName}
+                    onChange={(e) => updateSettings('profile', 'lastName', e.target.value)}
                   />
-                  
-                  <FormField
-                    control={form.control}
-                    name="role"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Role</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a role" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="user">User</SelectItem>
-                            <SelectItem value="admin">Admin</SelectItem>
-                            <SelectItem value="hr_manager">HR Manager</SelectItem>
-                            <SelectItem value="department_head">Department Head</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={settings.profile.email}
+                    onChange={(e) => updateSettings('profile', 'email', e.target.value)}
                   />
-                  
-                  <FormField
-                    control={form.control}
-                    name="bio"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Bio</FormLabel>
-                        <FormControl>
-                          <textarea
-                            rows={3}
-                            className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                            placeholder="A brief description about yourself"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                        <FormDescription>
-                          Brief description for your profile. URLs are hyperlinked.
-                        </FormDescription>
-                      </FormItem>
-                    )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Phone</Label>
+                  <Input
+                    id="phone"
+                    value={settings.profile.phone}
+                    onChange={(e) => updateSettings('profile', 'phone', e.target.value)}
                   />
-                  
-                  <div className="flex justify-end">
-                    <Button type="submit">Update profile</Button>
-                  </div>
-                </form>
-              </Form>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="department">Department</Label>
+                  <Input
+                    id="department"
+                    value={settings.profile.department}
+                    onChange={(e) => updateSettings('profile', 'department', e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="position">Position</Label>
+                  <Input
+                    id="position"
+                    value={settings.profile.position}
+                    onChange={(e) => updateSettings('profile', 'position', e.target.value)}
+                  />
+                </div>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
-        
+
         <TabsContent value="notifications" className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle>Notification Preferences</CardTitle>
               <CardDescription>
-                Configure how and when you receive notifications
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="text-sm font-medium">Email Notifications</h4>
-                    <p className="text-sm text-muted-foreground">
-                      Receive email notifications for important updates
-                    </p>
-                  </div>
-                  <Switch 
-                    checked={emailNotifications} 
-                    onCheckedChange={handleToggleEmailNotifications}
-                  />
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="text-sm font-medium">Voice Assistant</h4>
-                    <p className="text-sm text-muted-foreground">
-                      Enable voice feedback for navigation and actions
-                    </p>
-                  </div>
-                  <Switch 
-                    checked={isVoiceEnabled} 
-                    onCheckedChange={handleToggleVoice}
-                  />
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="text-sm font-medium">Browser Notifications</h4>
-                    <p className="text-sm text-muted-foreground">
-                      Receive notifications when browser is in background
-                    </p>
-                  </div>
-                  <Switch defaultChecked />
-                </div>
-              </div>
-              
-              <div className="space-y-4">
-                <h4 className="text-sm font-medium">Notification Categories</h4>
-                
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="approval-notifications" className="flex flex-col">
-                      <span>Approval Requests</span>
-                      <span className="text-xs text-muted-foreground">
-                        Leave approvals, expense approvals, etc.
-                      </span>
-                    </Label>
-                    <Switch id="approval-notifications" defaultChecked />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="system-notifications" className="flex flex-col">
-                      <span>System Notifications</span>
-                      <span className="text-xs text-muted-foreground">
-                        Updates, maintenance, outages, etc.
-                      </span>
-                    </Label>
-                    <Switch id="system-notifications" defaultChecked />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="task-notifications" className="flex flex-col">
-                      <span>Task Reminders</span>
-                      <span className="text-xs text-muted-foreground">
-                        Deadlines, assignments, to-dos, etc.
-                      </span>
-                    </Label>
-                    <Switch id="task-notifications" defaultChecked />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="message-notifications" className="flex flex-col">
-                      <span>Messages</span>
-                      <span className="text-xs text-muted-foreground">
-                        Direct messages, mentions, comments, etc.
-                      </span>
-                    </Label>
-                    <Switch id="message-notifications" defaultChecked />
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button variant="outline" className="w-full">Save preferences</Button>
-            </CardFooter>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="appearance" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Appearance Settings</CardTitle>
-              <CardDescription>
-                Customize the look and feel of your interface
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="text-sm font-medium">Dark Mode</h4>
-                    <p className="text-sm text-muted-foreground">
-                      Switch between light and dark themes
-                    </p>
-                  </div>
-                  <Switch 
-                    checked={darkMode} 
-                    onCheckedChange={handleToggleDarkMode}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <h4 className="text-sm font-medium">Text Size</h4>
-                  <div className="flex items-center space-x-2">
-                    <span className="text-sm">A</span>
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      defaultValue="50"
-                      className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                    />
-                    <span className="text-lg">A</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="space-y-4">
-                <h4 className="text-sm font-medium">Color Theme</h4>
-                <div className="grid grid-cols-5 gap-2">
-                  {["bg-blue-500", "bg-green-500", "bg-purple-500", "bg-red-500", "bg-gray-500"].map((color, index) => (
-                    <div key={index} className={`h-10 rounded-md cursor-pointer ${color}`} />
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <h4 className="text-sm font-medium">Dashboard Layout</h4>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="border rounded-md p-2 cursor-pointer hover:bg-accent">
-                    <div className="space-y-2">
-                      <div className="h-4 bg-muted rounded"></div>
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="h-16 bg-muted rounded"></div>
-                        <div className="h-16 bg-muted rounded"></div>
-                      </div>
-                      <div className="h-12 bg-muted rounded"></div>
-                    </div>
-                    <p className="text-xs text-center mt-2">Compact</p>
-                  </div>
-                  <div className="border rounded-md p-2 cursor-pointer hover:bg-accent">
-                    <div className="space-y-2">
-                      <div className="h-4 bg-muted rounded"></div>
-                      <div className="h-16 bg-muted rounded"></div>
-                      <div className="h-16 bg-muted rounded"></div>
-                    </div>
-                    <p className="text-xs text-center mt-2">Expanded</p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button variant="outline" className="w-full">Save appearance</Button>
-            </CardFooter>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="security" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Password Settings</CardTitle>
-              <CardDescription>
-                Update your password and security preferences
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="current-password">Current Password</Label>
-                  <Input id="current-password" type="password" />
-                </div>
-                <div>
-                  <Label htmlFor="new-password">New Password</Label>
-                  <Input id="new-password" type="password" />
-                </div>
-                <div>
-                  <Label htmlFor="confirm-password">Confirm New Password</Label>
-                  <Input id="confirm-password" type="password" />
-                </div>
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button 
-                className="w-full"
-                onClick={handleChangePassword}
-              >
-                Change Password
-              </Button>
-            </CardFooter>
-          </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Two-Factor Authentication</CardTitle>
-              <CardDescription>
-                Add an extra layer of security to your account
+                Choose which notifications you want to receive.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
-                <div>
-                  <h4 className="text-sm font-medium">Two-Factor Authentication</h4>
+                <div className="space-y-0.5">
+                  <Label>Email Notifications</Label>
                   <p className="text-sm text-muted-foreground">
-                    Require a verification code when logging in
+                    Receive notifications via email
                   </p>
                 </div>
-                <Switch />
+                <Switch
+                  checked={settings.notifications.emailNotifications}
+                  onCheckedChange={(checked) => updateSettings('notifications', 'emailNotifications', checked)}
+                />
+              </div>
+              <Separator />
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>Push Notifications</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Receive push notifications in your browser
+                  </p>
+                </div>
+                <Switch
+                  checked={settings.notifications.pushNotifications}
+                  onCheckedChange={(checked) => updateSettings('notifications', 'pushNotifications', checked)}
+                />
+              </div>
+              <Separator />
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>Leave Approvals</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Get notified about leave request updates
+                  </p>
+                </div>
+                <Switch
+                  checked={settings.notifications.leaveApprovals}
+                  onCheckedChange={(checked) => updateSettings('notifications', 'leaveApprovals', checked)}
+                />
+              </div>
+              <Separator />
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>Attendance Reminders</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Reminders for check-in/check-out
+                  </p>
+                </div>
+                <Switch
+                  checked={settings.notifications.attendanceReminders}
+                  onCheckedChange={(checked) => updateSettings('notifications', 'attendanceReminders', checked)}
+                />
+              </div>
+              <Separator />
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>System Updates</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Notifications about system maintenance and updates
+                  </p>
+                </div>
+                <Switch
+                  checked={settings.notifications.systemUpdates}
+                  onCheckedChange={(checked) => updateSettings('notifications', 'systemUpdates', checked)}
+                />
               </div>
             </CardContent>
-            <CardFooter>
-              <Button variant="outline" className="w-full">Save security settings</Button>
-            </CardFooter>
           </Card>
         </TabsContent>
 
-        <TabsContent value="integrations" className="space-y-4">
+        <TabsContent value="privacy" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center">
-                <Link className="h-5 w-5 mr-2" />
-                Third-Party Integrations
-              </CardTitle>
+              <CardTitle>Privacy Settings</CardTitle>
               <CardDescription>
-                Connect your HR system with other tools and services
+                Control your privacy and data sharing preferences.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-4">
-                {/* Google Calendar integration */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-md border">
-                  <div className="flex items-start md:items-center gap-3">
-                    <div className="bg-blue-100 p-2 rounded-md">
-                      <Calendar className="h-6 w-6 text-blue-600" />
-                    </div>
-                    <div>
-                      <h4 className="font-medium">Google Calendar</h4>
-                      <p className="text-sm text-muted-foreground">
-                        Sync your HR events with Google Calendar
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Switch 
-                      checked={googleCalendarIntegration} 
-                      onCheckedChange={() => handleToggleIntegration('google-calendar', googleCalendarIntegration)} 
-                    />
-                    <Button 
-                      variant="outline" 
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label>Profile Visibility</Label>
+                <p className="text-sm text-muted-foreground">
+                  Who can see your profile information
+                </p>
+                <div className="flex gap-2">
+                  {['public', 'team', 'private'].map((option) => (
+                    <Button
+                      key={option}
+                      variant={settings.privacy.profileVisibility === option ? 'default' : 'outline'}
                       size="sm"
-                      disabled={!googleCalendarIntegration}
+                      onClick={() => updateSettings('privacy', 'profileVisibility', option)}
                     >
-                      Configure
+                      {option.charAt(0).toUpperCase() + option.slice(1)}
                     </Button>
-                  </div>
+                  ))}
                 </div>
-                
-                {/* Slack integration */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-md border">
-                  <div className="flex items-start md:items-center gap-3">
-                    <div className="bg-purple-100 p-2 rounded-md">
-                      <Link className="h-6 w-6 text-purple-600" />
-                    </div>
-                    <div>
-                      <h4 className="font-medium">Slack</h4>
-                      <p className="text-sm text-muted-foreground">
-                        Send HR notifications to Slack channels
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Switch 
-                      checked={slackIntegration} 
-                      onCheckedChange={() => handleToggleIntegration('slack', slackIntegration)} 
-                    />
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      disabled={!slackIntegration}
-                    >
-                      Configure
-                    </Button>
-                  </div>
+              </div>
+              <Separator />
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>Contact Information Visibility</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Allow others to see your contact information
+                  </p>
                 </div>
-                
-                {/* Microsoft Teams integration */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-md border">
-                  <div className="flex items-start md:items-center gap-3">
-                    <div className="bg-blue-100 p-2 rounded-md">
-                      <Link className="h-6 w-6 text-blue-600" />
-                    </div>
-                    <div>
-                      <h4 className="font-medium">Microsoft Teams</h4>
-                      <p className="text-sm text-muted-foreground">
-                        Connect HR system with Microsoft Teams
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Switch 
-                      checked={teamsIntegration} 
-                      onCheckedChange={() => handleToggleIntegration('teams', teamsIntegration)} 
-                    />
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      disabled={!teamsIntegration}
-                    >
-                      Configure
-                    </Button>
-                  </div>
+                <Switch
+                  checked={settings.privacy.contactVisibility}
+                  onCheckedChange={(checked) => updateSettings('privacy', 'contactVisibility', checked)}
+                />
+              </div>
+              <Separator />
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>Activity Tracking</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Allow the system to track your activity for analytics
+                  </p>
                 </div>
-
-                {/* Zapier integration */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-md border">
-                  <div className="flex items-start md:items-center gap-3">
-                    <div className="bg-orange-100 p-2 rounded-md">
-                      <Cog className="h-6 w-6 text-orange-600" />
-                    </div>
-                    <div>
-                      <h4 className="font-medium">Zapier</h4>
-                      <p className="text-sm text-muted-foreground">
-                        Automate workflows with 3000+ apps using Zapier
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Switch 
-                      checked={zapierIntegration} 
-                      onCheckedChange={() => handleToggleIntegration('zapier', zapierIntegration)} 
-                    />
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      disabled={!zapierIntegration}
-                    >
-                      Configure
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Webhook URL configuration */}
-                {zapierIntegration && (
-                  <div className="p-4 rounded-md border bg-muted/30 space-y-3">
-                    <h4 className="text-sm font-medium">Zapier Webhook URL</h4>
-                    <div className="flex gap-2">
-                      <Input 
-                        placeholder="Enter your Zapier webhook URL" 
-                        value={webhookUrl}
-                        onChange={(e) => setWebhookUrl(e.target.value)}
-                        className="flex-1"
-                      />
-                      <Button onClick={handleSaveWebhook}>Save</Button>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      This webhook will be triggered for important HR events and activities
-                    </p>
-                  </div>
-                )}
+                <Switch
+                  checked={settings.privacy.activityTracking}
+                  onCheckedChange={(checked) => updateSettings('privacy', 'activityTracking', checked)}
+                />
               </div>
             </CardContent>
-            <CardFooter>
-              <Button variant="outline" className="w-full">Save integration settings</Button>
-            </CardFooter>
           </Card>
+        </TabsContent>
 
+        <TabsContent value="accessibility" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center">
-                <SettingsIcon className="h-5 w-5 mr-2" />
-                API Access
-              </CardTitle>
+              <CardTitle>Accessibility Options</CardTitle>
               <CardDescription>
-                Manage API credentials for external systems
+                Configure accessibility features to improve your experience.
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h4 className="text-sm font-medium">API Access</h4>
-                    <p className="text-xs text-muted-foreground">
-                      Enable API access to your HR data
-                    </p>
-                  </div>
-                  <Switch />
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>Voice Guidance</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Enable comprehensive voice assistance
+                  </p>
                 </div>
-                
-                <div className="p-4 border rounded-md bg-muted/20">
-                  <h4 className="text-sm font-medium mb-2">API Key</h4>
-                  <div className="bg-muted p-2 rounded text-sm font-mono mb-2">
-                    ••••••••••••••••••••••••••••••
-                  </div>
-                  <div className="flex justify-end">
-                    <Button variant="outline" size="sm">
-                      Regenerate Key
-                    </Button>
-                  </div>
+                <Switch
+                  checked={settings.accessibility.voiceGuidance}
+                  onCheckedChange={(checked) => updateSettings('accessibility', 'voiceGuidance', checked)}
+                />
+              </div>
+              <Separator />
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>High Contrast Mode</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Increase contrast for better visibility
+                  </p>
                 </div>
-                
-                <p className="text-xs text-muted-foreground">
-                  Warning: Regenerating your API key will invalidate your existing key and require
-                  updating any integrations using the old key.
-                </p>
+                <Switch
+                  checked={settings.accessibility.highContrast}
+                  onCheckedChange={(checked) => updateSettings('accessibility', 'highContrast', checked)}
+                />
+              </div>
+              <Separator />
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>Large Text</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Increase text size for better readability
+                  </p>
+                </div>
+                <Switch
+                  checked={settings.accessibility.largeText}
+                  onCheckedChange={(checked) => updateSettings('accessibility', 'largeText', checked)}
+                />
+              </div>
+              <Separator />
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>Reduced Motion</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Minimize animations and transitions
+                  </p>
+                </div>
+                <Switch
+                  checked={settings.accessibility.reducedMotion}
+                  onCheckedChange={(checked) => updateSettings('accessibility', 'reducedMotion', checked)}
+                />
               </div>
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
+
+      <div className="flex justify-between">
+        <div className="flex gap-2">
+          <Button onClick={handleExportData} variant="outline">
+            <Download className="mr-2 h-4 w-4" />
+            Export Data
+          </Button>
+        </div>
+        <div className="flex gap-2">
+          <Button onClick={handleSaveSettings}>
+            <Save className="mr-2 h-4 w-4" />
+            Save Settings
+          </Button>
+        </div>
+      </div>
+
+      <Alert className="border-destructive">
+        <AlertTriangle className="h-4 w-4" />
+        <AlertDescription>
+          <div className="flex justify-between items-center">
+            <span>Delete your account and all associated data permanently.</span>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={handleDeleteAccount}
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete Account
+            </Button>
+          </div>
+        </AlertDescription>
+      </Alert>
     </div>
   );
 };

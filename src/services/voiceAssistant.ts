@@ -97,9 +97,11 @@ class VoiceAssistant {
       utterance.volume = this.speechUtterance.volume;
       utterance.voice = this.voice;
       
-      // Add error handling
+      // Add error handling with reduced logging
       utterance.onerror = (event) => {
-        console.error('Speech synthesis error:', event.error);
+        if (event.error !== 'interrupted' && event.error !== 'canceled') {
+          console.error('Speech synthesis error:', event.error);
+        }
       };
       
       this.speechSynthesis.speak(utterance);
