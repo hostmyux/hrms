@@ -32,6 +32,8 @@ const RoleSwitcher: React.FC = () => {
     switch (role) {
       case 'admin':
         return <Building2 className="h-4 w-4" />;
+      case 'hr_manager':
+        return <Users className="h-4 w-4" />;
       case 'manager':
         return <Users className="h-4 w-4" />;
       case 'employee':
@@ -45,8 +47,10 @@ const RoleSwitcher: React.FC = () => {
     switch (role) {
       case 'admin':
         return 'destructive' as const;
-      case 'manager':
+      case 'hr_manager':
         return 'default' as const;
+      case 'manager':
+        return 'outline' as const;
       case 'employee':
         return 'secondary' as const;
       default:
@@ -94,8 +98,15 @@ const RoleSwitcher: React.FC = () => {
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => handleRoleSwitch('manager')}>
           <Users className="mr-2 h-4 w-4" />
-          <span>Manager View</span>
+          <span>Department Manager</span>
           {user.role === 'manager' && (
+            <Badge variant="secondary" className="ml-auto text-xs">Current</Badge>
+          )}
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => handleRoleSwitch('hr_manager')}>
+          <Users className="mr-2 h-4 w-4" />
+          <span>HR Manager</span>
+          {user.role === 'hr_manager' && (
             <Badge variant="secondary" className="ml-auto text-xs">Current</Badge>
           )}
         </DropdownMenuItem>

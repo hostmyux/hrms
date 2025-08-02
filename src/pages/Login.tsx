@@ -14,7 +14,7 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [selectedRole, setSelectedRole] = useState<'admin' | 'employee' | 'manager'>('employee');
+  const [selectedRole, setSelectedRole] = useState<'admin' | 'employee' | 'manager' | 'hr_manager'>('employee');
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,7 +27,7 @@ const Login: React.FC = () => {
     navigate('/');
   };
 
-  const quickLogin = (role: 'admin' | 'employee' | 'manager') => {
+  const quickLogin = (role: 'admin' | 'employee' | 'manager' | 'hr_manager') => {
     switchRole(role);
     toast.success(`Quick login as ${role}`, {
       description: `Welcome to HRMS Nexus!`
@@ -83,7 +83,8 @@ const Login: React.FC = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="employee">Employee</SelectItem>
-                    <SelectItem value="manager">Manager</SelectItem>
+                    <SelectItem value="manager">Department Manager</SelectItem>
+                    <SelectItem value="hr_manager">HR Manager</SelectItem>
                     <SelectItem value="admin">Admin</SelectItem>
                   </SelectContent>
                 </Select>
@@ -120,7 +121,15 @@ const Login: React.FC = () => {
                 className="flex items-center gap-2"
               >
                 <Users className="h-4 w-4" />
-                Manager Dashboard
+                Department Manager
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => quickLogin('hr_manager')}
+                className="flex items-center gap-2"
+              >
+                <Users className="h-4 w-4" />
+                HR Manager
               </Button>
               <Button 
                 variant="outline" 

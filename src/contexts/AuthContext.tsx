@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { localStorageService } from '../services/localStorageService';
 
-export type UserRole = 'admin' | 'employee' | 'manager';
+export type UserRole = 'admin' | 'employee' | 'manager' | 'hr_manager';
 
 export interface User {
   id: string;
@@ -24,6 +24,7 @@ interface AuthContextType {
   isAdmin: boolean;
   isEmployee: boolean;
   isManager: boolean;
+  isHRManager: boolean;
 }
 
 const defaultUsers: User[] = [
@@ -56,6 +57,16 @@ const defaultUsers: User[] = [
     employeeId: 'EMP003',
     joinDate: '2023-02-10',
     phone: '+1-555-0103'
+  },
+  {
+    id: '4',
+    name: 'Sarah HR Manager',
+    email: 'sarah@company.com',
+    role: 'hr_manager',
+    department: 'Human Resources',
+    employeeId: 'EMP004',
+    joinDate: '2023-01-20',
+    phone: '+1-555-0104'
   }
 ];
 
@@ -105,7 +116,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isAuthenticated: !!user,
     isAdmin: user?.role === 'admin',
     isEmployee: user?.role === 'employee',
-    isManager: user?.role === 'manager'
+    isManager: user?.role === 'manager',
+    isHRManager: user?.role === 'hr_manager'
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

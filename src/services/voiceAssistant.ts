@@ -61,7 +61,7 @@ class VoiceAssistant {
         this.voice = femaleEnVoice || anyEnVoice || voices[0];
         this.speechUtterance.voice = this.voice;
         
-        console.log('Voice assistant initialized with voice:', this.voice?.name);
+        // Voice assistant initialized with voice
       }
     } catch (error) {
       console.error('Error loading voices:', error);

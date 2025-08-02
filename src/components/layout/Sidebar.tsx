@@ -133,7 +133,7 @@ export const Sidebar = () => {
             />
           </SidebarSection>
 
-          {user && canAccessRoute(user.role, '/organization') && (
+          {user && (canAccessRoute(user.role, '/organization') || user.role === 'hr_manager') && (
             <SidebarSection title="Organization" isCollapsed={isCollapsed}>
               <SidebarItem 
                 icon={<Building size={18} />} 
@@ -142,7 +142,7 @@ export const Sidebar = () => {
                 isActive={location.pathname.startsWith('/organization')}
                 onClick={() => handleNavigation("/organization", "Organization")}
               />
-              {canAccessRoute(user.role, '/employees') && (
+              {(canAccessRoute(user.role, '/employees') || user.role === 'hr_manager') && (
                 <SidebarItem 
                   icon={<Users size={18} />} 
                   label="Employees" 
@@ -154,9 +154,9 @@ export const Sidebar = () => {
             </SidebarSection>
           )}
 
-          {user && (canAccessRoute(user.role, '/recruitment') || canAccessRoute(user.role, '/attendance') || canAccessRoute(user.role, '/performance') || canAccessRoute(user.role, '/payroll') || canAccessRoute(user.role, '/learning')) && (
+          {user && (canAccessRoute(user.role, '/recruitment') || canAccessRoute(user.role, '/attendance') || canAccessRoute(user.role, '/performance') || canAccessRoute(user.role, '/payroll') || canAccessRoute(user.role, '/learning') || user.role === 'hr_manager') && (
             <SidebarSection title="HR Processes" isCollapsed={isCollapsed}>
-              {canAccessRoute(user.role, '/recruitment') && (
+              {(canAccessRoute(user.role, '/recruitment') || user.role === 'hr_manager') && (
                 <SidebarItem 
                   icon={<UserPlus size={18} />} 
                   label="Recruitment" 
@@ -183,7 +183,7 @@ export const Sidebar = () => {
                   onClick={() => handleNavigation("/performance", "Performance")}
                 />
               )}
-              {canAccessRoute(user.role, '/payroll') && (
+              {(canAccessRoute(user.role, '/payroll') || user.role === 'hr_manager') && (
                 <SidebarItem 
                   icon={<Briefcase size={18} />} 
                   label="Payroll" 

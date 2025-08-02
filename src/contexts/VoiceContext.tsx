@@ -32,7 +32,7 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
         const enabled = voiceAssistant.isVoiceEnabled();
         setIsVoiceEnabled(enabled);
         setIsInitialized(true);
-        console.log('Voice assistant initialized successfully:', enabled);
+        // Voice assistant initialized successfully
       } catch (error) {
         console.error('Error initializing voice assistant:', error);
         setIsVoiceEnabled(false);
