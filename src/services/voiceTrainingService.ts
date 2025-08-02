@@ -160,6 +160,40 @@ class VoiceTrainingService {
       ]
     });
 
+    // Calendar training
+    this.trainingModules.set('calendar', {
+      module: 'Calendar Management',
+      welcomeMessage: 'Calendar management provides comprehensive tools for scheduling, event management, meeting coordination, and time-based planning with full responsive design.',
+      navigationGuide: 'Access detailed event creation, scheduling management, meeting coordination, reminder systems, and comprehensive calendar views with month and day display options.',
+      actionInstructions: [
+        'Create new events using the responsive Add Event button with comprehensive details including title, description, and attendees',
+        'Switch between month and day views to get different perspectives on your schedule',
+        'Search for specific events using the search bar to quickly locate meetings and appointments',
+        'Filter events by type including meetings, tasks, and reminders for focused viewing',
+        'Edit existing events by clicking on them to access the full-featured dialog with all event details',
+        'Use the calendar sidebar to navigate between dates and get quick event overviews'
+      ],
+      tips: [
+        'Month view provides a comprehensive overview of all events across the month',
+        'Day view shows detailed hourly scheduling for focused daily planning',
+        'Event types help categorize and organize different kinds of appointments',
+        'Search functionality allows quick location of specific events or topics',
+        'Attendee management helps coordinate meetings with multiple participants',
+        'All calendar interfaces are mobile-responsive for on-the-go scheduling'
+      ],
+      shortcuts: [
+        'Click directly on calendar dates to quickly add events for that day',
+        'Use keyboard navigation to move through calendar dates efficiently',
+        'Filter controls provide quick access to specific event types'
+      ],
+      commonTasks: [
+        'Schedule new meetings and appointments with detailed information',
+        'Review upcoming events and daily schedules',
+        'Coordinate meetings with multiple attendees and participants',
+        'Manage recurring events and appointment series'
+      ]
+    });
+
     // Add more modules with similar comprehensive detail
     this.trainingModules.set('employees', {
       module: 'Employee Management',

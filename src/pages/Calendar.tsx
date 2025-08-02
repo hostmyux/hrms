@@ -28,7 +28,7 @@ export interface Event {
 }
 
 const Calendar: React.FC = () => {
-  const { speak } = useVoice();
+  const { speak, provideModuleGuidance } = useVoice();
   const [date, setDate] = useState<Date>(new Date());
   const [events, setEvents] = useState<Event[]>([]);
   const [mode, setMode] = useState<'month' | 'day'>('month');
@@ -83,8 +83,9 @@ const Calendar: React.FC = () => {
     ];
 
     setEvents(sampleEvents);
-    speak("Calendar page loaded. You have 5 upcoming events this week. Use the controls to add new events, switch between month and day view, or search for specific events.");
-  }, [speak]);
+    // Provide initial voice guidance
+    provideModuleGuidance('calendar');
+  }, [provideModuleGuidance]);
 
   const handleDateChange = (newDate: Date | undefined) => {
     if (newDate) {
