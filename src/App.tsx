@@ -63,9 +63,9 @@ const DashboardRoute: React.FC = () => {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <VoiceProvider>
-        <UserProvider>
-          <AuthProvider>
+      <AuthProvider>
+        <VoiceProvider>
+          <UserProvider>
             <Toaster />
             <Sonner />
             <BrowserRouter>
@@ -250,9 +250,9 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
-          </AuthProvider>
-        </UserProvider>
-      </VoiceProvider>
+          </UserProvider>
+        </VoiceProvider>
+      </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
