@@ -30,35 +30,224 @@ import EmployeeDashboard from "./pages/EmployeeDashboard";
 
 const queryClient = new QueryClient();
 
-// Protected Route Component
-const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated } = useAuth();
-  
-  if (!isAuthenticated) {
-    return <Login />;
-  }
-  
-  return <>{children}</>;
-};
+// Move component definitions inside the provider tree
+const AppRoutes: React.FC = () => {
+  // Protected Route Component
+  const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const { isAuthenticated } = useAuth();
+    
+    if (!isAuthenticated) {
+      return <Login />;
+    }
+    
+    return <>{children}</>;
+  };
 
-// Dashboard Route Component
-const DashboardRoute: React.FC = () => {
-  const { user } = useAuth();
-  
-  if (user?.role === 'employee') {
+  // Dashboard Route Component
+  const DashboardRoute: React.FC = () => {
+    const { user } = useAuth();
+    
+    if (user?.role === 'employee') {
+      return (
+        <MainLayout>
+          <EmployeeDashboard />
+        </MainLayout>
+      );
+    }
+    
     return (
       <MainLayout>
-        <EmployeeDashboard />
+        <Dashboard />
       </MainLayout>
     );
-  }
-  
+  };
+
   return (
-    <MainLayout>
-      <Dashboard />
-    </MainLayout>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route 
+          path="/" 
+          element={
+            <ProtectedRoute>
+              <DashboardRoute />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/organization" 
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <RoleBasedRoute route="/organization">
+                  <Organization />
+                </RoleBasedRoute>
+              </MainLayout>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/employees" 
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <RoleBasedRoute route="/employees">
+                  <Employees />
+                </RoleBasedRoute>
+              </MainLayout>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/recruitment" 
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <RoleBasedRoute route="/recruitment">
+                  <Recruitment />
+                </RoleBasedRoute>
+              </MainLayout>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/attendance" 
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <RoleBasedRoute route="/attendance">
+                  <Attendance />
+                </RoleBasedRoute>
+              </MainLayout>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/payroll" 
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <RoleBasedRoute route="/payroll">
+                  <Payroll />
+                </RoleBasedRoute>
+              </MainLayout>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/performance" 
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <RoleBasedRoute route="/performance">
+                  <Performance />
+                </RoleBasedRoute>
+              </MainLayout>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/learning" 
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <RoleBasedRoute route="/learning">
+                  <Learning />
+                </RoleBasedRoute>
+              </MainLayout>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/reports" 
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <RoleBasedRoute route="/reports">
+                  <Reports />
+                </RoleBasedRoute>
+              </MainLayout>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/helpdesk" 
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <RoleBasedRoute route="/helpdesk">
+                  <Helpdesk />
+                </RoleBasedRoute>
+              </MainLayout>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/settings" 
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <RoleBasedRoute route="/settings">
+                  <Settings />
+                </RoleBasedRoute>
+              </MainLayout>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/notifications" 
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <RoleBasedRoute route="/notifications">
+                  <Notifications />
+                </RoleBasedRoute>
+              </MainLayout>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/calendar" 
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <RoleBasedRoute route="/calendar">
+                  <Calendar />
+                </RoleBasedRoute>
+              </MainLayout>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/documents" 
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <RoleBasedRoute route="/documents">
+                  <Documents />
+                </RoleBasedRoute>
+              </MainLayout>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/user-activity" 
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <RoleBasedRoute route="/user-activity">
+                  <UserActionHistory />
+                </RoleBasedRoute>
+              </MainLayout>
+            </ProtectedRoute>
+          } 
+        />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </BrowserRouter>
   );
 };
+
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -68,188 +257,7 @@ const App = () => (
           <UserProvider>
             <Toaster />
             <Sonner />
-            <BrowserRouter>
-              <Routes>
-              <Route path="/login" element={<Login />} />
-              <Route 
-                path="/" 
-                element={
-                  <ProtectedRoute>
-                    <DashboardRoute />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/organization" 
-                element={
-                  <ProtectedRoute>
-                    <MainLayout>
-                      <RoleBasedRoute route="/organization">
-                        <Organization />
-                      </RoleBasedRoute>
-                    </MainLayout>
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/employees" 
-                element={
-                  <ProtectedRoute>
-                    <MainLayout>
-                      <RoleBasedRoute route="/employees">
-                        <Employees />
-                      </RoleBasedRoute>
-                    </MainLayout>
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/recruitment" 
-                element={
-                  <ProtectedRoute>
-                    <MainLayout>
-                      <RoleBasedRoute route="/recruitment">
-                        <Recruitment />
-                      </RoleBasedRoute>
-                    </MainLayout>
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/attendance" 
-                element={
-                  <ProtectedRoute>
-                    <MainLayout>
-                      <RoleBasedRoute route="/attendance">
-                        <Attendance />
-                      </RoleBasedRoute>
-                    </MainLayout>
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/payroll" 
-                element={
-                  <ProtectedRoute>
-                    <MainLayout>
-                      <RoleBasedRoute route="/payroll">
-                        <Payroll />
-                      </RoleBasedRoute>
-                    </MainLayout>
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/performance" 
-                element={
-                  <ProtectedRoute>
-                    <MainLayout>
-                      <RoleBasedRoute route="/performance">
-                        <Performance />
-                      </RoleBasedRoute>
-                    </MainLayout>
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/learning" 
-                element={
-                  <ProtectedRoute>
-                    <MainLayout>
-                      <RoleBasedRoute route="/learning">
-                        <Learning />
-                      </RoleBasedRoute>
-                    </MainLayout>
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/reports" 
-                element={
-                  <ProtectedRoute>
-                    <MainLayout>
-                      <RoleBasedRoute route="/reports">
-                        <Reports />
-                      </RoleBasedRoute>
-                    </MainLayout>
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/helpdesk" 
-                element={
-                  <ProtectedRoute>
-                    <MainLayout>
-                      <RoleBasedRoute route="/helpdesk">
-                        <Helpdesk />
-                      </RoleBasedRoute>
-                    </MainLayout>
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/settings" 
-                element={
-                  <ProtectedRoute>
-                    <MainLayout>
-                      <RoleBasedRoute route="/settings">
-                        <Settings />
-                      </RoleBasedRoute>
-                    </MainLayout>
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/notifications" 
-                element={
-                  <ProtectedRoute>
-                    <MainLayout>
-                      <RoleBasedRoute route="/notifications">
-                        <Notifications />
-                      </RoleBasedRoute>
-                    </MainLayout>
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/calendar" 
-                element={
-                  <ProtectedRoute>
-                    <MainLayout>
-                      <RoleBasedRoute route="/calendar">
-                        <Calendar />
-                      </RoleBasedRoute>
-                    </MainLayout>
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/documents" 
-                element={
-                  <ProtectedRoute>
-                    <MainLayout>
-                      <RoleBasedRoute route="/documents">
-                        <Documents />
-                      </RoleBasedRoute>
-                    </MainLayout>
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/user-activity" 
-                element={
-                  <ProtectedRoute>
-                    <MainLayout>
-                      <RoleBasedRoute route="/user-activity">
-                        <UserActionHistory />
-                      </RoleBasedRoute>
-                    </MainLayout>
-                  </ProtectedRoute>
-                } 
-              />
-              <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrowserRouter>
+            <AppRoutes />
           </UserProvider>
         </VoiceProvider>
       </AuthProvider>
