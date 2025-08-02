@@ -14,6 +14,7 @@ interface VoiceContextType {
 const VoiceContext = createContext<VoiceContextType | undefined>(undefined);
 
 export function VoiceProvider({ children }: { children: React.ReactNode }) {
+  console.log('VoiceProvider: Rendering with children:', !!children);
   const [isVoiceEnabled, setIsVoiceEnabled] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
 
@@ -120,13 +121,25 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
     provideActionGuidance
   };
 
+  console.log('VoiceProvider: Providing context value:', value);
+  
   return <VoiceContext.Provider value={value}>{children}</VoiceContext.Provider>;
 }
 
 export function useVoice() {
   const context = useContext(VoiceContext);
+  console.log('useVoice: Context value:', context);
   if (context === undefined) {
-    throw new Error('useVoice must be used within a VoiceProvider');
+    console.error('useVoice: Context is undefined! VoiceProvider not found in component tree.');
+    // Instead of throwing, return a default implementation
+    return {
+      isVoiceEnabled: false,
+      toggleVoice: () => {},
+      speak: () => {},
+      stopSpeaking: () => {},
+      provideModuleGuidance: () => {},
+      provideActionGuidance: () => {}
+    };
   }
   return context;
 }
