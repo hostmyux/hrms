@@ -103,9 +103,9 @@ export const Sidebar = () => {
       >
         <div className="flex items-center px-4 py-5 border-b border-border">
           {!isCollapsed ? (
-            <h1 className="text-xl font-bold text-hrms-primary">HRMS Nexus</h1>
+            <h1 className="text-xl font-bold text-primary">HRMS Nexus</h1>
           ) : (
-            <h1 className="text-lg font-bold text-hrms-primary mx-auto">HN</h1>
+            <h1 className="text-lg font-bold text-primary mx-auto">HN</h1>
           )}
           <button 
             className={cn(

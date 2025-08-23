@@ -21,7 +21,7 @@ export const SidebarFooter: React.FC<SidebarFooterProps> = ({ isCollapsed }) => 
       <div className="flex items-center gap-3">
         {!isCollapsed && (
           <>
-            <div className="w-8 h-8 rounded-full bg-hrms-primary/20 flex items-center justify-center text-hrms-primary">
+            <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary">
               <User size={18} />
             </div>
             <div className="flex-1 min-w-0">
@@ -33,7 +33,7 @@ export const SidebarFooter: React.FC<SidebarFooterProps> = ({ isCollapsed }) => 
         <button 
           className={cn(
             "ml-auto w-8 h-8 rounded-full flex items-center justify-center",
-            isVoiceEnabled ? "bg-hrms-primary text-white" : "bg-muted text-muted-foreground"
+            isVoiceEnabled ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
           )}
           onClick={handleToggleVoice}
           title={isVoiceEnabled ? "Disable voice guidance" : "Enable voice guidance"}

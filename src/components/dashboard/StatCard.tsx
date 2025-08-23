@@ -45,7 +45,7 @@ export const StatCard: React.FC<StatCardProps> = ({
           <h3 className="text-2xl font-bold">{value}</h3>
           {description && <p className="text-xs text-muted-foreground">{description}</p>}
         </div>
-        <div className="p-2 bg-hrms-primary/10 rounded-full text-hrms-primary">
+        <div className="p-2 bg-primary/10 rounded-full text-primary">
           {icon}
         </div>
       </div>
@@ -54,7 +54,7 @@ export const StatCard: React.FC<StatCardProps> = ({
         <div className="flex items-center mt-4">
           <span className={cn(
             "text-xs font-medium mr-1",
-            trend.isPositive ? "text-green-500" : "text-red-500"
+            trend.isPositive ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
           )}>
             {trend.isPositive ? '+' : ''}{trend.value}%
           </span>

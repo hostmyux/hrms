@@ -305,7 +305,7 @@ const UserMenu: React.FC = () => {
         className="flex items-center gap-2 hover:bg-accent p-1 rounded-md"
         onClick={toggleMenu}
       >
-        <div className="w-8 h-8 rounded-full bg-hrms-primary/20 flex items-center justify-center text-hrms-primary">
+        <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary">
           <User size={18} />
         </div>
         <span className="text-sm font-medium">Admin</span>

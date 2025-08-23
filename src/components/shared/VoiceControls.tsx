@@ -164,7 +164,7 @@ export const VoiceControls: React.FC = () => {
                 onClick={handleTrainingMode}
                 className="h-8 w-8 sm:h-10 sm:w-10"
               >
-                <BookOpen className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
+                <BookOpen className="h-3 w-3 sm:h-4 sm:w-4 text-secondary" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>Activate comprehensive training mode</TooltipContent>
@@ -178,7 +178,7 @@ export const VoiceControls: React.FC = () => {
                 onClick={handleResponsiveInfo}
                 className="h-8 w-8 sm:h-10 sm:w-10"
               >
-                <Smartphone className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
+                <Smartphone className="h-3 w-3 sm:h-4 sm:w-4 text-accent-foreground" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>Get responsive design guidance</TooltipContent>

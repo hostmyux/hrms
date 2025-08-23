@@ -6,9 +6,11 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { VoiceProvider } from "./contexts/VoiceContext";
 import { UserProvider } from "./contexts/UserContext";
-import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { AuthProvider } from "./contexts/AuthContext";
 import { MainLayout } from "./components/layout/MainLayout";
 import { RoleBasedRoute } from "./components/layout/RoleBasedRoute";
+import { ProtectedRoute } from "./components/layout/ProtectedRoute";
+import { DashboardRoute } from "./components/layout/DashboardRoute";
 import Dashboard from "./pages/Dashboard";
 import Organization from "./pages/Organization";
 import Employees from "./pages/Employees";
@@ -30,38 +32,7 @@ import EmployeeDashboard from "./pages/EmployeeDashboard";
 
 const queryClient = new QueryClient();
 
-// Move component definitions inside the provider tree
 const AppRoutes: React.FC = () => {
-  // Protected Route Component
-  const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const { isAuthenticated } = useAuth();
-    
-    if (!isAuthenticated) {
-      return <Login />;
-    }
-    
-    return <>{children}</>;
-  };
-
-  // Dashboard Route Component
-  const DashboardRoute: React.FC = () => {
-    const { user } = useAuth();
-    
-    if (user?.role === 'employee') {
-      return (
-        <MainLayout>
-          <EmployeeDashboard />
-        </MainLayout>
-      );
-    }
-    
-    return (
-      <MainLayout>
-        <Dashboard />
-      </MainLayout>
-    );
-  };
-
   return (
     <BrowserRouter>
       <Routes>
