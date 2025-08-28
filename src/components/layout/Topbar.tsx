@@ -50,7 +50,22 @@ export const Topbar: React.FC = () => {
           <SearchBar />
         </div>
       )}
-      <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4">
+        <Button 
+          variant="outline" 
+          className="hidden sm:flex"
+          onClick={() => {
+            window.open('https://skillsim.vercel.app/dashboard', '_self');
+            addAction({
+              type: "navigation",
+              description: "Accessed Master Dashboard",
+              module: "External Dashboard"
+            });
+          }}
+        >
+          Master Dashboard
+        </Button>
+        
         <div className="relative" ref={notificationsRef}>
           <button 
             className="p-2 rounded-full hover:bg-accent relative"

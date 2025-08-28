@@ -8,17 +8,20 @@ import { QuickAccessCards } from '../components/dashboard/QuickAccessCards';
 import { RecentContent } from '../components/dashboard/RecentContent';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { toast } from 'sonner';
 import { localStorageService } from '../services/localStorageService';
 import { useResponsive } from '../hooks/useResponsive';
-import { Calendar, Clock } from 'lucide-react';
+import { Calendar, Clock, Download, Shield } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 const Dashboard: React.FC = () => {
   const { speak } = useVoice();
   const { addAction } = useUser();
   const navigate = useNavigate();
   const { isMobile } = useResponsive();
+  const { user } = useAuth();
   
   // Demo data
   const [dashboardData, setDashboardData] = useState({
@@ -215,13 +218,86 @@ const Dashboard: React.FC = () => {
         </CardFooter>
       </Card>
       
-      <RecentContent 
-        employees={demoEmployees}
-        activities={demoActivities}
-        onAddEmployeeClick={handleAddEmployeeClick}
-        onViewAllEmployees={handleViewAllEmployees}
-        onViewAllActivities={handleViewAllActivities}
-      />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <RecentContent 
+            employees={demoEmployees}
+            activities={demoActivities}
+            onAddEmployeeClick={handleAddEmployeeClick}
+            onViewAllEmployees={handleViewAllEmployees}
+            onViewAllActivities={handleViewAllActivities}
+          />
+          
+          <div className="space-y-6">
+            {/* Enterprise Features for Admin Users */}
+            {user?.role === 'admin' && (
+              <>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Quick Admin Actions</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start" 
+                      onClick={() => {
+                        navigate('/admin');
+                        addAction({
+                          type: "navigation",
+                          description: "Accessed admin panel",
+                          module: "Administration"
+                        });
+                      }}
+                    >
+                      <Shield className="mr-2 h-4 w-4" />
+                      System Administration
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start"
+                      onClick={() => {
+                        addAction({
+                          type: "export",
+                          description: "Initiated system backup",
+                          module: "Administration"
+                        });
+                        toast.success("System backup initiated");
+                      }}
+                    >
+                      <Download className="mr-2 h-4 w-4" />
+                      System Backup
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">System Health</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>System Status</span>
+                        <Badge className="bg-green-100 text-green-800">Healthy</Badge>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span>Database Size</span>
+                        <span className="text-muted-foreground">2.4 GB</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span>Active Sessions</span>
+                        <span className="text-muted-foreground">47</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span>Last Backup</span>
+                        <span className="text-muted-foreground">2 hours ago</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </>
+            )}
+          </div>
+        </div>
     </div>
   );
 };

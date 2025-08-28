@@ -268,6 +268,15 @@ export const Sidebar = () => {
                 onClick={() => handleNavigation("/settings", "Settings")}
               />
             )}
+            {canAccessRoute(user.role, '/admin') && (
+              <SidebarItem 
+                icon={<Shield size={18} />} 
+                label="Admin" 
+                href="/admin" 
+                isActive={location.pathname.startsWith('/admin')}
+                onClick={() => handleNavigation("/admin", "Admin")}
+              />
+            )}
           </SidebarSection>
         </div>
 

@@ -121,7 +121,8 @@ export const adminAccessibleRoutes = [
   '/notifications',
   '/calendar',
   '/documents',
-  '/user-activity'
+  '/user-activity',
+  '/admin'
 ];
 
 export const hasPermission = (

@@ -166,6 +166,18 @@ const AppRoutes: React.FC = () => {
           } 
         />
         <Route 
+          path="/admin" 
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <RoleBasedRoute route="/admin">
+                  <Admin />
+                </RoleBasedRoute>
+              </MainLayout>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
           path="/notifications" 
           element={
             <ProtectedRoute>
