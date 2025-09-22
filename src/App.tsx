@@ -29,6 +29,7 @@ import Documents from "./pages/Documents";
 import UserActionHistory from "./pages/UserActionHistory";
 import Login from "./pages/Login";
 import EmployeeDashboard from "./pages/EmployeeDashboard";
+import Admin from "./pages/Admin";
 
 const queryClient = new QueryClient();
 
