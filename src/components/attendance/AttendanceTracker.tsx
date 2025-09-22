@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { toast } from '../../utils/toastHelpers';
+import { toast } from 'sonner';
 import { useVoice } from '../../contexts/VoiceContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -146,11 +146,7 @@ export const AttendanceTracker: React.FC = () => {
         setAttendanceData(data);
         speak("Attendance records loaded. You can view, track, and manage employee attendance here.");
       } catch (error) {
-        toast({
-          title: "Error loading attendance",
-          description: "Failed to load attendance records. Please try again later.",
-          variant: "destructive",
-        });
+        toast.error("Failed to load attendance records. Please try again later.");
       } finally {
         setIsLoading(false);
       }
@@ -164,37 +160,37 @@ export const AttendanceTracker: React.FC = () => {
     switch (status) {
       case 'present':
         return (
-          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-badge-success text-badge-success-foreground">
             <CheckCircle2 className="w-3 h-3 mr-1" /> Present
           </span>
         );
       case 'absent':
         return (
-          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-badge-destructive text-badge-destructive-foreground">
             <AlertCircle className="w-3 h-3 mr-1" /> Absent
           </span>
         );
       case 'late':
         return (
-          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-badge-warning text-badge-warning-foreground">
             <Clock className="w-3 h-3 mr-1" /> Late
           </span>
         );
       case 'halfDay':
         return (
-          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-badge-info text-badge-info-foreground">
             <ArrowRightLeft className="w-3 h-3 mr-1" /> Half Day
           </span>
         );
       case 'weekend':
         return (
-          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground">
             <Calendar className="w-3 h-3 mr-1" /> Weekend
           </span>
         );
       case 'holiday':
         return (
-          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-badge-pending text-badge-pending-foreground">
             <CalendarDays className="w-3 h-3 mr-1" /> Holiday
           </span>
         );
@@ -348,12 +344,12 @@ export const AttendanceTracker: React.FC = () => {
                           let bgColor = '';
                           
                           switch (status) {
-                            case 'present': bgColor = 'bg-green-100'; break;
-                            case 'absent': bgColor = 'bg-red-100'; break;
-                            case 'late': bgColor = 'bg-amber-100'; break;
-                            case 'halfDay': bgColor = 'bg-blue-100'; break;
-                            case 'weekend': bgColor = 'bg-gray-100'; break;
-                            case 'holiday': bgColor = 'bg-purple-100'; break;
+                            case 'present': bgColor = 'bg-badge-success'; break;
+                            case 'absent': bgColor = 'bg-badge-destructive'; break;
+                            case 'late': bgColor = 'bg-badge-warning'; break;
+                            case 'halfDay': bgColor = 'bg-badge-info'; break;
+                            case 'weekend': bgColor = 'bg-muted'; break;
+                            case 'holiday': bgColor = 'bg-badge-pending'; break;
                           }
                           
                           return (
@@ -379,35 +375,35 @@ export const AttendanceTracker: React.FC = () => {
               </Table>
             </div>
             
-            <div className="mt-4">
-              <h4 className="text-sm font-semibold mb-2">Legend:</h4>
-              <div className="flex flex-wrap gap-2">
-                <div className="flex items-center">
-                  <div className="w-4 h-4 bg-green-100 mr-1"></div>
-                  <span className="text-sm">P - Present</span>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-4 h-4 bg-red-100 mr-1"></div>
-                  <span className="text-sm">A - Absent</span>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-4 h-4 bg-amber-100 mr-1"></div>
-                  <span className="text-sm">L - Late</span>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-4 h-4 bg-blue-100 mr-1"></div>
-                  <span className="text-sm">H - Half Day</span>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-4 h-4 bg-gray-100 mr-1"></div>
-                  <span className="text-sm">W - Weekend</span>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-4 h-4 bg-purple-100 mr-1"></div>
-                  <span className="text-sm">HD - Holiday</span>
+              <div className="mt-4">
+                <h4 className="text-sm font-semibold mb-2">Legend:</h4>
+                <div className="flex flex-wrap gap-2">
+                  <div className="flex items-center">
+                    <div className="w-4 h-4 bg-badge-success mr-1"></div>
+                    <span className="text-sm">P - Present</span>
+                  </div>
+                  <div className="flex items-center">
+                    <div className="w-4 h-4 bg-badge-destructive mr-1"></div>
+                    <span className="text-sm">A - Absent</span>
+                  </div>
+                  <div className="flex items-center">
+                    <div className="w-4 h-4 bg-badge-warning mr-1"></div>
+                    <span className="text-sm">L - Late</span>
+                  </div>
+                  <div className="flex items-center">
+                    <div className="w-4 h-4 bg-badge-info mr-1"></div>
+                    <span className="text-sm">H - Half Day</span>
+                  </div>
+                  <div className="flex items-center">
+                    <div className="w-4 h-4 bg-muted mr-1"></div>
+                    <span className="text-sm">W - Weekend</span>
+                  </div>
+                  <div className="flex items-center">
+                    <div className="w-4 h-4 bg-badge-pending mr-1"></div>
+                    <span className="text-sm">HD - Holiday</span>
+                  </div>
                 </div>
               </div>
-            </div>
           </div>
         ) : (
           // Daily View

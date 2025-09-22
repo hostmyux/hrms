@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { CheckCircle, Clock, Edit, FileText, Plus, AlertCircle } from 'lucide-react';
 import { useVoice } from '../../contexts/VoiceContext';
-import { toast } from '../../utils/toastHelpers';
+import { toast } from 'sonner';
 import {
   Dialog,
   DialogContent,
@@ -201,10 +201,7 @@ export const Reviews: React.FC = () => {
     
     setReviews(prev => [newReview, ...prev]);
     setIsCreateDialogOpen(false);
-    toast({
-      title: "Review Created",
-      description: `Performance review for ${data.employee} has been created.`
-    });
+    toast.success(`Performance review for ${data.employee} has been created.`);
     speak(`Review successfully created. A new performance review for ${data.employee} has been scheduled with a due date of ${data.dueDate}.`);
   };
 
@@ -227,10 +224,7 @@ export const Reviews: React.FC = () => {
     }));
     
     setIsEditDialogOpen(false);
-    toast({
-      title: "Review Updated",
-      description: `Performance review for ${data.employee} has been updated.`
-    });
+    toast.success(`Performance review for ${data.employee} has been updated.`);
     speak(`Review successfully updated. The performance review for ${data.employee} has been modified with the new information.`);
   };
 
@@ -248,20 +242,17 @@ export const Reviews: React.FC = () => {
     }));
     
     setIsStartDialogOpen(false);
-    toast({
-      title: "Review Initiated",
-      description: `Performance review for ${selectedReview.employee} has been started.`
-    });
+    toast.success(`Performance review for ${selectedReview.employee} has been started.`);
     speak(`Review successfully initiated. Notifications have been sent to both ${selectedReview.employee} and ${selectedReview.manager} to begin the review process.`);
   };
 
   const getStatusColor = (status: ReviewStatus) => {
     switch (status) {
-      case "Not Started": return "bg-gray-100 text-gray-800";
-      case "In Progress": return "bg-blue-100 text-blue-800";
-      case "Self Review": return "bg-purple-100 text-purple-800";
-      case "Manager Review": return "bg-yellow-100 text-yellow-800";
-      case "Completed": return "bg-green-100 text-green-800";
+      case "Not Started": return "bg-muted text-muted-foreground";
+      case "In Progress": return "bg-badge-info text-badge-info-foreground";
+      case "Self Review": return "bg-badge-pending text-badge-pending-foreground";
+      case "Manager Review": return "bg-badge-warning text-badge-warning-foreground";
+      case "Completed": return "bg-badge-success text-badge-success-foreground";
     }
   };
 

@@ -76,20 +76,20 @@ export const UserManagement: React.FC = () => {
 
   const getRoleColor = (role: string) => {
     switch (role) {
-      case 'admin': return 'bg-red-100 text-red-800';
-      case 'hr_manager': return 'bg-blue-100 text-blue-800';
-      case 'manager': return 'bg-purple-100 text-purple-800';
-      case 'employee': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'admin': return 'bg-badge-destructive text-badge-destructive-foreground';
+      case 'hr_manager': return 'bg-badge-info text-badge-info-foreground';
+      case 'manager': return 'bg-badge-pending text-badge-pending-foreground';
+      case 'employee': return 'bg-badge-success text-badge-success-foreground';
+      default: return 'bg-muted text-muted-foreground';
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return 'bg-green-100 text-green-800';
-      case 'inactive': return 'bg-gray-100 text-gray-800';
-      case 'suspended': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'active': return 'bg-badge-success text-badge-success-foreground';
+      case 'inactive': return 'bg-muted text-muted-foreground';
+      case 'suspended': return 'bg-badge-destructive text-badge-destructive-foreground';
+      default: return 'bg-muted text-muted-foreground';
     }
   };
 

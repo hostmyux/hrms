@@ -62,7 +62,35 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-			}
+				},
+				success: {
+					DEFAULT: 'hsl(var(--success))',
+					foreground: 'hsl(var(--success-foreground))'
+				},
+				warning: {
+					DEFAULT: 'hsl(var(--warning))',
+					foreground: 'hsl(var(--warning-foreground))'
+				},
+				info: {
+					DEFAULT: 'hsl(var(--info))',
+					foreground: 'hsl(var(--info-foreground))'
+				},
+				pending: {
+					DEFAULT: 'hsl(var(--pending))',
+					foreground: 'hsl(var(--pending-foreground))'
+				},
+				badge: {
+					success: 'hsl(var(--badge-success))',
+					'success-foreground': 'hsl(var(--badge-success-foreground))',
+					warning: 'hsl(var(--badge-warning))',
+					'warning-foreground': 'hsl(var(--badge-warning-foreground))',
+					info: 'hsl(var(--badge-info))',
+					'info-foreground': 'hsl(var(--badge-info-foreground))',
+					destructive: 'hsl(var(--badge-destructive))',
+					'destructive-foreground': 'hsl(var(--badge-destructive-foreground))',
+					pending: 'hsl(var(--badge-pending))',
+					'pending-foreground': 'hsl(var(--badge-pending-foreground))'
+				}
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

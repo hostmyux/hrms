@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { toast } from '../../utils/toastHelpers';
+import { toast } from 'sonner';
 import { useVoice } from '../../contexts/VoiceContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -230,11 +230,7 @@ export const LeaveManagement: React.FC = () => {
         setHolidays(holidaysList);
         speak("Leave management loaded. HR managers and supervisors can approve or reject leave requests, manage work from home requests, and view company holidays.");
       } catch (error) {
-        toast({
-          title: "Error loading leave data",
-          description: "Failed to load leave information. Please try again later.",
-          variant: "destructive",
-        });
+        toast.error("Failed to load leave information. Please try again later.");
       } finally {
         setIsLoading(false);
       }
@@ -251,11 +247,7 @@ export const LeaveManagement: React.FC = () => {
   // Handle new leave request
   const handleSubmitLeave = (data: LeaveFormData) => {
     if (!data.startDate || !data.endDate) {
-      toast({
-        title: "Missing dates",
-        description: "Please select both start and end dates for your leave request.",
-        variant: "destructive",
-      });
+      toast.error("Please select both start and end dates for your leave request.");
       return;
     }
     
@@ -284,10 +276,7 @@ export const LeaveManagement: React.FC = () => {
     setIsAddLeaveOpen(false);
     
     // Show success message
-    toast({
-      title: "Leave request submitted",
-      description: `Your ${data.type} leave request has been submitted successfully.`,
-    });
+    toast.success(`Your ${data.type} leave request has been submitted successfully.`);
     
     speak(`Your ${data.type} leave request has been submitted successfully and is pending approval.`);
     
@@ -340,10 +329,7 @@ export const LeaveManagement: React.FC = () => {
     setIsApprovalDialogOpen(false);
     
     // Show success message
-    toast({
-      title: "Leave request approved",
-      description: `You have approved ${selectedLeave.employeeName}'s leave request.`,
-    });
+    toast.success(`You have approved ${selectedLeave.employeeName}'s leave request.`);
     
     speak(`Leave request for ${selectedLeave.employeeName} has been approved. An email notification will be sent to the employee.`);
     
@@ -376,10 +362,7 @@ export const LeaveManagement: React.FC = () => {
     setIsRejectionDialogOpen(false);
     
     // Show success message
-    toast({
-      title: "Leave request rejected",
-      description: `You have rejected ${selectedLeave.employeeName}'s leave request.`,
-    });
+    toast.success(`You have rejected ${selectedLeave.employeeName}'s leave request.`);
     
     speak(`Leave request for ${selectedLeave.employeeName} has been rejected. An email notification will be sent to the employee with the provided reason.`);
     
@@ -414,19 +397,19 @@ export const LeaveManagement: React.FC = () => {
     switch (status) {
       case 'pending':
         return (
-          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-badge-pending text-badge-pending-foreground">
             <Clock className="w-3 h-3 mr-1" /> Pending
           </span>
         );
       case 'approved':
         return (
-          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-badge-success text-badge-success-foreground">
             <Check className="w-3 h-3 mr-1" /> Approved
           </span>
         );
       case 'rejected':
         return (
-          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-badge-destructive text-badge-destructive-foreground">
             <X className="w-3 h-3 mr-1" /> Rejected
           </span>
         );

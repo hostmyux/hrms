@@ -166,13 +166,13 @@ export const Applications: React.FC = () => {
 
   const getStageColor = (stage: string) => {
     switch (stage) {
-      case "New": return "bg-blue-100 text-blue-800";
-      case "Screening": return "bg-purple-100 text-purple-800";
-      case "Interview": return "bg-yellow-100 text-yellow-800";
-      case "Technical Test": return "bg-orange-100 text-orange-800";
-      case "Offer": return "bg-green-100 text-green-800";
-      case "Rejected": return "bg-red-100 text-red-800";
-      default: return "bg-gray-100 text-gray-800";
+      case "New": return "bg-badge-info text-badge-info-foreground";
+      case "Screening": return "bg-badge-pending text-badge-pending-foreground";
+      case "Interview": return "bg-badge-warning text-badge-warning-foreground";
+      case "Technical Test": return "bg-secondary text-secondary-foreground";
+      case "Offer": return "bg-badge-success text-badge-success-foreground";
+      case "Rejected": return "bg-badge-destructive text-badge-destructive-foreground";
+      default: return "bg-muted text-muted-foreground";
     }
   };
 

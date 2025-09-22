@@ -100,10 +100,10 @@ export const AuditTrail: React.FC = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'success': return 'bg-green-100 text-green-800';
-      case 'failed': return 'bg-red-100 text-red-800';
-      case 'warning': return 'bg-yellow-100 text-yellow-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'success': return 'bg-badge-success text-badge-success-foreground';
+      case 'failed': return 'bg-badge-destructive text-badge-destructive-foreground';
+      case 'warning': return 'bg-badge-warning text-badge-warning-foreground';
+      default: return 'bg-muted text-muted-foreground';
     }
   };
 
