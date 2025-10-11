@@ -11,13 +11,7 @@ import { useVoice } from '../../contexts/VoiceContext';
 import { useUser } from '../../contexts/UserContext';
 import { toast } from 'sonner';
 import { Plus, Calendar, User, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { ResponsiveDialog } from '../shared/ResponsiveDialog';
 
 interface LeaveRequest {
   id: string;
@@ -141,12 +135,12 @@ export const LeaveRequestManager: React.FC = () => {
     speak(`Leave request from ${request.employeeName}. Type: ${request.leaveType}. Duration: ${request.days} days. Status: ${request.status}. Submitted on ${request.submittedDate}.`);
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
     switch (status) {
-      case 'approved': return 'bg-green-100 text-green-800';
-      case 'rejected': return 'bg-red-100 text-red-800';
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'approved': return 'default';
+      case 'rejected': return 'destructive';
+      case 'pending': return 'secondary';
+      default: return 'outline';
     }
   };
 
@@ -216,7 +210,7 @@ export const LeaveRequestManager: React.FC = () => {
                     
                     <div className="flex items-center gap-2">
                       {getStatusIcon(request.status)}
-                      <Badge className={getStatusColor(request.status)}>
+                      <Badge variant={getStatusVariant(request.status)}>
                         {request.status}
                       </Badge>
                     </div>
@@ -269,7 +263,7 @@ export const LeaveRequestManager: React.FC = () => {
                     
                     <div className="flex items-center gap-2">
                       {getStatusIcon(request.status)}
-                      <Badge className={getStatusColor(request.status)}>
+                      <Badge variant={getStatusVariant(request.status)}>
                         {request.status}
                       </Badge>
                     </div>
@@ -281,103 +275,99 @@ export const LeaveRequestManager: React.FC = () => {
         </div>
       )}
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Leave Request Details</DialogTitle>
-            <DialogDescription>
-              Review and process the leave request below.
-            </DialogDescription>
-          </DialogHeader>
-          
-          {selectedRequest && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="font-medium">Employee</Label>
-                  <p>{selectedRequest.employeeName} ({selectedRequest.employeeId})</p>
-                </div>
-                <div>
-                  <Label className="font-medium">Leave Type</Label>
-                  <p className="capitalize">{selectedRequest.leaveType}</p>
-                </div>
-                <div>
-                  <Label className="font-medium">Start Date</Label>
-                  <p>{selectedRequest.startDate}</p>
-                </div>
-                <div>
-                  <Label className="font-medium">End Date</Label>
-                  <p>{selectedRequest.endDate}</p>
-                </div>
-                <div>
-                  <Label className="font-medium">Duration</Label>
-                  <p>{selectedRequest.days} days</p>
-                </div>
-                <div>
-                  <Label className="font-medium">Status</Label>
-                  <Badge className={getStatusColor(selectedRequest.status)}>
-                    {selectedRequest.status}
-                  </Badge>
-                </div>
-              </div>
-              
+      <ResponsiveDialog
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        title="Leave Request Details"
+        description="Review and process the leave request below."
+      >
+        {selectedRequest && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <Label className="font-medium">Reason</Label>
-                <p className="mt-1 text-sm">{selectedRequest.reason}</p>
+                <Label className="font-medium">Employee</Label>
+                <p>{selectedRequest.employeeName} ({selectedRequest.employeeId})</p>
               </div>
-              
-              {selectedRequest.status === 'pending' && (
-                <div className="space-y-3">
-                  <div>
-                    <Label htmlFor="comments">Comments (Optional)</Label>
-                    <Textarea
-                      id="comments"
-                      value={approvalComments}
-                      onChange={(e) => setApprovalComments(e.target.value)}
-                      placeholder="Add comments for approval/rejection..."
-                      rows={3}
-                    />
-                  </div>
-                  
-                  <div className="flex justify-end gap-2">
-                    <Button 
-                      variant="outline" 
-                      onClick={() => handleRejectRequest(selectedRequest.id)}
-                      className="text-red-600 hover:text-red-700"
-                    >
-                      <XCircle className="mr-2 h-4 w-4" />
-                      Reject
-                    </Button>
-                    <Button 
-                      onClick={() => handleApproveRequest(selectedRequest.id)}
-                      className="bg-green-600 hover:bg-green-700"
-                    >
-                      <CheckCircle className="mr-2 h-4 w-4" />
-                      Approve
-                    </Button>
-                  </div>
-                </div>
-              )}
-              
-              {selectedRequest.status !== 'pending' && (
-                <div>
-                  <Label className="font-medium">Decision</Label>
-                  <div className="mt-1 space-y-2">
-                    <p className="text-sm">
-                      <strong>Processed by:</strong> {selectedRequest.approvedBy}
-                    </p>
-                    {selectedRequest.comments && (
-                      <p className="text-sm">
-                        <strong>Comments:</strong> {selectedRequest.comments}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              )}
+              <div>
+                <Label className="font-medium">Leave Type</Label>
+                <p className="capitalize">{selectedRequest.leaveType}</p>
+              </div>
+              <div>
+                <Label className="font-medium">Start Date</Label>
+                <p>{selectedRequest.startDate}</p>
+              </div>
+              <div>
+                <Label className="font-medium">End Date</Label>
+                <p>{selectedRequest.endDate}</p>
+              </div>
+              <div>
+                <Label className="font-medium">Duration</Label>
+                <p>{selectedRequest.days} days</p>
+              </div>
+              <div>
+                <Label className="font-medium">Status</Label>
+                <Badge variant={getStatusVariant(selectedRequest.status)}>
+                  {selectedRequest.status}
+                </Badge>
+              </div>
             </div>
-          )}
-        </DialogContent>
-      </Dialog>
+            
+            <div>
+              <Label className="font-medium">Reason</Label>
+              <p className="mt-1 text-sm">{selectedRequest.reason}</p>
+            </div>
+            
+            {selectedRequest.status === 'pending' && (
+              <div className="space-y-3">
+                <div>
+                  <Label htmlFor="comments">Comments (Optional)</Label>
+                  <Textarea
+                    id="comments"
+                    value={approvalComments}
+                    onChange={(e) => setApprovalComments(e.target.value)}
+                    placeholder="Add comments for approval/rejection..."
+                    rows={3}
+                  />
+                </div>
+                
+                <div className="flex flex-col sm:flex-row justify-end gap-2">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => handleRejectRequest(selectedRequest.id)}
+                    className="w-full sm:w-auto text-destructive hover:text-destructive"
+                  >
+                    <XCircle className="mr-2 h-4 w-4" />
+                    Reject
+                  </Button>
+                  <Button 
+                    onClick={() => handleApproveRequest(selectedRequest.id)}
+                    className="w-full sm:w-auto"
+                  >
+                    <CheckCircle className="mr-2 h-4 w-4" />
+                    Approve
+                  </Button>
+                </div>
+              </div>
+            )}
+            
+            {selectedRequest.status !== 'pending' && (
+              <div>
+                <Label className="font-medium">Decision</Label>
+                <div className="mt-1 space-y-2">
+                  <p className="text-sm">
+                    <strong>Processed by:</strong> {selectedRequest.approvedBy}
+                  </p>
+                  {selectedRequest.comments && (
+                    <p className="text-sm">
+                      <strong>Comments:</strong> {selectedRequest.comments}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </ResponsiveDialog>
     </div>
   );
 };

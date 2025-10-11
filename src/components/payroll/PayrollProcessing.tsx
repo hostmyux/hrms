@@ -2,9 +2,11 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { CalendarDays, Download, Eye } from 'lucide-react';
 import { useVoice } from '../../contexts/VoiceContext';
+import { toast } from 'sonner';
 
 export const PayrollProcessing: React.FC = () => {
   const { speak } = useVoice();
@@ -46,13 +48,13 @@ export const PayrollProcessing: React.FC = () => {
                   <TableCell className="font-medium">{schedule.name}</TableCell>
                   <TableCell>{schedule.date}</TableCell>
                   <TableCell>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      schedule.status === "Completed" ? "bg-green-100 text-green-800" :
-                      schedule.status === "Pending" ? "bg-yellow-100 text-yellow-800" :
-                      "bg-blue-100 text-blue-800"
-                    }`}>
+                    <Badge variant={
+                      schedule.status === "Completed" ? "default" :
+                      schedule.status === "Pending" ? "secondary" :
+                      "outline"
+                    }>
                       {schedule.status}
-                    </span>
+                    </Badge>
                   </TableCell>
                   <TableCell>{schedule.employees}</TableCell>
                   <TableCell>

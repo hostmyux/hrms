@@ -10,13 +10,7 @@ import { useVoice } from '../../contexts/VoiceContext';
 import { useUser } from '../../contexts/UserContext';
 import { toast } from 'sonner';
 import { Plus, Edit, Trash2, Users, MapPin, DollarSign, Phone, Mail } from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { ResponsiveDialog } from '../shared/ResponsiveDialog';
 
 interface Department {
   id: string;
@@ -267,147 +261,13 @@ export const DepartmentManager: React.FC = () => {
         ))}
       </div>
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{isEditing ? 'Edit Department' : 'Create New Department'}</DialogTitle>
-            <DialogDescription>
-              {isEditing ? 'Modify the department details below.' : 'Fill in the comprehensive details to create a new department.'}
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="name">Department Name *</Label>
-                <Input
-                  id="name"
-                  value={formData.name || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                  placeholder="Enter department name"
-                />
-              </div>
-              
-              <div className="grid gap-2">
-                <Label htmlFor="status">Status</Label>
-                <Select value={formData.status || 'active'} onValueChange={(value) => setFormData(prev => ({ ...prev, status: value as 'active' | 'inactive' }))}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="inactive">Inactive</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            
-            <div className="grid gap-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                value={formData.description || ''}
-                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Enter comprehensive department description"
-                className="min-h-[80px]"
-              />
-            </div>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="manager">Manager *</Label>
-                <Input
-                  id="manager"
-                  value={formData.manager || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, manager: e.target.value }))}
-                  placeholder="Enter manager name"
-                />
-              </div>
-              
-              <div className="grid gap-2">
-                <Label htmlFor="location">Location *</Label>
-                <Input
-                  id="location"
-                  value={formData.location || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
-                  placeholder="Enter office location"
-                />
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="phone">Phone</Label>
-                <Input
-                  id="phone"
-                  value={formData.phone || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-                  placeholder="Enter department phone"
-                />
-              </div>
-              
-              <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={formData.email || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                  placeholder="Enter department email"
-                />
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="employeeCount">Employee Count</Label>
-                <Input
-                  id="employeeCount"
-                  type="number"
-                  min="0"
-                  value={formData.employeeCount || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, employeeCount: parseInt(e.target.value) || 0 }))}
-                  placeholder="0"
-                />
-              </div>
-              
-              <div className="grid gap-2">
-                <Label htmlFor="budget">Annual Budget ($)</Label>
-                <Input
-                  id="budget"
-                  type="number"
-                  min="0"
-                  value={formData.budget || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, budget: parseInt(e.target.value) || 0 }))}
-                  placeholder="0"
-                />
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="establishedDate">Established Date</Label>
-                <Input
-                  id="establishedDate"
-                  type="date"
-                  value={formData.establishedDate || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, establishedDate: e.target.value }))}
-                />
-              </div>
-              
-              <div className="grid gap-2">
-                <Label htmlFor="costCenter">Cost Center</Label>
-                <Input
-                  id="costCenter"
-                  value={formData.costCenter || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, costCenter: e.target.value }))}
-                  placeholder="Enter cost center code"
-                />
-              </div>
-            </div>
-          </div>
-          
-          <div className="flex flex-col sm:flex-row justify-end gap-2">
+      <ResponsiveDialog
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        title={isEditing ? 'Edit Department' : 'Create New Department'}
+        description={isEditing ? 'Modify the department details below.' : 'Fill in the comprehensive details to create a new department.'}
+        footer={
+          <div className="flex flex-col sm:flex-row justify-end gap-2 w-full">
             <Button variant="outline" onClick={() => setIsDialogOpen(false)} className="w-full sm:w-auto">
               Cancel
             </Button>
@@ -415,8 +275,139 @@ export const DepartmentManager: React.FC = () => {
               {isEditing ? 'Update' : 'Create'} Department
             </Button>
           </div>
-        </DialogContent>
-      </Dialog>
+        }
+      >
+        <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="name">Department Name *</Label>
+              <Input
+                id="name"
+                value={formData.name || ''}
+                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                placeholder="Enter department name"
+              />
+            </div>
+            
+            <div className="grid gap-2">
+              <Label htmlFor="status">Status</Label>
+              <Select value={formData.status || 'active'} onValueChange={(value) => setFormData(prev => ({ ...prev, status: value as 'active' | 'inactive' }))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          
+          <div className="grid gap-2">
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              value={formData.description || ''}
+              onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+              placeholder="Enter comprehensive department description"
+              className="min-h-[80px]"
+            />
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="manager">Manager *</Label>
+              <Input
+                id="manager"
+                value={formData.manager || ''}
+                onChange={(e) => setFormData(prev => ({ ...prev, manager: e.target.value }))}
+                placeholder="Enter manager name"
+              />
+            </div>
+            
+            <div className="grid gap-2">
+              <Label htmlFor="location">Location *</Label>
+              <Input
+                id="location"
+                value={formData.location || ''}
+                onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
+                placeholder="Enter office location"
+              />
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="phone">Phone</Label>
+              <Input
+                id="phone"
+                value={formData.phone || ''}
+                onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                placeholder="Enter department phone"
+              />
+            </div>
+            
+            <div className="grid gap-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={formData.email || ''}
+                onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                placeholder="Enter department email"
+              />
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="employeeCount">Employee Count</Label>
+              <Input
+                id="employeeCount"
+                type="number"
+                min="0"
+                value={formData.employeeCount || ''}
+                onChange={(e) => setFormData(prev => ({ ...prev, employeeCount: parseInt(e.target.value) || 0 }))}
+                placeholder="0"
+              />
+            </div>
+            
+            <div className="grid gap-2">
+              <Label htmlFor="budget">Annual Budget ($)</Label>
+              <Input
+                id="budget"
+                type="number"
+                min="0"
+                value={formData.budget || ''}
+                onChange={(e) => setFormData(prev => ({ ...prev, budget: parseInt(e.target.value) || 0 }))}
+                placeholder="0"
+              />
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="establishedDate">Established Date</Label>
+              <Input
+                id="establishedDate"
+                type="date"
+                value={formData.establishedDate || ''}
+                onChange={(e) => setFormData(prev => ({ ...prev, establishedDate: e.target.value }))}
+              />
+            </div>
+            
+            <div className="grid gap-2">
+              <Label htmlFor="costCenter">Cost Center</Label>
+              <Input
+                id="costCenter"
+                value={formData.costCenter || ''}
+                onChange={(e) => setFormData(prev => ({ ...prev, costCenter: e.target.value }))}
+                placeholder="Enter cost center code"
+              />
+            </div>
+          </div>
+        </div>
+      </ResponsiveDialog>
     </div>
   );
 };

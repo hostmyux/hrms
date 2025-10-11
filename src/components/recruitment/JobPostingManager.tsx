@@ -11,13 +11,7 @@ import { useVoice } from '../../contexts/VoiceContext';
 import { useUser } from '../../contexts/UserContext';
 import { toast } from 'sonner';
 import { Plus, Edit, Trash2, MapPin, DollarSign, Clock, Users } from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { ResponsiveDialog } from '../shared/ResponsiveDialog';
 
 interface JobPosting {
   id: string;
@@ -164,12 +158,12 @@ export const JobPostingManager: React.FC = () => {
     speak(`Job: ${job.title} in ${job.department}. Location: ${job.location}. Salary range: ${job.salary.min} to ${job.salary.max} ${job.salary.currency}. Status: ${job.status}. ${job.applicantCount} applicants.`);
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
     switch (status) {
-      case 'active': return 'bg-green-100 text-green-800';
-      case 'paused': return 'bg-yellow-100 text-yellow-800';
-      case 'closed': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'active': return 'default';
+      case 'paused': return 'secondary';
+      case 'closed': return 'destructive';
+      default: return 'outline';
     }
   };
 
@@ -194,7 +188,7 @@ export const JobPostingManager: React.FC = () => {
               <CardTitle className="flex items-center justify-between">
                 <span>{job.title}</span>
                 <div className="flex gap-2">
-                  <Badge className={getStatusColor(job.status)}>
+                  <Badge variant={getStatusVariant(job.status)}>
                     {job.status}
                   </Badge>
                   <Button 
@@ -257,118 +251,115 @@ export const JobPostingManager: React.FC = () => {
         ))}
       </div>
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{isEditing ? 'Edit Job Posting' : 'Create New Job Posting'}</DialogTitle>
-            <DialogDescription>
-              {isEditing ? 'Modify the job posting details below.' : 'Fill in the details to create a new job posting.'}
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="title">Job Title *</Label>
-                <Input
-                  id="title"
-                  value={formData.title || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                  placeholder="Enter job title"
-                />
-              </div>
-              
-              <div className="grid gap-2">
-                <Label htmlFor="department">Department *</Label>
-                <Input
-                  id="department"
-                  value={formData.department || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, department: e.target.value }))}
-                  placeholder="Enter department"
-                />
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="location">Location *</Label>
-                <Input
-                  id="location"
-                  value={formData.location || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
-                  placeholder="Enter location"
-                />
-              </div>
-              
-              <div className="grid gap-2">
-                <Label htmlFor="type">Job Type</Label>
-                <Select 
-                  value={formData.type} 
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, type: value as any }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select job type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="full-time">Full Time</SelectItem>
-                    <SelectItem value="part-time">Part Time</SelectItem>
-                    <SelectItem value="contract">Contract</SelectItem>
-                    <SelectItem value="internship">Internship</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            
-            <div className="grid gap-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                value={formData.description || ''}
-                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Enter job description"
-                rows={4}
-              />
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="salaryMin">Min Salary</Label>
-                <Input
-                  id="salaryMin"
-                  type="number"
-                  value={formData.salary?.min || ''}
-                  onChange={(e) => setFormData(prev => ({ 
-                    ...prev, 
-                    salary: { ...prev.salary, min: parseInt(e.target.value) || 0, max: prev.salary?.max || 0, currency: 'USD' }
-                  }))}
-                  placeholder="0"
-                />
-              </div>
-              
-              <div className="grid gap-2">
-                <Label htmlFor="salaryMax">Max Salary</Label>
-                <Input
-                  id="salaryMax"
-                  type="number"
-                  value={formData.salary?.max || ''}
-                  onChange={(e) => setFormData(prev => ({ 
-                    ...prev, 
-                    salary: { ...prev.salary, min: prev.salary?.min || 0, max: parseInt(e.target.value) || 0, currency: 'USD' }
-                  }))}
-                  placeholder="0"
-                />
-              </div>
-            </div>
-          </div>
-          
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleSaveJob}>
+      <ResponsiveDialog
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        title={isEditing ? 'Edit Job Posting' : 'Create New Job Posting'}
+        description={isEditing ? 'Modify the job posting details below.' : 'Fill in the details to create a new job posting.'}
+        footer={
+          <div className="flex flex-col sm:flex-row justify-end gap-2 w-full">
+            <Button variant="outline" onClick={() => setIsDialogOpen(false)} className="w-full sm:w-auto">Cancel</Button>
+            <Button onClick={handleSaveJob} className="w-full sm:w-auto">
               {isEditing ? 'Update' : 'Create'} Job Posting
             </Button>
           </div>
-        </DialogContent>
-      </Dialog>
+        }
+      >
+        <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="title">Job Title *</Label>
+              <Input
+                id="title"
+                value={formData.title || ''}
+                onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                placeholder="Enter job title"
+              />
+            </div>
+            
+            <div className="grid gap-2">
+              <Label htmlFor="department">Department *</Label>
+              <Input
+                id="department"
+                value={formData.department || ''}
+                onChange={(e) => setFormData(prev => ({ ...prev, department: e.target.value }))}
+                placeholder="Enter department"
+              />
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="location">Location *</Label>
+              <Input
+                id="location"
+                value={formData.location || ''}
+                onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
+                placeholder="Enter location"
+              />
+            </div>
+            
+            <div className="grid gap-2">
+              <Label htmlFor="type">Job Type</Label>
+              <Select 
+                value={formData.type} 
+                onValueChange={(value) => setFormData(prev => ({ ...prev, type: value as any }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select job type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="full-time">Full Time</SelectItem>
+                  <SelectItem value="part-time">Part Time</SelectItem>
+                  <SelectItem value="contract">Contract</SelectItem>
+                  <SelectItem value="internship">Internship</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          
+          <div className="grid gap-2">
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              value={formData.description || ''}
+              onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+              placeholder="Enter job description"
+              rows={4}
+            />
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="salaryMin">Min Salary</Label>
+              <Input
+                id="salaryMin"
+                type="number"
+                value={formData.salary?.min || ''}
+                onChange={(e) => setFormData(prev => ({ 
+                  ...prev, 
+                  salary: { ...prev.salary, min: parseInt(e.target.value) || 0, max: prev.salary?.max || 0, currency: 'USD' }
+                }))}
+                placeholder="0"
+              />
+            </div>
+            
+            <div className="grid gap-2">
+              <Label htmlFor="salaryMax">Max Salary</Label>
+              <Input
+                id="salaryMax"
+                type="number"
+                value={formData.salary?.max || ''}
+                onChange={(e) => setFormData(prev => ({ 
+                  ...prev, 
+                  salary: { ...prev.salary, min: prev.salary?.min || 0, max: parseInt(e.target.value) || 0, currency: 'USD' }
+                }))}
+                placeholder="0"
+              />
+            </div>
+          </div>
+        </div>
+      </ResponsiveDialog>
     </div>
   );
 };
