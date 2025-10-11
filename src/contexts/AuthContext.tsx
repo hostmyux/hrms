@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useMemo } from 'react';
 import { localStorageService } from '../services/localStorageService';
 
 export type UserRole = 'admin' | 'employee' | 'manager' | 'hr_manager';
@@ -108,7 +108,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const value = {
+  const value = useMemo(() => ({
     user,
     login,
     logout,
@@ -118,7 +118,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isEmployee: user?.role === 'employee',
     isManager: user?.role === 'manager',
     isHRManager: user?.role === 'hr_manager'
-  };
+  }), [user]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

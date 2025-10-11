@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ResponsiveDialog } from '@/components/shared/ResponsiveDialog';
 import { toast } from 'sonner';
 
 interface Document {
@@ -243,40 +243,13 @@ const Documents: React.FC = () => {
       </Tabs>
 
       {/* Document Detail Dialog */}
-      <Dialog open={!!selectedDocument} onOpenChange={() => setSelectedDocument(null)}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              {selectedDocument && getTypeIcon(selectedDocument.type)}
-              {selectedDocument?.name}
-            </DialogTitle>
-            <DialogDescription>
-              {selectedDocument?.type.toUpperCase()} • {selectedDocument?.size}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <p className="text-muted-foreground">Category</p>
-                <p className="font-medium capitalize">{selectedDocument?.category}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Upload Date</p>
-                <p className="font-medium">{selectedDocument && formatDate(selectedDocument.uploadDate)}</p>
-              </div>
-              {selectedDocument?.sharedWith && (
-                <div className="col-span-2">
-                  <p className="text-muted-foreground">Shared With</p>
-                  <div className="flex flex-wrap gap-2 mt-1">
-                    {selectedDocument.sharedWith.map((person, index) => (
-                      <Badge key={index} variant="secondary">{person}</Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-          <DialogFooter className="flex sm:justify-between">
+      <ResponsiveDialog 
+        open={!!selectedDocument} 
+        onOpenChange={() => setSelectedDocument(null)}
+        title={selectedDocument ? `${selectedDocument.name}` : "Document Details"}
+        description={selectedDocument ? `${selectedDocument.type.toUpperCase()} • ${selectedDocument.size}` : ""}
+        footer={
+          <div className="flex flex-col sm:flex-row gap-2 w-full sm:justify-between">
             <Button variant="outline" className="flex items-center gap-2" onClick={() => toast.success("Document downloaded")}>
               <Download className="h-4 w-4" />
               Download
@@ -294,33 +267,41 @@ const Documents: React.FC = () => {
                 Delete
               </Button>
             </div>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Upload Dialog */}
-      <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Upload Document</DialogTitle>
-            <DialogDescription>
-              Upload a new document to your document library.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="border-2 border-dashed rounded-md p-8 text-center">
-              <FileUp className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-              <p className="font-medium">Drag and drop files here</p>
-              <p className="text-sm text-muted-foreground mb-4">or</p>
-              <Button variant="outline">Browse Files</Button>
+          </div>
+        }
+      >
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <p className="text-muted-foreground">Category</p>
+              <p className="font-medium capitalize">{selectedDocument?.category}</p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">
-                Supported file types: PDF, DOCX, XLSX, JPG, PNG
-              </p>
+              <p className="text-muted-foreground">Upload Date</p>
+              <p className="font-medium">{selectedDocument && formatDate(selectedDocument.uploadDate)}</p>
             </div>
+            {selectedDocument?.sharedWith && (
+              <div className="col-span-2">
+                <p className="text-muted-foreground">Shared With</p>
+                <div className="flex flex-wrap gap-2 mt-1">
+                  {selectedDocument.sharedWith.map((person, index) => (
+                    <Badge key={index} variant="secondary">{person}</Badge>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
-          <DialogFooter>
+        </div>
+      </ResponsiveDialog>
+
+      {/* Upload Dialog */}
+      <ResponsiveDialog
+        open={isUploadDialogOpen}
+        onOpenChange={setIsUploadDialogOpen}
+        title="Upload Document"
+        description="Upload a new document to your document library."
+        footer={
+          <>
             <Button variant="outline" onClick={() => setIsUploadDialogOpen(false)}>
               Cancel
             </Button>
@@ -328,9 +309,23 @@ const Documents: React.FC = () => {
               <FileCheck className="h-4 w-4" />
               Upload
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <div className="border-2 border-dashed rounded-md p-8 text-center">
+            <FileUp className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+            <p className="font-medium">Drag and drop files here</p>
+            <p className="text-sm text-muted-foreground mb-4">or</p>
+            <Button variant="outline">Browse Files</Button>
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground">
+              Supported file types: PDF, DOCX, XLSX, JPG, PNG
+            </p>
+          </div>
+        </div>
+      </ResponsiveDialog>
     </div>
   );
 };

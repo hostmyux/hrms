@@ -13,6 +13,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { UserPlus, FileText, Users, Briefcase, Upload, Eye, Pencil, Trash2, Check } from 'lucide-react';
+import { ResponsiveDialog } from '@/components/shared/ResponsiveDialog';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { Textarea } from '@/components/ui/textarea';
@@ -545,78 +546,13 @@ const Employees: React.FC = () => {
           </div>
 
           {/* View Employee Dialog */}
-          <Dialog open={isViewingEmployee} onOpenChange={setIsViewingEmployee}>
-            <DialogContent className="sm:max-w-[600px]">
-              <DialogHeader>
-                <DialogTitle>Employee Profile</DialogTitle>
-                <DialogDescription>
-                  Detailed information for {selectedEmployee?.firstName} {selectedEmployee?.lastName}
-                </DialogDescription>
-              </DialogHeader>
-              
-              {selectedEmployee && (
-                <div className="space-y-6 py-4">
-                  <div className="flex items-center space-x-4">
-                    <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
-                      <Users size={24} className="text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold">{selectedEmployee.firstName} {selectedEmployee.lastName}</h3>
-                      <p className="text-sm text-muted-foreground">{selectedEmployee.position}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <h4 className="text-sm font-semibold mb-2">Contact Information</h4>
-                      <div className="space-y-2">
-                        <div className="grid grid-cols-[100px_1fr]">
-                          <span className="text-sm text-muted-foreground">Email:</span>
-                          <span className="text-sm">{selectedEmployee.email}</span>
-                        </div>
-                        <div className="grid grid-cols-[100px_1fr]">
-                          <span className="text-sm text-muted-foreground">Phone:</span>
-                          <span className="text-sm">{selectedEmployee.phone}</span>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <h4 className="text-sm font-semibold mb-2">Employment Details</h4>
-                      <div className="space-y-2">
-                        <div className="grid grid-cols-[100px_1fr]">
-                          <span className="text-sm text-muted-foreground">Department:</span>
-                          <span className="text-sm">{selectedEmployee.department}</span>
-                        </div>
-                        <div className="grid grid-cols-[100px_1fr]">
-                          <span className="text-sm text-muted-foreground">Position:</span>
-                          <span className="text-sm">{selectedEmployee.position}</span>
-                        </div>
-                        <div className="grid grid-cols-[100px_1fr]">
-                          <span className="text-sm text-muted-foreground">Joined:</span>
-                          <span className="text-sm">{formatDate(selectedEmployee.joiningDate)}</span>
-                        </div>
-                        <div className="grid grid-cols-[100px_1fr]">
-                          <span className="text-sm text-muted-foreground">Status:</span>
-                          <span className="text-sm">
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                              selectedEmployee.status === 'active' ? 'bg-green-100 text-green-800' :
-                              selectedEmployee.status === 'on-leave' ? 'bg-amber-100 text-amber-800' :
-                              'bg-red-100 text-red-800'
-                            }`}>
-                              {selectedEmployee.status === 'active' ? 'Active' : 
-                              selectedEmployee.status === 'on-leave' ? 'On Leave' : 
-                              'Inactive'}
-                            </span>
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-              
-              <DialogFooter className="flex space-x-2 justify-end">
+          <ResponsiveDialog
+            open={isViewingEmployee}
+            onOpenChange={setIsViewingEmployee}
+            title="Employee Profile"
+            description={selectedEmployee ? `Detailed information for ${selectedEmployee.firstName} ${selectedEmployee.lastName}` : ""}
+            footer={
+              <div className="flex gap-2 justify-end">
                 <Button 
                   variant="outline" 
                   size="sm"
@@ -638,9 +574,71 @@ const Employees: React.FC = () => {
                   Delete
                 </Button>
                 <Button onClick={() => setIsViewingEmployee(false)}>Close</Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+              </div>
+            }
+          >
+            {selectedEmployee && (
+              <div className="space-y-6">
+                <div className="flex items-center space-x-4">
+                  <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Users size={24} className="text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold">{selectedEmployee.firstName} {selectedEmployee.lastName}</h3>
+                    <p className="text-sm text-muted-foreground">{selectedEmployee.position}</p>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <h4 className="text-sm font-semibold mb-2">Contact Information</h4>
+                    <div className="space-y-2">
+                      <div className="grid grid-cols-[100px_1fr]">
+                        <span className="text-sm text-muted-foreground">Email:</span>
+                        <span className="text-sm">{selectedEmployee.email}</span>
+                      </div>
+                      <div className="grid grid-cols-[100px_1fr]">
+                        <span className="text-sm text-muted-foreground">Phone:</span>
+                        <span className="text-sm">{selectedEmployee.phone}</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h4 className="text-sm font-semibold mb-2">Employment Details</h4>
+                    <div className="space-y-2">
+                      <div className="grid grid-cols-[100px_1fr]">
+                        <span className="text-sm text-muted-foreground">Department:</span>
+                        <span className="text-sm">{selectedEmployee.department}</span>
+                      </div>
+                      <div className="grid grid-cols-[100px_1fr]">
+                        <span className="text-sm text-muted-foreground">Position:</span>
+                        <span className="text-sm">{selectedEmployee.position}</span>
+                      </div>
+                      <div className="grid grid-cols-[100px_1fr]">
+                        <span className="text-sm text-muted-foreground">Joined:</span>
+                        <span className="text-sm">{formatDate(selectedEmployee.joiningDate)}</span>
+                      </div>
+                      <div className="grid grid-cols-[100px_1fr]">
+                        <span className="text-sm text-muted-foreground">Status:</span>
+                        <span className="text-sm">
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            selectedEmployee.status === 'active' ? 'bg-green-100 text-green-800' :
+                            selectedEmployee.status === 'on-leave' ? 'bg-amber-100 text-amber-800' :
+                            'bg-red-100 text-red-800'
+                          }`}>
+                            {selectedEmployee.status === 'active' ? 'Active' : 
+                            selectedEmployee.status === 'on-leave' ? 'On Leave' : 
+                            'Inactive'}
+                          </span>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </ResponsiveDialog>
 
           {/* Edit Employee Dialog */}
           <Dialog open={isEditingEmployee} onOpenChange={setIsEditingEmployee}>

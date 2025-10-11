@@ -4,6 +4,7 @@ import { VoiceControls } from '../components/shared/VoiceControls';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { ResponsiveDialog } from '@/components/shared/ResponsiveDialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -232,123 +233,119 @@ const Payroll: React.FC = () => {
       </Tabs>
       
       {/* Add Salary Component Dialog */}
-      <Dialog open={isAddComponentOpen} onOpenChange={setIsAddComponentOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>Add Salary Component</DialogTitle>
-            <DialogDescription>
-              Create a new component for the salary structure.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <Form {...componentForm}>
-            <form onSubmit={componentForm.handleSubmit(onSubmitSalaryComponent)} className="space-y-4">
+      <ResponsiveDialog
+        open={isAddComponentOpen}
+        onOpenChange={setIsAddComponentOpen}
+        title="Add Salary Component"
+        description="Create a new component for the salary structure."
+      >
+        <Form {...componentForm}>
+          <form onSubmit={componentForm.handleSubmit(onSubmitSalaryComponent)} className="space-y-4">
+            <FormField
+              control={componentForm.control}
+              name="name"
+              rules={{ required: "Component name is required" }}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Component Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g., Basic Salary, Housing Allowance" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={componentForm.control}
-                name="name"
-                rules={{ required: "Component name is required" }}
+                name="type"
+                rules={{ required: "Type is required" }}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Component Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., Basic Salary, Housing Allowance" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={componentForm.control}
-                  name="type"
-                  rules={{ required: "Type is required" }}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Type</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select component type" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="earnings">Earnings</SelectItem>
-                          <SelectItem value="deductions">Deductions</SelectItem>
-                          <SelectItem value="benefits">Benefits</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={componentForm.control}
-                  name="amount"
-                  rules={{ required: "Amount is required" }}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Amount / Percentage</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g., 5000, 15%" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              
-              <FormField
-                control={componentForm.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Brief description of this component" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={componentForm.control}
-                name="taxable"
-                rules={{ required: "Taxable status is required" }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Taxable</FormLabel>
+                    <FormLabel>Type</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select taxable status" />
+                          <SelectValue placeholder="Select component type" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="yes">Yes</SelectItem>
-                        <SelectItem value="no">No</SelectItem>
+                        <SelectItem value="earnings">Earnings</SelectItem>
+                        <SelectItem value="deductions">Deductions</SelectItem>
+                        <SelectItem value="benefits">Benefits</SelectItem>
                       </SelectContent>
                     </Select>
-                    <FormDescription>
-                      Whether this component is subject to income tax
-                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
               
-              <DialogFooter>
-                <Button variant="outline" type="button" onClick={() => setIsAddComponentOpen(false)}>
-                  Cancel
-                </Button>
-                <Button type="submit">Add Component</Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
+              <FormField
+                control={componentForm.control}
+                name="amount"
+                rules={{ required: "Amount is required" }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Amount / Percentage</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., 5000, 15%" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            
+            <FormField
+              control={componentForm.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Brief description of this component" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={componentForm.control}
+              name="taxable"
+              rules={{ required: "Taxable status is required" }}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Taxable</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select taxable status" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="yes">Yes</SelectItem>
+                      <SelectItem value="no">No</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    Whether this component is subject to income tax
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <div className="flex gap-2 justify-end pt-4">
+              <Button variant="outline" type="button" onClick={() => setIsAddComponentOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit">Add Component</Button>
+            </div>
+          </form>
+        </Form>
+      </ResponsiveDialog>
       
       {/* Run Payroll Dialog */}
       <Dialog open={isRunPayrollOpen} onOpenChange={setIsRunPayrollOpen}>
