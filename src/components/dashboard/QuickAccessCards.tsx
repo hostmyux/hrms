@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Calendar, BarChart, FileText, UserPlus, Star } from 'lucide-react';
-import { localStorageService } from '../../services/localStorageService';
 import { useUser } from '../../contexts/UserContext';
 import { useVoice } from '../../contexts/VoiceContext';
 import { toast } from 'sonner';
@@ -63,33 +62,10 @@ export const QuickAccessCards: React.FC<QuickAccessCardsProps> = ({ onCardClick 
     }
   ]);
 
-  // Load saved preferences on component mount
+  // Initialize voice on mount
   useEffect(() => {
-    const savedCards = localStorageService.getItem<QuickAccessCard[]>('quick_access_cards', []);
-    
-    if (savedCards && savedCards.length > 0) {
-      setCards(prevCards => {
-        return prevCards.map(defaultCard => {
-          const savedCard = savedCards.find(sc => sc.id === defaultCard.id);
-          return savedCard ? { ...defaultCard, isFavorite: savedCard.isFavorite } : defaultCard;
-        });
-      });
-    }
-
     speak("Quick access cards loaded. You have four main modules available: Leave Management for handling employee time off requests, Performance Goals for setting and tracking objectives, Payroll for processing payments, and Recruitment for managing the hiring pipeline. Click the star icon on any card to add it to your favorites for priority display. Hover over cards to hear detailed descriptions of each module's capabilities.");
   }, [speak]);
-
-  useEffect(() => {
-    try {
-      localStorageService.setItem('quick_access_cards', cards.map(card => ({
-        id: card.id,
-        isFavorite: card.isFavorite
-      })));
-    } catch (error) {
-      console.error('Error saving card preferences:', error);
-      toast.error("Unable to save your favorite card preferences");
-    }
-  }, [cards]);
 
   const toggleFavorite = (id: string, event: React.MouseEvent) => {
     event.stopPropagation();

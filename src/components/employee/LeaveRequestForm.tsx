@@ -10,7 +10,6 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { CalendarIcon, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
-import { localStorageService } from '../../services/localStorageService';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface LeaveRequestFormProps {
@@ -74,11 +73,6 @@ const LeaveRequestForm: React.FC<LeaveRequestFormProps> = ({ onClose, onSubmit }
       status: 'pending',
       submittedAt: new Date().toISOString()
     };
-
-    // Save to local storage
-    const existingRequests = localStorageService.getItem<any[]>('leave_requests', []);
-    existingRequests.push(leaveRequest);
-    localStorageService.setItem('leave_requests', existingRequests);
 
     toast.success('Leave request submitted successfully', {
       description: `Your ${formData.type} leave request for ${calculateDays()} days has been submitted for approval.`

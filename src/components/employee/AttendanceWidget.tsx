@@ -14,7 +14,6 @@ import {
   Timer
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { localStorageService } from '../../services/localStorageService';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface AttendanceRecord {
@@ -45,57 +44,20 @@ const AttendanceWidget: React.FC = () => {
     return () => clearInterval(timer);
   }, []);
 
-  // Load today's attendance and calculate stats
-  useEffect(() => {
-    const today = new Date().toISOString().split('T')[0];
-    const attendanceKey = `attendance_${user?.id}_${today}`;
-    const attendance = localStorageService.getItem<AttendanceRecord>(attendanceKey, null);
-    
-    if (attendance) {
-      setTodayAttendance(attendance);
-      setIsCheckedIn(!!attendance.checkIn && !attendance.checkOut);
-    }
-
-    // Calculate weekly stats
-    calculateWeeklyStats();
-  }, [user?.id]);
-
   const calculateWeeklyStats = () => {
-    const weekStart = new Date();
-    weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-    
-    let totalHours = 0;
-    let onTimeDays = 0;
-    let totalDays = 0;
-
-    for (let i = 0; i < 7; i++) {
-      const date = new Date(weekStart);
-      date.setDate(weekStart.getDate() + i);
-      const dateStr = date.toISOString().split('T')[0];
-      
-      if (date <= new Date()) {
-        const attendanceKey = `attendance_${user?.id}_${dateStr}`;
-        const attendance = localStorageService.getItem<AttendanceRecord>(attendanceKey, null);
-        
-        if (attendance) {
-          totalDays++;
-          if (attendance.workingHours) {
-            totalHours += attendance.workingHours;
-          }
-          if (attendance.status === 'present') {
-            onTimeDays++;
-          }
-        }
-      }
-    }
-
+    // Demo stats - no persistence
     setWeeklyStats({
-      totalHours: Math.round(totalHours * 10) / 10,
-      avgHours: totalDays > 0 ? Math.round((totalHours / totalDays) * 10) / 10 : 0,
-      onTimePercentage: totalDays > 0 ? Math.round((onTimeDays / totalDays) * 100) : 0,
-      totalDays
+      totalHours: 32.5,
+      avgHours: 8.1,
+      onTimePercentage: 90,
+      totalDays: 4
     });
   };
+
+  // Initialize on mount
+  useEffect(() => {
+    calculateWeeklyStats();
+  }, []);
 
   const handleCheckIn = () => {
     const now = new Date();
@@ -107,11 +69,9 @@ const AttendanceWidget: React.FC = () => {
       date: today,
       checkIn: time,
       status: now.getHours() > 9 ? 'late' : 'present',
-      location: 'Office' // In a real app, this could be from GPS
+      location: 'Office'
     };
 
-    const attendanceKey = `attendance_${user?.id}_${today}`;
-    localStorageService.setItem(attendanceKey, attendance);
     setTodayAttendance(attendance);
     setIsCheckedIn(true);
     
@@ -135,17 +95,12 @@ const AttendanceWidget: React.FC = () => {
       workingHours: Math.round(workingHours * 100) / 100
     };
 
-    const attendanceKey = `attendance_${user?.id}_${todayAttendance.date}`;
-    localStorageService.setItem(attendanceKey, updatedAttendance);
     setTodayAttendance(updatedAttendance);
     setIsCheckedIn(false);
     
     toast.success('Checked out successfully!', {
       description: `Total working hours: ${updatedAttendance.workingHours} hours`
     });
-    
-    // Recalculate stats
-    setTimeout(calculateWeeklyStats, 100);
   };
 
   const formatTime = (time: Date) => {

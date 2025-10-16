@@ -1,5 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { localStorageService } from '../services/localStorageService';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 interface UserAction {
   id: string;
@@ -33,22 +32,9 @@ const defaultPreferences: UserPreferences = {
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
-export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [actions, setActions] = useState<UserAction[]>(() => 
-    localStorageService.getItem<UserAction[]>('user_actions', [])
-  );
-  
-  const [preferences, setPreferences] = useState<UserPreferences>(() => 
-    localStorageService.getItem<UserPreferences>('user_preferences', defaultPreferences)
-  );
-
-  useEffect(() => {
-    localStorageService.setItem('user_actions', actions);
-  }, [actions]);
-
-  useEffect(() => {
-    localStorageService.setItem('user_preferences', preferences);
-  }, [preferences]);
+export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [actions, setActions] = useState<UserAction[]>([]);
+  const [preferences, setPreferences] = useState<UserPreferences>(defaultPreferences);
 
   const addAction = (action: Omit<UserAction, 'id' | 'timestamp'>) => {
     const newAction = {

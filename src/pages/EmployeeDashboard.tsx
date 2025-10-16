@@ -23,7 +23,6 @@ import {
   LogIn
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { localStorageService } from '../services/localStorageService';
 import LeaveRequestForm from '../components/employee/LeaveRequestForm';
 import AttendanceWidget from '../components/employee/AttendanceWidget';
 
@@ -159,17 +158,11 @@ const EmployeeDashboard: React.FC = () => {
     return () => clearInterval(timer);
   }, []);
 
-  // Load today's attendance
+  // Initialize on mount
   useEffect(() => {
-    const today = new Date().toISOString().split('T')[0];
-    const attendanceKey = `attendance_${user?.id}_${today}`;
-    const attendance = localStorageService.getItem<AttendanceRecord>(attendanceKey, null);
-    
-    if (attendance) {
-      setTodayAttendance(attendance);
-      setIsCheckedIn(!!attendance.checkIn && !attendance.checkOut);
-    }
-  }, [user?.id]);
+    setIsCheckedIn(false);
+    setTodayAttendance(null);
+  }, []);
 
   const handleCheckIn = () => {
     const now = new Date();
@@ -183,8 +176,6 @@ const EmployeeDashboard: React.FC = () => {
       status: now.getHours() > 9 ? 'late' : 'present'
     };
 
-    const attendanceKey = `attendance_${user?.id}_${today}`;
-    localStorageService.setItem(attendanceKey, attendance);
     setTodayAttendance(attendance);
     setIsCheckedIn(true);
     
@@ -208,8 +199,6 @@ const EmployeeDashboard: React.FC = () => {
       workingHours: Math.round(workingHours * 100) / 100
     };
 
-    const attendanceKey = `attendance_${user?.id}_${todayAttendance.date}`;
-    localStorageService.setItem(attendanceKey, updatedAttendance);
     setTodayAttendance(updatedAttendance);
     setIsCheckedIn(false);
     

@@ -9,7 +9,6 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { localStorageService } from '../services/localStorageService';
 import { toast } from 'sonner';
 import { 
   User, 
@@ -84,13 +83,10 @@ const Settings: React.FC = () => {
   });
 
   useEffect(() => {
-    const savedSettings = localStorageService.getItem<UserSettings>('user_settings', settings);
-    setSettings(savedSettings);
     speak("Settings page loaded. Configure your profile, notifications, privacy, and accessibility preferences.");
   }, [speak]);
 
   const handleSaveSettings = () => {
-    localStorageService.setItem('user_settings', settings);
     toast.success("Settings saved successfully");
     speak("Your settings have been saved successfully");
   };
@@ -117,7 +113,6 @@ const Settings: React.FC = () => {
 
   const handleDeleteAccount = () => {
     if (confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
-      localStorageService.clear();
       logout();
       toast.success("Account deleted successfully");
       speak("Your account has been deleted successfully");

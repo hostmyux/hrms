@@ -11,10 +11,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { toast } from 'sonner';
-import { localStorageService } from '../services/localStorageService';
+import { useAuth } from '../contexts/AuthContext';
 import { useResponsive } from '../hooks/useResponsive';
 import { Calendar, Clock, Download, Shield } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
 
 const Dashboard: React.FC = () => {
   const { speak } = useVoice();
@@ -24,12 +23,12 @@ const Dashboard: React.FC = () => {
   const { user } = useAuth();
   
   // Demo data
-  const [dashboardData, setDashboardData] = useState({
+  const [dashboardData] = useState({
     employees: 245,
     onLeave: 8,
     openPositions: 12,
     pendingApprovals: 18,
-    lastVisit: localStorageService.getItem<string>('last_dashboard_visit', ''),
+    lastVisit: new Date().toISOString(),
   });
   
   // Additional demo data - employees
@@ -57,23 +56,12 @@ const Dashboard: React.FC = () => {
 
   // Store last visit time
   useEffect(() => {
-    const now = new Date().toISOString();
-    
     // Log page visit
     addAction({
       type: "view",
       description: "Viewed dashboard home page",
       module: "Dashboard"
     });
-    
-    // Store last visit in local storage
-    localStorageService.setItem('last_dashboard_visit', now);
-    
-    // Update state with the previous last visit time
-    setDashboardData(prev => ({
-      ...prev,
-      lastVisit: localStorageService.getItem<string>('last_dashboard_visit', now)
-    }));
   }, [addAction]);
 
   const handleCardNavigation = (destination: string, message: string) => {
