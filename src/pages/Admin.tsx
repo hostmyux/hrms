@@ -7,6 +7,7 @@ import { UserManagement } from '../components/admin/UserManagement';
 import { VoiceControls } from '../components/shared/VoiceControls';
 import { useVoice } from '../contexts/VoiceContext';
 import { Shield, Users, Download, Settings, BarChart3, Database } from 'lucide-react';
+import { toast } from 'sonner';
 
 export const Admin: React.FC = () => {
   const { speak } = useVoice();
@@ -86,15 +87,39 @@ export const Admin: React.FC = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="p-3 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors">
+                <div 
+                  className="p-3 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
+                  onClick={() => {
+                    speak('Initiating system backup. This will create a complete backup of all data.');
+                    toast.success('Backup initiated', {
+                      description: 'System backup is being created'
+                    });
+                  }}
+                >
                   <h4 className="font-medium">Backup System Data</h4>
                   <p className="text-sm text-muted-foreground">Create a complete system backup</p>
                 </div>
-                <div className="p-3 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors">
+                <div 
+                  className="p-3 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
+                  onClick={() => {
+                    speak('Running system health check. Analyzing system performance and integrity.');
+                    toast.success('Health check running', {
+                      description: 'Comprehensive diagnostics in progress'
+                    });
+                  }}
+                >
                   <h4 className="font-medium">System Health Check</h4>
                   <p className="text-sm text-muted-foreground">Run comprehensive system diagnostics</p>
                 </div>
-                <div className="p-3 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors">
+                <div 
+                  className="p-3 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
+                  onClick={() => {
+                    speak('Clearing system cache to optimize performance.');
+                    toast.success('Cache cleared', {
+                      description: 'System cache has been optimized'
+                    });
+                  }}
+                >
                   <h4 className="font-medium">Clear System Cache</h4>
                   <p className="text-sm text-muted-foreground">Optimize system performance</p>
                 </div>

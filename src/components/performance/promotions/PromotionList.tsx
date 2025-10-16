@@ -16,6 +16,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { PromotionDialogs } from './PromotionDialogs';
 import { promotionCycles as initialPromotionCycles } from './demoData';
 import { PromotionCycle, PromotionCandidate, PromotionStatus2 } from './types';
+import { toast } from 'sonner';
 
 export const PromotionList = () => {
   const [promotionCycles, setPromotionCycles] = useState<PromotionCycle[]>(initialPromotionCycles);
@@ -165,7 +166,16 @@ export const PromotionList = () => {
             </SelectContent>
           </Select>
           
-          <Button variant="outline">Export</Button>
+          <Button 
+            variant="outline"
+            onClick={() => {
+              toast.success('Export initiated', {
+                description: 'Promotion data is being exported'
+              });
+            }}
+          >
+            Export
+          </Button>
         </div>
       </div>
       

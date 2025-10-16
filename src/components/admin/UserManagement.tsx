@@ -224,7 +224,18 @@ export const UserManagement: React.FC = () => {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">
-                        <Button variant="ghost" size="icon" title="Edit">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={() => {
+                            setSelectedUser(user);
+                            speak(`Opening edit dialog for ${user.name}. You can modify user details, role, and permissions.`);
+                            toast.info('Edit user functionality', {
+                              description: 'User editing dialog would open here'
+                            });
+                          }}
+                          title="Edit"
+                        >
                           <Edit className="h-4 w-4" />
                         </Button>
                         <Button 
