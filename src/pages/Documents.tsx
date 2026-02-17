@@ -33,59 +33,26 @@ const Documents: React.FC = () => {
   // Sample document data
   useEffect(() => {
     const sampleDocuments: Document[] = [
-      {
-        id: '1',
-        name: 'Employee Handbook 2023',
-        type: 'pdf',
-        size: '2.4 MB',
-        category: 'hr',
-        uploadDate: new Date(2023, 1, 15),
-        sharedWith: ['All Employees']
-      },
-      {
-        id: '2',
-        name: 'Payroll Report Q1',
-        type: 'xls',
-        size: '1.7 MB',
-        category: 'payroll',
-        uploadDate: new Date(2023, 3, 5),
-        sharedWith: ['Finance Team', 'HR Team']
-      },
-      {
-        id: '3',
-        name: 'Performance Review Template',
-        type: 'doc',
-        size: '540 KB',
-        category: 'hr',
-        uploadDate: new Date(2023, 2, 22),
-        sharedWith: ['Managers']
-      },
-      {
-        id: '4',
-        name: 'Training Certificate',
-        type: 'pdf',
-        size: '890 KB',
-        category: 'training',
-        uploadDate: new Date(2023, 4, 10)
-      },
-      {
-        id: '5',
-        name: 'Expense Policy',
-        type: 'pdf',
-        size: '1.2 MB',
-        category: 'hr',
-        uploadDate: new Date(2023, 0, 30),
-        sharedWith: ['All Employees']
-      },
-      {
-        id: '6',
-        name: 'Company Organization Chart',
-        type: 'img',
-        size: '3.1 MB',
-        category: 'hr',
-        uploadDate: new Date(2023, 5, 1),
-        sharedWith: ['All Employees']
-      }
+      { id: '1', name: 'Employee Handbook 2025', type: 'pdf', size: '2.4 MB', category: 'hr', uploadDate: new Date(2025, 1, 15), sharedWith: ['All Employees'] },
+      { id: '2', name: 'Payroll Report Q1 2025', type: 'xls', size: '1.7 MB', category: 'payroll', uploadDate: new Date(2025, 3, 5), sharedWith: ['Finance Team', 'HR Team'] },
+      { id: '3', name: 'Performance Review Template', type: 'doc', size: '540 KB', category: 'hr', uploadDate: new Date(2025, 2, 22), sharedWith: ['Managers'] },
+      { id: '4', name: 'AWS Certification Training', type: 'pdf', size: '890 KB', category: 'training', uploadDate: new Date(2025, 4, 10) },
+      { id: '5', name: 'Expense Policy v3.1', type: 'pdf', size: '1.2 MB', category: 'hr', uploadDate: new Date(2025, 0, 30), sharedWith: ['All Employees'] },
+      { id: '6', name: 'Company Organization Chart', type: 'img', size: '3.1 MB', category: 'hr', uploadDate: new Date(2025, 5, 1), sharedWith: ['All Employees'] },
+      { id: '7', name: 'Salary Structure 2025', type: 'xls', size: '2.1 MB', category: 'payroll', uploadDate: new Date(2025, 0, 10), sharedWith: ['HR Team'] },
+      { id: '8', name: 'Tax Deduction Summary', type: 'xls', size: '980 KB', category: 'payroll', uploadDate: new Date(2025, 3, 15) },
+      { id: '9', name: 'Leadership Workshop Materials', type: 'pdf', size: '4.5 MB', category: 'training', uploadDate: new Date(2025, 2, 1), sharedWith: ['Managers'] },
+      { id: '10', name: 'Code of Conduct', type: 'pdf', size: '1.8 MB', category: 'hr', uploadDate: new Date(2025, 0, 5), sharedWith: ['All Employees'] },
+      { id: '11', name: 'My Resume', type: 'doc', size: '320 KB', category: 'personal', uploadDate: new Date(2025, 1, 20) },
+      { id: '12', name: 'Compliance Training Certificate', type: 'pdf', size: '650 KB', category: 'training', uploadDate: new Date(2025, 3, 28) },
+      { id: '13', name: 'Benefits Enrollment Guide', type: 'pdf', size: '2.8 MB', category: 'hr', uploadDate: new Date(2025, 0, 15), sharedWith: ['All Employees'] },
+      { id: '14', name: 'Monthly Payroll Feb 2025', type: 'xls', size: '1.4 MB', category: 'payroll', uploadDate: new Date(2025, 2, 5), sharedWith: ['Finance Team'] },
+      { id: '15', name: 'Diversity & Inclusion Policy', type: 'pdf', size: '1.1 MB', category: 'hr', uploadDate: new Date(2025, 1, 1), sharedWith: ['All Employees'] },
+      { id: '16', name: 'Agile Methodology Course', type: 'pdf', size: '3.2 MB', category: 'training', uploadDate: new Date(2025, 4, 5) },
+      { id: '17', name: 'Personal Tax Documents', type: 'pdf', size: '780 KB', category: 'personal', uploadDate: new Date(2025, 3, 1) },
+      { id: '18', name: 'Safety Protocols Manual', type: 'doc', size: '2.0 MB', category: 'hr', uploadDate: new Date(2025, 0, 20), sharedWith: ['All Employees'] },
+      { id: '19', name: 'Q4 2024 Payroll Audit', type: 'xls', size: '3.5 MB', category: 'payroll', uploadDate: new Date(2025, 1, 10), sharedWith: ['Finance Team'] },
+      { id: '20', name: 'Project Management Certification', type: 'pdf', size: '1.5 MB', category: 'training', uploadDate: new Date(2025, 5, 15) },
     ];
 
     setDocuments(sampleDocuments);
@@ -166,7 +133,7 @@ const Documents: React.FC = () => {
             <FileUp className="h-4 w-4" />
             Upload
           </Button>
-          <Button variant="outline" className="flex items-center gap-2">
+          <Button variant="outline" className="flex items-center gap-2" onClick={() => toast.success('New folder created', { description: 'Folder added to document library' })}>
             <FolderPlus className="h-4 w-4" />
             New Folder
           </Button>

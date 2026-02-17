@@ -34,89 +34,49 @@ const Learning: React.FC = () => {
   const { speak } = useVoice();
   const [activeTab, setActiveTab] = useState('courses');
   const [courses, setCourses] = useState<Course[]>([
-    {
-      id: 1,
-      title: "HR Compliance Fundamentals",
-      category: "Compliance",
-      duration: "2 hours",
-      progress: 100,
-      status: 'completed'
-    },
-    {
-      id: 2,
-      title: "Diversity & Inclusion Basics",
-      category: "Culture",
-      duration: "3 hours",
-      progress: 45,
-      status: 'in-progress'
-    },
-    {
-      id: 3,
-      title: "Performance Management Essentials",
-      category: "Management",
-      duration: "4 hours",
-      progress: 0,
-      status: 'not-started'
-    },
-    {
-      id: 4,
-      title: "Recruitment Best Practices",
-      category: "Recruitment",
-      duration: "2.5 hours",
-      progress: 75,
-      status: 'in-progress'
-    },
-    {
-      id: 5,
-      title: "Employee Onboarding 101",
-      category: "Onboarding",
-      duration: "1.5 hours",
-      progress: 0,
-      status: 'not-started'
-    }
+    { id: 1, title: "HR Compliance Fundamentals", category: "Compliance", duration: "2 hours", progress: 100, status: 'completed' },
+    { id: 2, title: "Diversity & Inclusion Basics", category: "Culture", duration: "3 hours", progress: 45, status: 'in-progress' },
+    { id: 3, title: "Performance Management Essentials", category: "Management", duration: "4 hours", progress: 0, status: 'not-started' },
+    { id: 4, title: "Recruitment Best Practices", category: "Recruitment", duration: "2.5 hours", progress: 75, status: 'in-progress' },
+    { id: 5, title: "Employee Onboarding 101", category: "Onboarding", duration: "1.5 hours", progress: 0, status: 'not-started' },
+    { id: 6, title: "Data Privacy & GDPR", category: "Compliance", duration: "3 hours", progress: 100, status: 'completed' },
+    { id: 7, title: "Effective Communication Skills", category: "Soft Skills", duration: "2 hours", progress: 60, status: 'in-progress' },
+    { id: 8, title: "Project Management Fundamentals", category: "Management", duration: "5 hours", progress: 20, status: 'in-progress' },
+    { id: 9, title: "Cybersecurity Awareness", category: "Compliance", duration: "1 hour", progress: 100, status: 'completed' },
+    { id: 10, title: "Financial Reporting Basics", category: "Finance", duration: "3.5 hours", progress: 0, status: 'not-started' },
+    { id: 11, title: "Agile Methodology", category: "Management", duration: "4 hours", progress: 90, status: 'in-progress' },
+    { id: 12, title: "Customer Service Excellence", category: "Soft Skills", duration: "2 hours", progress: 100, status: 'completed' },
+    { id: 13, title: "Advanced Excel for HR", category: "Technical", duration: "3 hours", progress: 30, status: 'in-progress' },
+    { id: 14, title: "Workplace Safety Training", category: "Compliance", duration: "1.5 hours", progress: 100, status: 'completed' },
+    { id: 15, title: "Conflict Resolution", category: "Soft Skills", duration: "2 hours", progress: 0, status: 'not-started' },
+    { id: 16, title: "Leadership Development", category: "Management", duration: "6 hours", progress: 15, status: 'in-progress' },
+    { id: 17, title: "Time Management Mastery", category: "Soft Skills", duration: "1.5 hours", progress: 100, status: 'completed' },
+    { id: 18, title: "Cloud Computing Basics", category: "Technical", duration: "4 hours", progress: 0, status: 'not-started' },
+    { id: 19, title: "Business Writing Skills", category: "Soft Skills", duration: "2 hours", progress: 55, status: 'in-progress' },
+    { id: 20, title: "Change Management", category: "Management", duration: "3 hours", progress: 0, status: 'not-started' },
   ]);
 
-  const [trainings, setTrainings] = useState<TrainingEvent[]>([
-    {
-      id: 1,
-      title: "Effective Leadership Workshop",
-      date: "May 15, 2025",
-      type: "workshop",
-      duration: "Full day",
-      enrollmentStatus: "open"
-    },
-    {
-      id: 2,
-      title: "HR Tech Innovation Webinar",
-      date: "May 20, 2025",
-      type: "webinar",
-      duration: "2 hours",
-      enrollmentStatus: "open"
-    },
-    {
-      id: 3,
-      title: "Annual HR Conference 2025",
-      date: "June 10-12, 2025",
-      type: "conference",
-      duration: "3 days",
-      enrollmentStatus: "open"
-    },
-    {
-      id: 4,
-      title: "Conflict Resolution Strategies",
-      date: "May 25, 2025",
-      type: "workshop",
-      duration: "Half day",
-      enrollmentStatus: "full"
-    },
-    {
-      id: 5,
-      title: "Payroll Management Deep Dive",
-      date: "April 29, 2025",
-      type: "webinar",
-      duration: "1.5 hours",
-      enrollmentStatus: "closed"
-    }
+  const [trainings] = useState<TrainingEvent[]>([
+    { id: 1, title: "Effective Leadership Workshop", date: "May 15, 2025", type: "workshop", duration: "Full day", enrollmentStatus: "open" },
+    { id: 2, title: "HR Tech Innovation Webinar", date: "May 20, 2025", type: "webinar", duration: "2 hours", enrollmentStatus: "open" },
+    { id: 3, title: "Annual HR Conference 2025", date: "June 10-12, 2025", type: "conference", duration: "3 days", enrollmentStatus: "open" },
+    { id: 4, title: "Conflict Resolution Strategies", date: "May 25, 2025", type: "workshop", duration: "Half day", enrollmentStatus: "full" },
+    { id: 5, title: "Payroll Management Deep Dive", date: "April 29, 2025", type: "webinar", duration: "1.5 hours", enrollmentStatus: "closed" },
+    { id: 6, title: "AI in HR: Future Trends", date: "June 5, 2025", type: "webinar", duration: "2 hours", enrollmentStatus: "open" },
+    { id: 7, title: "Team Building Masterclass", date: "June 15, 2025", type: "workshop", duration: "Full day", enrollmentStatus: "open" },
+    { id: 8, title: "Compliance Update 2025", date: "May 30, 2025", type: "webinar", duration: "1 hour", enrollmentStatus: "open" },
+    { id: 9, title: "Remote Team Management", date: "June 20, 2025", type: "workshop", duration: "Half day", enrollmentStatus: "open" },
+    { id: 10, title: "Employee Wellness Summit", date: "July 1-2, 2025", type: "conference", duration: "2 days", enrollmentStatus: "open" },
+    { id: 11, title: "Negotiation Skills Workshop", date: "June 25, 2025", type: "workshop", duration: "Full day", enrollmentStatus: "full" },
+    { id: 12, title: "Data Analytics for HR", date: "July 10, 2025", type: "webinar", duration: "2 hours", enrollmentStatus: "open" },
+    { id: 13, title: "Diversity Hiring Practices", date: "May 28, 2025", type: "workshop", duration: "Half day", enrollmentStatus: "closed" },
+    { id: 14, title: "Benefits Administration Workshop", date: "June 8, 2025", type: "workshop", duration: "Full day", enrollmentStatus: "open" },
+    { id: 15, title: "Performance Coaching Seminar", date: "July 15, 2025", type: "webinar", duration: "1.5 hours", enrollmentStatus: "open" },
+    { id: 16, title: "Global HR Practices Conference", date: "August 5-7, 2025", type: "conference", duration: "3 days", enrollmentStatus: "open" },
+    { id: 17, title: "Mental Health First Aid", date: "June 12, 2025", type: "workshop", duration: "Full day", enrollmentStatus: "full" },
+    { id: 18, title: "Succession Planning Workshop", date: "July 20, 2025", type: "workshop", duration: "Half day", enrollmentStatus: "open" },
+    { id: 19, title: "Employment Law Update", date: "June 30, 2025", type: "webinar", duration: "2 hours", enrollmentStatus: "open" },
+    { id: 20, title: "Strategic HR Planning", date: "August 15, 2025", type: "workshop", duration: "Full day", enrollmentStatus: "open" },
   ]);
 
   useEffect(() => {
@@ -184,7 +144,7 @@ const Learning: React.FC = () => {
               />
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" className="gap-2">
+              <Button variant="outline" size="sm" className="gap-2" onClick={() => toast('Filter options coming soon')}>
                 <Filter className="h-4 w-4" />
                 Filter
               </Button>
@@ -235,7 +195,9 @@ const Learning: React.FC = () => {
                       Continue Learning
                     </Button>
                   ) : (
-                    <Button variant="secondary" className="w-full">
+                    <Button variant="secondary" className="w-full" onClick={() => {
+                      toast.success(`Certificate for "${course.title}" downloaded`);
+                    }}>
                       <CheckCircle className="mr-2 h-4 w-4" />
                       Certificate
                     </Button>
@@ -250,7 +212,7 @@ const Learning: React.FC = () => {
               <p className="text-sm text-muted-foreground text-center mb-4">
                 Browse our catalog for more learning opportunities
               </p>
-              <Button>
+              <Button onClick={() => toast.success('Course catalog opened', { description: 'Browse available courses' })}>
                 Explore Catalog
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
@@ -409,7 +371,7 @@ const Learning: React.FC = () => {
               </div>
             </CardContent>
             <CardFooter>
-              <Button variant="outline" className="w-full">
+              <Button variant="outline" className="w-full" onClick={() => toast.success('Learning report downloaded')}>
                 <FileText className="mr-2 h-4 w-4" />
                 Download Full Report
               </Button>

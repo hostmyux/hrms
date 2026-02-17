@@ -153,7 +153,7 @@ export const AttendanceTracker: React.FC = () => {
     };
 
     loadAttendance();
-  }, [speak, toast, selectedMonth, selectedEmployee]);
+  }, [speak, selectedMonth, selectedEmployee]);
 
   // Get status badge
   const getStatusBadge = (status: AttendanceStatus) => {
