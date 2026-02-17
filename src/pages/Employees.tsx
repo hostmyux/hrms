@@ -56,39 +56,26 @@ const documentSchema = z.object({
 });
 
 const mockProfiles = [
-  {
-    id: 1,
-    firstName: "John",
-    lastName: "Smith",
-    position: "Software Engineer",
-    department: "Engineering",
-    joiningDate: "2022-05-15",
-    email: "john.smith@example.com",
-    phone: "123-456-7890",
-    status: 'active'
-  },
-  {
-    id: 2,
-    firstName: "Sarah",
-    lastName: "Johnson",
-    position: "HR Manager",
-    department: "Human Resources",
-    joiningDate: "2021-03-10",
-    email: "sarah.johnson@example.com",
-    phone: "234-567-8901",
-    status: 'active'
-  },
-  {
-    id: 3,
-    firstName: "Michael",
-    lastName: "Brown",
-    position: "Product Manager",
-    department: "Product",
-    joiningDate: "2023-01-22",
-    email: "michael.brown@example.com",
-    phone: "345-678-9012",
-    status: 'on-leave'
-  }
+  { id: 1, firstName: "John", lastName: "Smith", position: "Software Engineer", department: "Engineering", joiningDate: "2022-05-15", email: "john.smith@example.com", phone: "123-456-7890", status: 'active' },
+  { id: 2, firstName: "Sarah", lastName: "Johnson", position: "HR Manager", department: "Human Resources", joiningDate: "2021-03-10", email: "sarah.johnson@example.com", phone: "234-567-8901", status: 'active' },
+  { id: 3, firstName: "Michael", lastName: "Brown", position: "Product Manager", department: "Product", joiningDate: "2023-01-22", email: "michael.brown@example.com", phone: "345-678-9012", status: 'on-leave' },
+  { id: 4, firstName: "Emily", lastName: "Davis", position: "UX Designer", department: "Design", joiningDate: "2022-08-01", email: "emily.davis@example.com", phone: "456-789-0123", status: 'active' },
+  { id: 5, firstName: "Robert", lastName: "Wilson", position: "Frontend Developer", department: "Engineering", joiningDate: "2023-06-15", email: "robert.wilson@example.com", phone: "567-890-1234", status: 'active' },
+  { id: 6, firstName: "Jennifer", lastName: "Lee", position: "Marketing Specialist", department: "Marketing", joiningDate: "2022-11-20", email: "jennifer.lee@example.com", phone: "678-901-2345", status: 'active' },
+  { id: 7, firstName: "David", lastName: "Chen", position: "Financial Analyst", department: "Finance", joiningDate: "2021-09-05", email: "david.chen@example.com", phone: "789-012-3456", status: 'active' },
+  { id: 8, firstName: "Lisa", lastName: "Garcia", position: "Sales Executive", department: "Sales", joiningDate: "2023-02-14", email: "lisa.garcia@example.com", phone: "890-123-4567", status: 'active' },
+  { id: 9, firstName: "Thomas", lastName: "Anderson", position: "DevOps Engineer", department: "Engineering", joiningDate: "2022-04-10", email: "thomas.anderson@example.com", phone: "901-234-5678", status: 'active' },
+  { id: 10, firstName: "Maria", lastName: "Rodriguez", position: "Customer Success Manager", department: "Operations", joiningDate: "2023-07-01", email: "maria.rodriguez@example.com", phone: "012-345-6789", status: 'on-leave' },
+  { id: 11, firstName: "James", lastName: "Taylor", position: "Backend Developer", department: "Engineering", joiningDate: "2022-10-15", email: "james.taylor@example.com", phone: "111-222-3333", status: 'active' },
+  { id: 12, firstName: "Amanda", lastName: "White", position: "Recruiter", department: "Human Resources", joiningDate: "2023-03-20", email: "amanda.white@example.com", phone: "222-333-4444", status: 'active' },
+  { id: 13, firstName: "Daniel", lastName: "Harris", position: "Data Scientist", department: "Engineering", joiningDate: "2022-12-01", email: "daniel.harris@example.com", phone: "333-444-5555", status: 'active' },
+  { id: 14, firstName: "Sophia", lastName: "Martin", position: "Content Strategist", department: "Marketing", joiningDate: "2023-05-10", email: "sophia.martin@example.com", phone: "444-555-6666", status: 'active' },
+  { id: 15, firstName: "Christopher", lastName: "Clark", position: "QA Engineer", department: "Engineering", joiningDate: "2022-07-25", email: "chris.clark@example.com", phone: "555-666-7777", status: 'active' },
+  { id: 16, firstName: "Jessica", lastName: "Lewis", position: "Account Manager", department: "Sales", joiningDate: "2023-01-05", email: "jessica.lewis@example.com", phone: "666-777-8888", status: 'active' },
+  { id: 17, firstName: "Ryan", lastName: "Walker", position: "Project Manager", department: "Operations", joiningDate: "2021-11-15", email: "ryan.walker@example.com", phone: "777-888-9999", status: 'active' },
+  { id: 18, firstName: "Ashley", lastName: "Hall", position: "Payroll Specialist", department: "Finance", joiningDate: "2022-06-20", email: "ashley.hall@example.com", phone: "888-999-0000", status: 'active' },
+  { id: 19, firstName: "Kevin", lastName: "Allen", position: "Security Engineer", department: "Engineering", joiningDate: "2023-04-15", email: "kevin.allen@example.com", phone: "999-000-1111", status: 'active' },
+  { id: 20, firstName: "Rachel", lastName: "Young", position: "Training Coordinator", department: "Human Resources", joiningDate: "2022-09-01", email: "rachel.young@example.com", phone: "000-111-2222", status: 'active' },
 ];
 
 const mockDocumentTypes = [

@@ -237,7 +237,7 @@ export const LeaveManagement: React.FC = () => {
     };
 
     loadData();
-  }, [speak, toast]);
+  }, [speak]);
 
   // Filter leave requests by status
   const filteredLeaveRequests = statusFilter === 'all'

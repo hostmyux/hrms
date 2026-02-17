@@ -7,6 +7,11 @@ import { BarChart as BarChartIcon, PieChart as PieChartIcon, LineChart as LineCh
 import { Button } from '@/components/ui/button';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
 import { VoiceControls } from '../components/shared/VoiceControls';
+import { toast } from 'sonner';
+
+const handleDownloadReport = (reportName: string) => {
+  toast.success(`${reportName} report downloaded`, { description: 'Report has been exported as PDF' });
+};
 
 // Mock HR Dashboard data
 const employeesByDepartment = [
@@ -203,7 +208,7 @@ const Reports: React.FC = () => {
                 </ResponsiveContainer>
               </CardContent>
               <CardFooter className="border-t pt-2">
-                <Button variant="ghost" size="sm" className="ml-auto">
+                <Button variant="ghost" size="sm" className="ml-auto" onClick={() => handleDownloadReport('Department Distribution')}>
                   <Download className="mr-2 h-4 w-4" />
                   Download Report
                 </Button>
@@ -231,7 +236,7 @@ const Reports: React.FC = () => {
                 </ResponsiveContainer>
               </CardContent>
               <CardFooter className="border-t pt-2">
-                <Button variant="ghost" size="sm" className="ml-auto">
+                <Button variant="ghost" size="sm" className="ml-auto" onClick={() => handleDownloadReport('New Hires Trend')}>
                   <Download className="mr-2 h-4 w-4" />
                   Download Report
                 </Button>
@@ -263,7 +268,7 @@ const Reports: React.FC = () => {
               </ResponsiveContainer>
             </CardContent>
             <CardFooter className="border-t pt-2">
-              <Button variant="ghost" size="sm" className="ml-auto">
+              <Button variant="ghost" size="sm" className="ml-auto" onClick={() => handleDownloadReport('Employee Type Distribution')}>
                 <Download className="mr-2 h-4 w-4" />
                 Download Report
               </Button>
@@ -342,7 +347,7 @@ const Reports: React.FC = () => {
                 </ResponsiveContainer>
               </CardContent>
               <CardFooter className="border-t pt-2">
-                <Button variant="ghost" size="sm" className="ml-auto">
+                <Button variant="ghost" size="sm" className="ml-auto" onClick={() => handleDownloadReport('Recruitment Funnel')}>
                   <Download className="mr-2 h-4 w-4" />
                   Download Report
                 </Button>
@@ -371,7 +376,7 @@ const Reports: React.FC = () => {
                 </ResponsiveContainer>
               </CardContent>
               <CardFooter className="border-t pt-2">
-                <Button variant="ghost" size="sm" className="ml-auto">
+                <Button variant="ghost" size="sm" className="ml-auto" onClick={() => handleDownloadReport('Time to Hire')}>
                   <Download className="mr-2 h-4 w-4" />
                   Download Report
                 </Button>
@@ -454,7 +459,7 @@ const Reports: React.FC = () => {
                 </ResponsiveContainer>
               </CardContent>
               <CardFooter className="border-t pt-2">
-                <Button variant="ghost" size="sm" className="ml-auto">
+                <Button variant="ghost" size="sm" className="ml-auto" onClick={() => handleDownloadReport('Monthly Attendance Trend')}>
                   <Download className="mr-2 h-4 w-4" />
                   Download Report
                 </Button>
@@ -488,7 +493,7 @@ const Reports: React.FC = () => {
                 </ResponsiveContainer>
               </CardContent>
               <CardFooter className="border-t pt-2">
-                <Button variant="ghost" size="sm" className="ml-auto">
+                <Button variant="ghost" size="sm" className="ml-auto" onClick={() => handleDownloadReport('Leave Distribution')}>
                   <Download className="mr-2 h-4 w-4" />
                   Download Report
                 </Button>
@@ -573,7 +578,7 @@ const Reports: React.FC = () => {
                 </ResponsiveContainer>
               </CardContent>
               <CardFooter className="border-t pt-2">
-                <Button variant="ghost" size="sm" className="ml-auto">
+                <Button variant="ghost" size="sm" className="ml-auto" onClick={() => handleDownloadReport('Payroll Expense Trend')}>
                   <Download className="mr-2 h-4 w-4" />
                   Download Report
                 </Button>
@@ -607,7 +612,7 @@ const Reports: React.FC = () => {
                 </ResponsiveContainer>
               </CardContent>
               <CardFooter className="border-t pt-2">
-                <Button variant="ghost" size="sm" className="ml-auto">
+                <Button variant="ghost" size="sm" className="ml-auto" onClick={() => handleDownloadReport('Department Expense')}>
                   <Download className="mr-2 h-4 w-4" />
                   Download Report
                 </Button>
