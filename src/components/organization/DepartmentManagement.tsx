@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { toast } from '../../utils/toastHelpers';
+import { toast } from 'sonner';
 import { useVoice } from '../../contexts/VoiceContext';
 import { 
   getDepartments, 
@@ -83,18 +83,14 @@ export const DepartmentManagement: React.FC = () => {
         setDepartments(data);
         speak("Departments loaded. You can view, add, edit, or delete departments from this screen.");
       } catch (error) {
-        toast({
-          title: "Error loading departments",
-          description: "Failed to load departments. Please try again later.",
-          variant: "destructive",
-        });
+        toast.error("Failed to load departments. Please try again later.");
       } finally {
         setIsLoading(false);
       }
     };
 
     loadDepartments();
-  }, [speak, toast]);
+  }, [speak]);
 
   // Handle sort
   const handleSort = (field: keyof Department) => {
@@ -168,11 +164,7 @@ export const DepartmentManagement: React.FC = () => {
   // Handle department creation
   const handleCreateDepartment = async () => {
     if (!formData.name || !formData.managerName) {
-      toast({
-        title: "Missing fields",
-        description: "Please fill in all required fields.",
-        variant: "destructive",
-      });
+      toast.error("Please fill in all required fields.");
       return;
     }
 
@@ -189,17 +181,10 @@ export const DepartmentManagement: React.FC = () => {
       
       setDepartments(prev => [...prev, newDepartment]);
       setIsAddDialogOpen(false);
-      toast({
-        title: "Success",
-        description: `Department "${newDepartment.name}" created successfully.`,
-      });
+      toast.success(`Department "${newDepartment.name}" created successfully.`);
       speak(`Department ${newDepartment.name} created successfully.`);
     } catch (error) {
-      toast({
-        title: "Error creating department",
-        description: "Failed to create department. Please try again.",
-        variant: "destructive",
-      });
+      toast.error("Failed to create department. Please try again.");
     } finally {
       setIsSaving(false);
     }
@@ -208,11 +193,7 @@ export const DepartmentManagement: React.FC = () => {
   // Handle department update
   const handleUpdateDepartment = async () => {
     if (!selectedDepartment || !formData.name || !formData.managerName) {
-      toast({
-        title: "Missing fields",
-        description: "Please fill in all required fields.",
-        variant: "destructive",
-      });
+      toast.error("Please fill in all required fields.");
       return;
     }
 
@@ -224,17 +205,10 @@ export const DepartmentManagement: React.FC = () => {
         prev.map(dept => dept.id === updatedDepartment.id ? updatedDepartment : dept)
       );
       setIsEditDialogOpen(false);
-      toast({
-        title: "Success",
-        description: `Department "${updatedDepartment.name}" updated successfully.`,
-      });
+      toast.success(`Department "${updatedDepartment.name}" updated successfully.`);
       speak(`Department ${updatedDepartment.name} updated successfully.`);
     } catch (error) {
-      toast({
-        title: "Error updating department",
-        description: "Failed to update department. Please try again.",
-        variant: "destructive",
-      });
+      toast.error("Failed to update department. Please try again.");
     } finally {
       setIsSaving(false);
     }
@@ -250,17 +224,10 @@ export const DepartmentManagement: React.FC = () => {
       
       setDepartments(prev => prev.filter(dept => dept.id !== selectedDepartment.id));
       setIsDeleteDialogOpen(false);
-      toast({
-        title: "Success",
-        description: `Department "${selectedDepartment.name}" deleted successfully.`,
-      });
+      toast.success(`Department "${selectedDepartment.name}" deleted successfully.`);
       speak(`Department ${selectedDepartment.name} deleted successfully.`);
     } catch (error) {
-      toast({
-        title: "Error deleting department",
-        description: "Failed to delete department. Please try again.",
-        variant: "destructive",
-      });
+      toast.error("Failed to delete department. Please try again.");
     } finally {
       setIsSaving(false);
     }

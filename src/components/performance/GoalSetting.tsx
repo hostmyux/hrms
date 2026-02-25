@@ -6,7 +6,7 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 import { Edit, Plus, Target, Trash, AlertCircle } from 'lucide-react';
 import { useVoice } from '../../contexts/VoiceContext';
 import { Progress } from '@/components/ui/progress';
-import { toast } from '../../utils/toastHelpers';
+import { toast } from 'sonner';
 import {
   Dialog,
   DialogContent,
@@ -204,10 +204,7 @@ export const GoalSetting: React.FC = () => {
     
     setGoals(prev => [newGoal, ...prev]);
     setIsCreateDialogOpen(false);
-    toast({
-      title: "Goal Created",
-      description: `${data.title} has been successfully created.`
-    });
+    toast.success(`${data.title} has been successfully created.`);
     speak(`Goal successfully created. The new goal "${data.title}" has been added to your tracking system and assigned to ${data.owner}.`);
   };
 
@@ -232,10 +229,7 @@ export const GoalSetting: React.FC = () => {
     }));
     
     setIsEditDialogOpen(false);
-    toast({
-      title: "Goal Updated",
-      description: `${data.title} has been successfully updated.`
-    });
+    toast.success(`${data.title} has been successfully updated.`);
     speak(`Goal successfully updated. The changes to "${data.title}" have been saved. Goal is now set to ${data.progress}% complete with a status of ${data.status}.`);
   };
 
@@ -244,10 +238,7 @@ export const GoalSetting: React.FC = () => {
     
     setGoals(prev => prev.filter(goal => goal.id !== selectedGoal.id));
     setIsDeleteDialogOpen(false);
-    toast({
-      title: "Goal Deleted",
-      description: `${selectedGoal.title} has been removed.`
-    });
+    toast.success(`${selectedGoal.title} has been removed.`);
     speak(`Goal successfully deleted. ${selectedGoal.title} has been removed from your tracking system.`);
   };
 

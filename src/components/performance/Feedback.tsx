@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MessageSquare, Plus, ThumbsUp, User, Send } from 'lucide-react';
 import { useVoice } from '../../contexts/VoiceContext';
-import { toast } from '../../utils/toastHelpers';
+import { toast } from 'sonner';
 import {
   Dialog,
   DialogContent,
@@ -156,10 +156,7 @@ export const Feedback: React.FC = () => {
     
     setFeedbackItems(prev => [newFeedback, ...prev]);
     setIsAddFeedbackOpen(false);
-    toast({
-      title: "Feedback Shared",
-      description: `Your ${data.type.toLowerCase()} feedback has been shared with ${data.to}.`
-    });
+    toast.success(`Your ${data.type.toLowerCase()} feedback has been shared with ${data.to}.`);
     speak(`Feedback successfully shared. Your ${data.type.toLowerCase()} feedback has been sent to ${data.to} and they will receive a notification.`);
     feedbackForm.reset();
   };
@@ -180,10 +177,7 @@ export const Feedback: React.FC = () => {
     }));
     
     setIsRespondOpen(false);
-    toast({
-      title: "Response Sent",
-      description: `Your response to ${selectedFeedback.from}'s feedback has been sent.`
-    });
+    toast.success(`Your response to ${selectedFeedback.from}'s feedback has been sent.`);
     speak(`Response successfully sent. Your reply to ${selectedFeedback.from}'s feedback has been delivered.`);
     responseForm.reset();
   };

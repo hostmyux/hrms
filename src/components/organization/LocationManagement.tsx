@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { toast } from '../../utils/toastHelpers';
+import { toast } from 'sonner';
 import { useVoice } from '../../contexts/VoiceContext';
 import { 
   getLocations, 
@@ -108,18 +108,14 @@ export const LocationManagement: React.FC = () => {
         setLocations(data);
         speak("Office locations loaded. You can view, add, edit, or delete office locations from this screen.");
       } catch (error) {
-        toast({
-          title: "Error loading locations",
-          description: "Failed to load office locations. Please try again later.",
-          variant: "destructive",
-        });
+        toast.error("Failed to load office locations. Please try again later.");
       } finally {
         setIsLoading(false);
       }
     };
 
     loadLocations();
-  }, [speak, toast]);
+  }, [speak]);
 
   // Handle sort
   const handleSort = (field: keyof Location) => {
@@ -233,11 +229,7 @@ export const LocationManagement: React.FC = () => {
   // Handle location creation
   const handleCreateLocation = async () => {
     if (!formData.name || !formData.address?.city || !formData.address?.country) {
-      toast({
-        title: "Missing fields",
-        description: "Please fill in all required fields.",
-        variant: "destructive",
-      });
+      toast.error("Please fill in all required fields.");
       return;
     }
 
@@ -261,17 +253,10 @@ export const LocationManagement: React.FC = () => {
       
       setLocations(prev => [...prev, newLocation]);
       setIsAddDialogOpen(false);
-      toast({
-        title: "Success",
-        description: `Location "${newLocation.name}" created successfully.`,
-      });
+      toast.success(`Location "${newLocation.name}" created successfully.`);
       speak(`Location ${newLocation.name} created successfully.`);
     } catch (error) {
-      toast({
-        title: "Error creating location",
-        description: "Failed to create location. Please try again.",
-        variant: "destructive",
-      });
+      toast.error("Failed to create location. Please try again.");
     } finally {
       setIsSaving(false);
     }
@@ -280,11 +265,7 @@ export const LocationManagement: React.FC = () => {
   // Handle location update
   const handleUpdateLocation = async () => {
     if (!selectedLocation || !formData.name || !formData.address?.city || !formData.address?.country) {
-      toast({
-        title: "Missing fields",
-        description: "Please fill in all required fields.",
-        variant: "destructive",
-      });
+      toast.error("Please fill in all required fields.");
       return;
     }
 
@@ -299,17 +280,10 @@ export const LocationManagement: React.FC = () => {
         prev.map(loc => loc.id === updatedLocation.id ? updatedLocation : loc)
       );
       setIsEditDialogOpen(false);
-      toast({
-        title: "Success",
-        description: `Location "${updatedLocation.name}" updated successfully.`,
-      });
+      toast.success(`Location "${updatedLocation.name}" updated successfully.`);
       speak(`Location ${updatedLocation.name} updated successfully.`);
     } catch (error) {
-      toast({
-        title: "Error updating location",
-        description: "Failed to update location. Please try again.",
-        variant: "destructive",
-      });
+      toast.error("Failed to update location. Please try again.");
     } finally {
       setIsSaving(false);
     }
@@ -325,17 +299,10 @@ export const LocationManagement: React.FC = () => {
       
       setLocations(prev => prev.filter(loc => loc.id !== selectedLocation.id));
       setIsDeleteDialogOpen(false);
-      toast({
-        title: "Success",
-        description: `Location "${selectedLocation.name}" deleted successfully.`,
-      });
+      toast.success(`Location "${selectedLocation.name}" deleted successfully.`);
       speak(`Location ${selectedLocation.name} deleted successfully.`);
     } catch (error) {
-      toast({
-        title: "Error deleting location",
-        description: "Failed to delete location. Please try again.",
-        variant: "destructive",
-      });
+      toast.error("Failed to delete location. Please try again.");
     } finally {
       setIsSaving(false);
     }

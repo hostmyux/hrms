@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { toast } from '../../utils/toastHelpers';
+import { toast } from 'sonner';
 import { useVoice } from '../../contexts/VoiceContext';
 import { 
   getDesignations, 
@@ -92,18 +92,14 @@ export const DesignationManagement: React.FC = () => {
         setDesignations(data);
         speak("Job titles and designations loaded. You can view, add, edit, or delete job positions from this screen.");
       } catch (error) {
-        toast({
-          title: "Error loading designations",
-          description: "Failed to load job titles. Please try again later.",
-          variant: "destructive",
-        });
+        toast.error("Failed to load job titles. Please try again later.");
       } finally {
         setIsLoading(false);
       }
     };
 
     loadDesignations();
-  }, [speak, toast]);
+  }, [speak]);
 
   // Handle sort
   const handleSort = (field: keyof Designation) => {
@@ -203,20 +199,12 @@ export const DesignationManagement: React.FC = () => {
   // Handle designation creation
   const handleCreateDesignation = async () => {
     if (!formData.title || !formData.department) {
-      toast({
-        title: "Missing fields",
-        description: "Please fill in all required fields.",
-        variant: "destructive",
-      });
+      toast.error("Please fill in all required fields.");
       return;
     }
 
     if (formData.minSalary && formData.maxSalary && formData.minSalary > formData.maxSalary) {
-      toast({
-        title: "Invalid salary range",
-        description: "Minimum salary cannot be greater than maximum salary.",
-        variant: "destructive",
-      });
+      toast.error("Minimum salary cannot be greater than maximum salary.");
       return;
     }
 
@@ -233,17 +221,10 @@ export const DesignationManagement: React.FC = () => {
       
       setDesignations(prev => [...prev, newDesignation]);
       setIsAddDialogOpen(false);
-      toast({
-        title: "Success",
-        description: `Job title "${newDesignation.title}" created successfully.`,
-      });
+      toast.success(`Job title "${newDesignation.title}" created successfully.`);
       speak(`Job title ${newDesignation.title} created successfully.`);
     } catch (error) {
-      toast({
-        title: "Error creating job title",
-        description: "Failed to create job title. Please try again.",
-        variant: "destructive",
-      });
+      toast.error("Failed to create job title. Please try again.");
     } finally {
       setIsSaving(false);
     }
@@ -252,20 +233,12 @@ export const DesignationManagement: React.FC = () => {
   // Handle designation update
   const handleUpdateDesignation = async () => {
     if (!selectedDesignation || !formData.title || !formData.department) {
-      toast({
-        title: "Missing fields",
-        description: "Please fill in all required fields.",
-        variant: "destructive",
-      });
+      toast.error("Please fill in all required fields.");
       return;
     }
 
     if (formData.minSalary && formData.maxSalary && formData.minSalary > formData.maxSalary) {
-      toast({
-        title: "Invalid salary range",
-        description: "Minimum salary cannot be greater than maximum salary.",
-        variant: "destructive",
-      });
+      toast.error("Minimum salary cannot be greater than maximum salary.");
       return;
     }
 
@@ -277,17 +250,10 @@ export const DesignationManagement: React.FC = () => {
         prev.map(desig => desig.id === updatedDesignation.id ? updatedDesignation : desig)
       );
       setIsEditDialogOpen(false);
-      toast({
-        title: "Success",
-        description: `Job title "${updatedDesignation.title}" updated successfully.`,
-      });
+      toast.success(`Job title "${updatedDesignation.title}" updated successfully.`);
       speak(`Job title ${updatedDesignation.title} updated successfully.`);
     } catch (error) {
-      toast({
-        title: "Error updating job title",
-        description: "Failed to update job title. Please try again.",
-        variant: "destructive",
-      });
+      toast.error("Failed to update job title. Please try again.");
     } finally {
       setIsSaving(false);
     }
@@ -303,17 +269,10 @@ export const DesignationManagement: React.FC = () => {
       
       setDesignations(prev => prev.filter(desig => desig.id !== selectedDesignation.id));
       setIsDeleteDialogOpen(false);
-      toast({
-        title: "Success",
-        description: `Job title "${selectedDesignation.title}" deleted successfully.`,
-      });
+      toast.success(`Job title "${selectedDesignation.title}" deleted successfully.`);
       speak(`Job title ${selectedDesignation.title} deleted successfully.`);
     } catch (error) {
-      toast({
-        title: "Error deleting job title",
-        description: "Failed to delete job title. Please try again.",
-        variant: "destructive",
-      });
+      toast.error("Failed to delete job title. Please try again.");
     } finally {
       setIsSaving(false);
     }
