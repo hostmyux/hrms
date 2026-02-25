@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { toast } from "../../utils/toastHelpers";
+import { toast } from 'sonner';
 import { useVoice } from '../../contexts/VoiceContext';
 import { getCompanyInfo, updateCompanyInfo, type Company } from '../../services/organizationService';
 import { Card, CardContent } from '@/components/ui/card';
@@ -25,18 +25,14 @@ export const CompanyInfoForm: React.FC = () => {
         setCompanyData(data);
         speak("Company information loaded. You can edit details like company name, contact information, and address.");
       } catch (error) {
-        toast({
-          title: "Error loading company information",
-          description: "Failed to load company details. Please try again later.",
-          variant: "destructive",
-        });
+        toast.error("Failed to load company details. Please try again later.");
       } finally {
         setIsLoading(false);
       }
     };
 
     loadCompanyInfo();
-  }, [speak, toast]);
+  }, [speak]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -77,17 +73,10 @@ export const CompanyInfoForm: React.FC = () => {
     setIsSaving(true);
     try {
       await updateCompanyInfo(companyData);
-      toast({
-        title: "Success",
-        description: "Company information has been updated successfully.",
-      });
+      toast.success("Company information has been updated successfully.");
       speak("Company information updated successfully.");
     } catch (error) {
-      toast({
-        title: "Error saving changes",
-        description: "There was a problem updating the company information.",
-        variant: "destructive",
-      });
+      toast.error("There was a problem updating the company information.");
     } finally {
       setIsSaving(false);
     }

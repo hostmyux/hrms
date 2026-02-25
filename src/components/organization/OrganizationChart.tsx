@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { toast } from '../../utils/toastHelpers';
+import { toast } from 'sonner';
 import { useVoice } from '../../contexts/VoiceContext';
 import { getOrganizationChart, type OrgChartNode } from '../../services/organizationService';
 import { Card, CardContent } from '@/components/ui/card';
@@ -21,18 +21,14 @@ export const OrganizationChart: React.FC = () => {
         setOrgChart(data);
         speak("Organization chart loaded. View your company's hierarchy structure.");
       } catch (error) {
-        toast({
-          title: "Error loading organization chart",
-          description: "Failed to load organization chart. Please try again later.",
-          variant: "destructive",
-        });
+        toast.error("Failed to load organization chart. Please try again later.");
       } finally {
         setIsLoading(false);
       }
     };
 
     loadOrgChart();
-  }, [speak, toast]);
+  }, [speak]);
 
   const handleZoomIn = () => {
     setZoomLevel(prev => Math.min(prev + 0.1, 2));
@@ -47,10 +43,7 @@ export const OrganizationChart: React.FC = () => {
   };
 
   const handleDownloadChart = () => {
-    toast({
-      title: "Download started",
-      description: "Organization chart download initiated.",
-    });
+    toast.success("Organization chart download initiated.");
     // In a real implementation, this would generate and download a PNG/PDF of the org chart
   };
 
